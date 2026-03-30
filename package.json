@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "axiomatic-color-workspace",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.6.5",
+  "scripts": {
+    "build": "pnpm --filter './packages/*' build",
+    "test": "vitest run",
+    "check": "tsc --build",
+    "lint": "eslint .",
+    "clean": "pnpm --filter './packages/*' clean"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}
