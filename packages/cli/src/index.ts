@@ -7,7 +7,12 @@
  */
 
 import type { SolverConfig } from "@design-axioms/color";
-import { DEFAULT_CONFIG, generateCSS, solve } from "@design-axioms/color";
+import {
+  DEFAULT_CONFIG,
+  generateCSS,
+  generateHTML,
+  solve,
+} from "@design-axioms/color";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -21,6 +26,7 @@ Commands:
   build [config]    Solve and emit CSS (default: axiomatic.config.json)
   validate [config] Validate config without emitting CSS
   inspect [config]  Print solver output as JSON
+  demo [config]     Generate a self-contained HTML demo page
 
 Options:
   --output, -o      Output file (default: stdout)
@@ -74,6 +80,19 @@ if (command === "build") {
   const config = loadConfig(configPath);
   const output = solve(config);
   console.log(JSON.stringify(output, null, 2));
+} else if (command === "demo") {
+  const config = loadConfig(configPath);
+  const output = solve(config);
+  const html = generateHTML(output, config);
+
+  if (outputPath) {
+    writeFileSync(resolve(outputPath), html, "utf-8");
+    console.log(`Demo written to ${outputPath}`);
+  } else {
+    const defaultPath = resolve("demo.html");
+    writeFileSync(defaultPath, html, "utf-8");
+    console.log(`Demo written to demo.html`);
+  }
 } else {
   console.error(`Unknown command: ${command}`);
   process.exit(1);

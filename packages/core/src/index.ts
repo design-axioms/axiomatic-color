@@ -6,7 +6,7 @@
  */
 
 export { DEFAULT_CONFIG } from "./defaults.js";
-export { generateCSS } from "./generator/index.js";
+export { generateCSS, generateHTML } from "./generator/index.js";
 export { solve } from "./solver/index.js";
 
 export type {
