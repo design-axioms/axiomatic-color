@@ -119,9 +119,14 @@ function generateSurfaces(output: SolverOutput, prefix: string): string {
  * Helper: emit an oklch() color string from lightness + atmosphere vars.
  * Atmosphere (hue/chroma) is referenced via custom properties so it
  * inherits independently of lightness (§9).
+ * Chroma is tapered near lightness extremes via safe bicone (§5):
+ *   min(C, C × (1 - |2L - 1|))
  */
 function oklchColor(lightness: number, prefix: string): string {
-  return `oklch(${lightness.toFixed(4)} var(--${prefix}-atm-chroma) var(--${prefix}-atm-hue))`;
+  const L = lightness.toFixed(4);
+  const C = `var(--${prefix}-atm-chroma)`;
+  const taper = `calc(${C} * (1 - abs(2 * ${L} - 1)))`;
+  return `oklch(${L} ${taper} var(--${prefix}-atm-hue))`;
 }
 
 /**
