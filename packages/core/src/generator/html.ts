@@ -120,7 +120,13 @@ function modeInfo(surface: SolvedSurface): ModeInfo {
 function headerHTML(): string {
   return `  <header class="demo-header">
     <h1 class="text-high">Axiomatic Color System</h1>
-    <button id="mode-toggle" class="surface-action text-high demo-toggle">☾ Dark Mode</button>
+    <div class="demo-controls">
+      <label class="demo-color-label text-subtle">
+        Key Color
+        <input type="color" id="key-color" value="#6e56cf" class="demo-color-input">
+      </label>
+      <button id="mode-toggle" class="surface-action text-high demo-toggle">☮ Dark Mode</button>
+    </div>
   </header>`;
 }
 
@@ -256,6 +262,27 @@ body {
 }
 .demo-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
 
+.demo-controls { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+
+.demo-color-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.demo-color-input {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+.demo-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.demo-color-input::-webkit-color-swatch { border: none; border-radius: 0.375rem; }
+
 .demo-toggle {
   padding: 0.5rem 1.25rem;
   border: none;
@@ -368,13 +395,60 @@ body {
 
 function toggleScript(): string {
   return `(function() {
+  // Mode toggle
   var dark = false;
   var btn = document.getElementById('mode-toggle');
   btn.addEventListener('click', function() {
     dark = !dark;
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-    btn.textContent = dark ? '☀ Light Mode' : '☾ Dark Mode';
+    btn.textContent = dark ? '☀ Light Mode' : '☮ Dark Mode';
   });
+
+  // Key color input — hex → OKLch → update atmosphere on all surfaces
+  var colorInput = document.getElementById('key-color');
+  colorInput.addEventListener('input', function(e) {
+    var hex = e.target.value;
+    var oklch = hexToOklch(hex);
+    var surfaces = document.querySelectorAll('[class*="surface-"]');
+    surfaces.forEach(function(el) {
+      el.style.setProperty('--axm-atm-hue', oklch.h);
+      el.style.setProperty('--axm-atm-chroma', oklch.c);
+    });
+  });
+
+  // Minimal hex → OKLch converter (no dependencies)
+  function hexToOklch(hex) {
+    // Hex → sRGB [0,1]
+    var r = parseInt(hex.slice(1,3), 16) / 255;
+    var g = parseInt(hex.slice(3,5), 16) / 255;
+    var b = parseInt(hex.slice(5,7), 16) / 255;
+
+    // sRGB → linear
+    r = r <= 0.04045 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+    g = g <= 0.04045 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+    b = b <= 0.04045 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+    // Linear sRGB → LMS (Oklab M1)
+    var l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+    var m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+    var s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+
+    // Cube root
+    l = Math.cbrt(l); m = Math.cbrt(m); s = Math.cbrt(s);
+
+    // LMS’ → OKLab (M2)
+    var L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+    var A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+    var B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+
+    // OKLab → OKLch
+    var C = Math.sqrt(A * A + B * B);
+    var H = Math.atan2(B, A) * 180 / Math.PI;
+    if (H < 0) H += 360;
+    if (C < 0.001) H = 0; // Achromatic: avoid meaningless hue
+
+    return { l: L, c: C.toFixed(4), h: H.toFixed(4) };
+  }
 })();`;
 }
 
