@@ -121,6 +121,8 @@ function generateSurfaces(output: SolverOutput, prefix: string): string {
  * inherits independently of lightness (§9).
  * Chroma is tapered near lightness extremes via safe bicone (§5):
  *   min(C, C × (1 - |2L - 1|))
+ * The min() is omitted in output: since L ∈ [0,1], the taper factor
+ * (1 - |2L - 1|) is always in [0,1], so C × t ≤ C always holds.
  */
 function oklchColor(lightness: number, prefix: string): string {
   const L = lightness.toFixed(4);
