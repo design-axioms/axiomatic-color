@@ -341,6 +341,28 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   cursor: pointer;
 }
+#chroma-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(to right,
+    oklch(0.6 0 var(--axm-atm-hue, 0)),
+    oklch(0.6 0.1 var(--axm-atm-hue, 0)),
+    oklch(0.6 0.2 var(--axm-atm-hue, 0)),
+    oklch(0.6 0.3 var(--axm-atm-hue, 0)),
+    oklch(0.6 0.4 var(--axm-atm-hue, 0)));
+}
+#chroma-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: oklch(0.6 var(--axm-atm-chroma, 0) var(--axm-atm-hue, 0));
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
 .demo-swatch-preview {
   width: 2rem;
   height: 2rem;
