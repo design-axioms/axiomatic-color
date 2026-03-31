@@ -127,6 +127,17 @@ function headerHTML(): string {
       </label>
       <button id="mode-toggle" class="surface-action text-high demo-toggle">☮ Dark Mode</button>
     </div>
+    <div class="demo-sliders text-subtle">
+      <label class="demo-slider-label">
+        Hue <output id="hue-val">288</output>
+        <input type="range" id="hue-slider" min="0" max="360" step="1" value="288" class="demo-slider">
+      </label>
+      <label class="demo-slider-label">
+        Chroma <output id="chroma-val">0.17</output>
+        <input type="range" id="chroma-slider" min="0" max="0.4" step="0.005" value="0.17" class="demo-slider">
+      </label>
+      <div class="demo-swatch-preview" id="swatch-preview"></div>
+    </div>
   </header>`;
 }
 
@@ -283,6 +294,37 @@ body {
 .demo-color-input::-webkit-color-swatch-wrapper { padding: 0; }
 .demo-color-input::-webkit-color-swatch { border: none; border-radius: 0.375rem; }
 
+.demo-sliders {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+.demo-slider-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.demo-slider-label output {
+  min-width: 2.5rem;
+  text-align: right;
+}
+.demo-slider {
+  width: 120px;
+  accent-color: oklch(0.6 0.15 var(--axm-atm-hue, 0));
+}
+.demo-swatch-preview {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background: oklch(0.6 0.15 0);
+  flex-shrink: 0;
+}
+
 .demo-toggle {
   padding: 0.5rem 1.25rem;
   border: none;
@@ -404,17 +446,48 @@ function toggleScript(): string {
     btn.textContent = dark ? '☀ Light Mode' : '☮ Dark Mode';
   });
 
-  // Key color input — hex → OKLch → update atmosphere on all surfaces
+  // Atmosphere state
+  var currentHue = 288;
+  var currentChroma = 0.17;
+
   var colorInput = document.getElementById('key-color');
-  colorInput.addEventListener('input', function(e) {
-    var hex = e.target.value;
-    var oklch = hexToOklch(hex);
+  var hueSlider = document.getElementById('hue-slider');
+  var chromaSlider = document.getElementById('chroma-slider');
+  var hueVal = document.getElementById('hue-val');
+  var chromaVal = document.getElementById('chroma-val');
+  var preview = document.getElementById('swatch-preview');
+
+  function applyAtmosphere(h, c) {
+    currentHue = h;
+    currentChroma = c;
     var surfaces = document.querySelectorAll('[class*="surface-"]');
     surfaces.forEach(function(el) {
-      el.style.setProperty('--axm-atm-hue', oklch.h);
-      el.style.setProperty('--axm-atm-chroma', oklch.c);
+      el.style.setProperty('--axm-atm-hue', h);
+      el.style.setProperty('--axm-atm-chroma', c);
     });
+    hueVal.textContent = Math.round(h);
+    chromaVal.textContent = parseFloat(c).toFixed(2);
+    preview.style.background = 'oklch(0.6 ' + c + ' ' + h + ')';
+  }
+
+  // Hex picker → update sliders + atmosphere
+  colorInput.addEventListener('input', function(e) {
+    var oklch = hexToOklch(e.target.value);
+    hueSlider.value = oklch.h;
+    chromaSlider.value = oklch.c;
+    applyAtmosphere(parseFloat(oklch.h), parseFloat(oklch.c));
   });
+
+  // Sliders → update atmosphere (hex picker stays as last-picked hex)
+  hueSlider.addEventListener('input', function() {
+    applyAtmosphere(parseFloat(hueSlider.value), currentChroma);
+  });
+  chromaSlider.addEventListener('input', function() {
+    applyAtmosphere(currentHue, parseFloat(chromaSlider.value));
+  });
+
+  // Initialize preview
+  applyAtmosphere(currentHue, currentChroma);
 
   // Minimal hex → OKLch converter (no dependencies)
   function hexToOklch(hex) {
