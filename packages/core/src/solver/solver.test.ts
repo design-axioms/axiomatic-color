@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG } from "../defaults.js";
+import { generateCSS } from "../generator/css.js";
 import { contrastForPair, contrastWithChroma } from "../math.js";
 import { solve } from "./index.js";
 
@@ -156,11 +157,20 @@ describe("solver", () => {
       action!.lightness,
     );
     const chromatic = contrastWithChroma(
-      action!.textValues.high, 0, 0,
-      action!.lightness, taperedChroma, hue,
+      action!.textValues.high,
+      0,
+      0,
+      action!.lightness,
+      taperedChroma,
+      hue,
     );
 
     // Delta must be less than the safety margin (3.4 pts for C=0.12)
     expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.4);
+  });
+
+  it("CSS output matches golden master", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).toMatchSnapshot();
   });
 });
