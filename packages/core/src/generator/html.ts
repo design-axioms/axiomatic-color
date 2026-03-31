@@ -317,6 +317,30 @@ body {
   width: 120px;
   accent-color: oklch(0.6 0.15 var(--axm-atm-hue, 0));
 }
+#hue-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(to right,
+    oklch(0.7 0.15 0),
+    oklch(0.7 0.15 60),
+    oklch(0.7 0.15 120),
+    oklch(0.7 0.15 180),
+    oklch(0.7 0.15 240),
+    oklch(0.7 0.15 300),
+    oklch(0.7 0.15 360));
+}
+#hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: oklch(0.6 0.15 var(--axm-atm-hue, 0));
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
 .demo-swatch-preview {
   width: 2rem;
   height: 2rem;
@@ -478,12 +502,14 @@ function toggleScript(): string {
     applyAtmosphere(parseFloat(oklch.h), parseFloat(oklch.c));
   });
 
-  // Sliders → update atmosphere (hex picker stays as last-picked hex)
+  // Sliders → update atmosphere + sync hex picker
   hueSlider.addEventListener('input', function() {
     applyAtmosphere(parseFloat(hueSlider.value), currentChroma);
+    colorInput.value = oklchToHex(0.6, currentChroma, currentHue);
   });
   chromaSlider.addEventListener('input', function() {
     applyAtmosphere(currentHue, parseFloat(chromaSlider.value));
+    colorInput.value = oklchToHex(0.6, currentChroma, currentHue);
   });
 
   // Initialize preview
@@ -521,6 +547,34 @@ function toggleScript(): string {
     if (C < 0.001) H = 0; // Achromatic: avoid meaningless hue
 
     return { l: L, c: C.toFixed(4), h: H.toFixed(4) };
+  }
+
+  // OKLch → hex (reverse direction for slider → picker sync)
+  function oklchToHex(L, C, H) {
+    var hRad = H * Math.PI / 180;
+    var a = C * Math.cos(hRad);
+    var b = C * Math.sin(hRad);
+
+    // OKLab → LMS' (inverse M2)
+    var l = L + 0.3963377774 * a + 0.2158037573 * b;
+    var m = L - 0.1055613458 * a - 0.0638541728 * b;
+    var s = L - 0.0894841775 * a - 1.2914855480 * b;
+
+    // Cube
+    l = l*l*l; m = m*m*m; s = s*s*s;
+
+    // LMS → linear sRGB (inverse M1)
+    var r = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+    var g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+    var bb = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+    // Linear → sRGB gamma
+    function gamma(x) { return x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1/2.4) - 0.055; }
+    r = Math.round(Math.max(0, Math.min(1, gamma(r))) * 255);
+    g = Math.round(Math.max(0, Math.min(1, gamma(g))) * 255);
+    bb = Math.round(Math.max(0, Math.min(1, gamma(bb))) * 255);
+
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + bb).toString(16).slice(1);
   }
 })();`;
 }
