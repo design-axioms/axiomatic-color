@@ -16,7 +16,7 @@ import type {
 } from "../types.js";
 import { converter, parse } from "culori";
 import { planSurfacePlacements } from "./planner.js";
-import { classifyComposition, solveTextValues } from "./validator.js";
+import { classifyComposition, solveBorderValues, solveTextValues } from "./validator.js";
 
 const toOklch = converter("oklch");
 
@@ -54,6 +54,11 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
         const chroma = surface.targetChroma ?? 0;
         const textValues = solveTextValues(ctx, planned.lightness, chroma);
 
+        // Solve borders
+        const borderValues = config.borderTargets
+          ? solveBorderValues(ctx, planned.lightness, chroma, config.borderTargets)
+          : undefined;
+
         // Solve states
         const states: Record<string, { lightness: number }> = {};
         if (surface.states) {
@@ -72,6 +77,7 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
           polarity,
           lightness: planned.lightness,
           textValues,
+          ...(borderValues ? { borderValues } : {}),
           ...(surface.hue ? { hue: resolveHue(surface.hue, config) } : {}),
           ...(surface.targetChroma !== undefined
             ? { chroma: surface.targetChroma }

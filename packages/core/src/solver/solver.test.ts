@@ -95,4 +95,31 @@ describe("solver", () => {
     expect(card!.states!["hover"]).toBeDefined();
     expect(card!.states!["active"]).toBeDefined();
   });
+
+  it("pre-solves border values for each surface", () => {
+    for (const surface of output.light.surfaces) {
+      expect(surface.borderValues).toBeDefined();
+      expect(surface.borderValues!.decorative).toBeDefined();
+      expect(surface.borderValues!.interactive).toBeDefined();
+      expect(surface.borderValues!.critical).toBeDefined();
+    }
+  });
+
+  it("border values achieve their APCA targets", () => {
+    for (const surface of output.light.surfaces) {
+      // Decorative (10) — should always be achievable
+      const decorativeApca = contrastForPair(
+        surface.borderValues!.decorative,
+        surface.lightness,
+      );
+      expect(decorativeApca).toBeGreaterThan(8);
+
+      // Interactive (30)
+      const interactiveApca = contrastForPair(
+        surface.borderValues!.interactive,
+        surface.lightness,
+      );
+      expect(interactiveApca).toBeGreaterThan(25);
+    }
+  });
 });

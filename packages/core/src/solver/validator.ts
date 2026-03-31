@@ -71,6 +71,47 @@ export function solveTextValues(
 }
 
 /**
+ * Pre-solve border lightness values for a surface.
+ *
+ * Same approach as text: binary-search per tier. Same direction logic
+ * (dark borders on light surfaces, light borders on dark surfaces).
+ */
+export function solveBorderValues(
+  ctx: Context,
+  surfaceLightness: number,
+  chroma: number,
+  targets: { readonly decorative: number; readonly interactive: number; readonly critical: number },
+): NonNullable<SolvedSurface["borderValues"]> {
+  const margin = safetyMarginForChroma(chroma);
+
+  const usesDarkForeground =
+    (ctx.polarity === "page" && ctx.mode === "light") ||
+    (ctx.polarity === "inverted" && ctx.mode === "dark");
+  const [fgMin, fgMax] = usesDarkForeground ? [0, 0.5] : [0.5, 1];
+
+  function solveTier(target: number): number {
+    const adjustedTarget = target + margin;
+    const ceiling = textCeiling(surfaceLightness);
+    const effectiveTarget = Math.min(adjustedTarget, ceiling - 0.5);
+
+    return roundLightness(
+      binarySearchLightness(
+        fgMin,
+        fgMax,
+        (fg) => contrastForPair(fg, surfaceLightness),
+        effectiveTarget,
+      ),
+    );
+  }
+
+  return {
+    decorative: solveTier(targets.decorative),
+    interactive: solveTier(targets.interactive),
+    critical: solveTier(targets.critical),
+  };
+}
+
+/**
  * Validate that a surface can achieve the required text contrast grades.
  * Returns a list of grades that cannot be met.
  */

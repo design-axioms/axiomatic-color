@@ -193,6 +193,11 @@ export interface SolvedSurface {
     readonly subtle: number;
     readonly subtlest: number;
   };
+  readonly borderValues?: {
+    readonly decorative: number;
+    readonly interactive: number;
+    readonly critical: number;
+  };
   readonly hue?: number;
   readonly chroma?: number;
   readonly states?: Record<string, { readonly lightness: number }>;

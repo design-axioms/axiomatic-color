@@ -177,14 +177,14 @@ function compositionHTML(): string {
     <p class="text-subtle comp-intro">The body is the page surface. Below: workspace → card → action nesting.</p>
     <div class="surface-workspace comp-panel">
       <p class="text-subtle comp-label">Workspace</p>
-      <div class="surface-card comp-card">
+      <div class="surface-card comp-card border-decorative">
         <h3 class="text-high">Card Title</h3>
         <p class="text-strong">Body text on a card surface — strong grade for comfortable reading.</p>
         <p class="text-subtle">Secondary details use the subtle grade.</p>
         <p class="text-subtlest">Tertiary hint text at the subtlest grade.</p>
-        <button class="surface-action comp-button text-high">Action Button</button>
+        <button class="surface-action comp-button border-interactive text-high">Action Button</button>
       </div>
-      <div class="surface-card comp-card">
+      <div class="surface-card comp-card border-decorative">
         <h3 class="text-high">Another Card</h3>
         <p class="text-strong">Cards are siblings, not nested. Same lightness, same text contrast.</p>
       </div>
@@ -193,6 +193,20 @@ function compositionHTML(): string {
       <h3 class="text-high">Spotlight</h3>
       <p class="text-strong">Inverted polarity — massive APCA gap from page surfaces.</p>
       <p class="text-subtle">Secondary text on inverted surface.</p>
+    </div>
+    <div class="comp-border-showcase">
+      <h3 class="text-strong">Border Tiers</h3>
+      <div class="comp-border-row">
+        <div class="surface-card comp-border-box border-decorative">
+          <span class="text-subtle">Decorative (10)</span>
+        </div>
+        <div class="surface-card comp-border-box border-interactive">
+          <span class="text-subtle">Interactive (30)</span>
+        </div>
+        <div class="surface-card comp-border-box border-critical">
+          <span class="text-subtle">Critical (80)</span>
+        </div>
+      </div>
     </div>
   </section>`;
 }
@@ -307,6 +321,23 @@ body {
 }
 .comp-spotlight h3 { margin-bottom: 0.5rem; }
 .comp-spotlight p { margin-bottom: 0.25rem; }
+
+/* Border showcase */
+.comp-border-showcase { margin-top: 1.5rem; }
+.comp-border-showcase h3 { margin-bottom: 0.75rem; }
+.comp-border-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.comp-border-box {
+  flex: 1;
+  min-width: 140px;
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+/* Border utility layout support */
+.border-decorative { border: 1px solid; }
+.border-interactive { border: 2px solid; }
+.border-critical { border: 2px solid; }
 
 /* CSS source */
 .demo-source { border-radius: 0.75rem; padding: 0; overflow: hidden; }
