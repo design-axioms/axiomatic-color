@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG } from "../defaults.js";
-import { contrastForPair } from "../math.js";
+import { contrastForPair, contrastWithChroma } from "../math.js";
 import { solve } from "./index.js";
 
 describe("solver", () => {
@@ -121,5 +121,46 @@ describe("solver", () => {
       );
       expect(interactiveApca).toBeGreaterThan(25);
     }
+  });
+
+  it("reports unmet text grades on constrained surfaces", () => {
+    // Card/Action in light mode have ceilings below 108 — high should be flagged
+    const card = output.light.surfaces.find((s) => s.slug === "card");
+    expect(card!.diagnostics).toBeDefined();
+    expect(card!.diagnostics!.unmetTextGrades).toContain("high");
+    expect(card!.diagnostics!.unmetTextGrades).toContain("strong");
+  });
+
+  it("spotlight has fewer unmet grades than page-polarity surfaces", () => {
+    // Spotlight (inverted, L~0.10) has a higher ceiling (~108) than
+    // page-polarity surfaces (~101 at best). Even spotlight can't quite
+    // hit the 100 target for "high", but it meets more grades overall.
+    const spotlight = output.light.surfaces.find((s) => s.slug === "spotlight");
+    const card = output.light.surfaces.find((s) => s.slug === "card");
+    const spotlightUnmet = spotlight!.diagnostics?.unmetTextGrades ?? [];
+    const cardUnmet = card!.diagnostics?.unmetTextGrades ?? [];
+    expect(spotlightUnmet.length).toBeLessThan(cardUnmet.length);
+  });
+
+  it("safety margin covers taper-induced APCA delta", () => {
+    // Regression test: the APCA delta between achromatic and tapered-chromatic
+    // contrast must be within the safety margin budget.
+    // Worst case: Action surface dark mode (tapered C=0.096, H=288 purple).
+    const action = output.dark.surfaces.find((s) => s.slug === "action");
+    const taperFactor = 1 - Math.abs(2 * action!.lightness - 1);
+    const taperedChroma = (action!.chroma ?? 0) * taperFactor;
+    const hue = action!.hue ?? 0;
+
+    const achromatic = contrastForPair(
+      action!.textValues.high,
+      action!.lightness,
+    );
+    const chromatic = contrastWithChroma(
+      action!.textValues.high, 0, 0,
+      action!.lightness, taperedChroma, hue,
+    );
+
+    // Delta must be less than the safety margin (3.4 pts for C=0.12)
+    expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.4);
   });
 });

@@ -112,24 +112,35 @@ export function solveBorderValues(
 }
 
 /**
- * Validate that a surface can achieve the required text contrast grades.
- * Returns a list of grades that cannot be met.
+ * Validate that a surface can achieve a set of contrast targets.
+ * Returns a list of target names that cannot be met (the "noisy no").
  */
-export function validateTextContrast(
+export function validateTargets(
   surfaceLightness: number,
   chroma: number,
+  targets: Record<string, number>,
 ): string[] {
   const ceiling = textCeiling(surfaceLightness);
   const margin = safetyMarginForChroma(chroma);
   const failures: string[] = [];
 
-  for (const [name, target] of Object.entries(TEXT_GRADES)) {
+  for (const [name, target] of Object.entries(targets)) {
     if (ceiling < target + margin) {
       failures.push(name);
     }
   }
 
   return failures;
+}
+
+/**
+ * Validate text contrast grades for a surface.
+ */
+export function validateTextContrast(
+  surfaceLightness: number,
+  chroma: number,
+): string[] {
+  return validateTargets(surfaceLightness, chroma, { ...TEXT_GRADES });
 }
 
 /**

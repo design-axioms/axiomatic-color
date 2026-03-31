@@ -62,6 +62,7 @@ interface SwatchInfo {
 interface ModeInfo {
   lightness: number;
   apca: Record<string, number>;
+  unmetGrades: readonly string[];
 }
 
 function buildSwatchData(
@@ -107,7 +108,11 @@ function modeInfo(surface: SolvedSurface): ModeInfo {
     apca[grade] = contrastForPair(surface.textValues[grade], surface.lightness);
   }
 
-  return { lightness: surface.lightness, apca };
+  return {
+    lightness: surface.lightness,
+    apca,
+    unmetGrades: surface.diagnostics?.unmetTextGrades ?? [],
+  };
 }
 
 // --- HTML sections ---
@@ -133,8 +138,8 @@ ${cards}
 function swatchCardHTML(s: SwatchInfo): string {
   const grades = ["high", "strong", "subtle", "subtlest"] as const;
   const gradeLabels: Record<string, string> = {
-    high: "High (108 target)",
-    strong: "Strong (105 target)",
+    high: "High (100 target)",
+    strong: "Strong (95 target)",
     subtle: "Subtle (90 target)",
     subtlest: "Subtlest (75 target)",
   };
@@ -147,10 +152,15 @@ function swatchCardHTML(s: SwatchInfo): string {
     .join("\n");
 
   const metaRows = grades
-    .map(
-      (g) =>
-        `            <tr><td>${g}</td><td>${s.light.apca[g]!.toFixed(1)}</td><td>${s.dark.apca[g]!.toFixed(1)}</td></tr>`,
-    )
+    .map((g) => {
+      const lightUnmet = s.light.unmetGrades.includes(g);
+      const darkUnmet = s.dark.unmetGrades.includes(g);
+      const lightVal = s.light.apca[g]!.toFixed(1);
+      const darkVal = s.dark.apca[g]!.toFixed(1);
+      const lightCell = lightUnmet ? `<span class="swatch-unmet">${lightVal} ⚠</span>` : lightVal;
+      const darkCell = darkUnmet ? `<span class="swatch-unmet">${darkVal} ⚠</span>` : darkVal;
+      return `            <tr><td>${g}</td><td>${lightCell}</td><td>${darkCell}</td></tr>`;
+    })
     .join("\n");
 
   return `      <div class="swatch surface-${s.slug}">
@@ -296,6 +306,7 @@ body {
 .swatch-table td { padding: 0.125rem 0; }
 .swatch-table td:not(:first-child),
 .swatch-table th:not(:first-child) { text-align: right; }
+.swatch-unmet { opacity: 0.7; }
 
 /* Composition */
 .comp-intro { margin-bottom: 1rem; }

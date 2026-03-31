@@ -36,15 +36,15 @@ export interface Oklch {
  * These are the system's Tier 1 guarantees.
  */
 export interface TextGrades {
-  readonly high: number; // 108 — maximum legibility
-  readonly strong: number; // 105 — body text
+  readonly high: number; // 100 — high contrast, achievable on primary reading surfaces
+  readonly strong: number; // 95  — body text
   readonly subtle: number; // 90  — secondary text
   readonly subtlest: number; // 75  — tertiary/hint text
 }
 
 export const TEXT_GRADES: TextGrades = {
-  high: 108,
-  strong: 105,
+  high: 100,
+  strong: 95,
   subtle: 90,
   subtlest: 75,
 } as const;
@@ -197,6 +197,10 @@ export interface SolvedSurface {
     readonly decorative: number;
     readonly interactive: number;
     readonly critical: number;
+  };
+  readonly diagnostics?: {
+    readonly unmetTextGrades: readonly string[];
+    readonly unmetBorderTiers: readonly string[];
   };
   readonly hue?: number;
   readonly chroma?: number;

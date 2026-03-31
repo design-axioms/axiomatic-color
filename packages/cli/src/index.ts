@@ -61,13 +61,26 @@ if (command === "build") {
   const config = loadConfig(configPath);
   const output = solve(config);
 
-  // Report composition
+  // Report composition and diagnostics
   for (const mode of [output.light, output.dark]) {
     console.log(`\n=== ${mode.mode.toUpperCase()} MODE ===`);
     for (const surface of mode.surfaces) {
       console.log(
         `  ${surface.slug}: L=${surface.lightness.toFixed(4)}, polarity=${surface.polarity}`,
       );
+      if (surface.diagnostics) {
+        const { unmetTextGrades, unmetBorderTiers } = surface.diagnostics;
+        if (unmetTextGrades.length > 0) {
+          console.log(
+            `    ⚠ unmet text grades: ${unmetTextGrades.join(", ")}`,
+          );
+        }
+        if (unmetBorderTiers.length > 0) {
+          console.log(
+            `    ⚠ unmet border tiers: ${unmetBorderTiers.join(", ")}`,
+          );
+        }
+      }
     }
     console.log(`\n  Composition:`);
     for (const c of mode.composition) {
