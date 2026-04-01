@@ -1,6 +1,6 @@
 {
   "name": "@design-axioms/color-cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -14,7 +14,8 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@design-axioms/color": "workspace:*"

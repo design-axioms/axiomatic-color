@@ -1,28 +1,24 @@
 {
   "name": "@design-axioms/color",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./css": {
-      "types": "./dist/css/index.d.ts",
-      "default": "./dist/css/index.js"
     }
   },
   "files": [
-    "dist",
-    "css"
+    "dist"
   ],
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "build": "tsc --build",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "apca-w3": "^0.1.9",
