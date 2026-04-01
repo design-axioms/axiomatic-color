@@ -2,3 +2,10 @@ node_modules/
 dist/
 *.tsbuildinfo
 .logs/
+.runtime/
+
+# Generated outputs
+demo.html
+demo.css
+docs/.vitepress/dist/
+docs/.vitepress/cache/
