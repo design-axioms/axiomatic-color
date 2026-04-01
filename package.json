@@ -17,6 +17,8 @@
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
+    "@fontsource/geist-mono": "^5.2.7",
+    "@fontsource/geist-sans": "^5.2.5",
     "@vitest/coverage-v8": "^4.1.2",
     "markdown-it-mathjax3": "^4.3.2",
     "vite": "^8.0.3",
