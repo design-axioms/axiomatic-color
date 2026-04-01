@@ -7,10 +7,10 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/
+      link: /guide/getting-started
     - theme: alt
-      text: Architecture
-      link: /architecture
+      text: Why Axiomatic?
+      link: /guide/
 features:
   - title: Contrast Guarantees
     details: Every text grade and border tier is solved against APCA targets with hue-aware safety margins. The system tells you when targets can't be met.

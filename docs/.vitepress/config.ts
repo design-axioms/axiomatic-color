@@ -2,14 +2,15 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "Axiomatic Color",
-  description: "A physics engine for design — guarantees contrast correctness using APCA",
+  description:
+    "A physics engine for design — guarantees contrast correctness using APCA",
   markdown: {
     math: true,
   },
   themeConfig: {
     nav: [
-      { text: "Guide", link: "/guide/" },
-      { text: "Architecture", link: "/architecture" },
+      { text: "Guide", link: "/guide/getting-started" },
+      { text: "Why?", link: "/guide/" },
       { text: "Demo", link: "/demo" },
     ],
     sidebar: [
