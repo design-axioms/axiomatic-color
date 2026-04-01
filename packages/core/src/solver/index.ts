@@ -84,11 +84,9 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
         }
 
         // Diagnostics — flag unmet targets (the "noisy no")
-        const unmetTextGrades = validateTargets(
-          planned.lightness,
-          chroma,
-          { ...TEXT_GRADES },
-        );
+        const unmetTextGrades = validateTargets(planned.lightness, chroma, {
+          ...TEXT_GRADES,
+        });
         const unmetBorderTiers = config.borderTargets
           ? validateTargets(planned.lightness, chroma, config.borderTargets)
           : [];

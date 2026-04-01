@@ -50,7 +50,7 @@ Since `light-dark()` only accepts `<color>` values, both mode branches must emit
 **Safety margins by chroma level:**
 
 | Chroma | Safety Margin |
-|--------|---------------|
+| ------ | ------------- |
 | 0.05   | 2 APCA pts    |
 | 0.10   | 3 APCA pts    |
 | 0.15   | 4 APCA pts    |

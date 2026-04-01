@@ -56,6 +56,7 @@ axiomatic demo --output my-demo.html
 ```
 
 The demo includes:
+
 - Surface swatches with text grade samples and APCA tables
 - Composition layout showing surface nesting
 - Border tier showcase

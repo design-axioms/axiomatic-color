@@ -1,0 +1,7 @@
+[project]
+name = "axiomatic-color"
+domain = "axiomatic-color.localhost"
+
+[services.web]
+type = "exec"
+command = "pnpm docs:dev --port=$PORT"

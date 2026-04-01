@@ -43,10 +43,14 @@ The generated CSS uses `color-scheme` on `:root` to drive `light-dark()`. Switch
 
 ```css
 /* Light mode (default) */
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+}
 
 /* Dark mode */
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+}
 ```
 
 Apply surfaces and text grades using the generated classes:

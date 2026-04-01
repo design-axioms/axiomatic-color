@@ -8,12 +8,12 @@ The Axiomatic Color system uses mathematical models to guarantee correctness. Bu
 
 The UI is not a static painting — it's a **signal processing system**.
 
-| Internal Concept | Pedagogical Term | The Metaphor |
-|:-----------------|:-----------------|:-------------|
-| **Atmosphere** | **Context** | The "Weather" of the room. It permeates everything — warm or cool, vivid or muted. |
-| **Text Grades** | **Voice** | The "Speaker." They can whisper (Subtlest) or project clearly (High). |
-| **Contrast Mode** | **Volume** | The "Volume Knob." High Contrast Mode amplifies the signal. |
-| **Light/Dark Mode** | **Time of Day** | The "Sun." Light mode is daytime, dark mode is night. |
+| Internal Concept    | Pedagogical Term | The Metaphor                                                                       |
+| :------------------ | :--------------- | :--------------------------------------------------------------------------------- |
+| **Atmosphere**      | **Context**      | The "Weather" of the room. It permeates everything — warm or cool, vivid or muted. |
+| **Text Grades**     | **Voice**        | The "Speaker." They can whisper (Subtlest) or project clearly (High).              |
+| **Contrast Mode**   | **Volume**       | The "Volume Knob." High Contrast Mode amplifies the signal.                        |
+| **Light/Dark Mode** | **Time of Day**  | The "Sun." Light mode is daytime, dark mode is night.                              |
 
 ## Key Metaphors
 

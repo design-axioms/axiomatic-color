@@ -6,13 +6,13 @@ A surface is a named region with a semantic identity. `card` always means `card`
 
 The default configuration defines five surfaces across two polarities:
 
-| Surface | Polarity | Role |
-|---------|----------|------|
-| Page | page | Base background |
-| Workspace | page | Elevated work area |
-| Card | page | Content container |
-| Action | page | Interactive element (button) |
-| Spotlight | inverted | High-emphasis callout |
+| Surface   | Polarity | Role                         |
+| --------- | -------- | ---------------------------- |
+| Page      | page     | Base background              |
+| Workspace | page     | Elevated work area           |
+| Card      | page     | Content container            |
+| Action    | page     | Interactive element (button) |
+| Spotlight | inverted | High-emphasis callout        |
 
 Each surface class sets CSS custom properties that text and border utilities consume:
 
@@ -39,12 +39,12 @@ Cross-polarity pairs (e.g., Page ↔ Spotlight) have massive APCA contrast gaps 
 
 Text on any surface is available in four contrast grades:
 
-| Grade | APCA Target | Use |
-|-------|-------------|-----|
-| High | 100 | Maximum contrast — high contrast mode, critical labels |
-| Strong | 95 | Body text — comfortable sustained reading |
-| Subtle | 90 | Secondary text — supporting information |
-| Subtlest | 75 | Tertiary text — hints, timestamps, metadata |
+| Grade    | APCA Target | Use                                                    |
+| -------- | ----------- | ------------------------------------------------------ |
+| High     | 100         | Maximum contrast — high contrast mode, critical labels |
+| Strong   | 95          | Body text — comfortable sustained reading              |
+| Subtle   | 90          | Secondary text — supporting information                |
+| Subtlest | 75          | Tertiary text — hints, timestamps, metadata            |
 
 The solver binary-searches for the text lightness that achieves each target. When the surface's APCA ceiling can't reach a target, the solver finds the best achievable value and flags it in diagnostics.
 
@@ -52,11 +52,11 @@ The solver binary-searches for the text lightness that achieves each target. Whe
 
 Borders follow the same pattern — three tiers solved per surface:
 
-| Tier | APCA Target | Use |
-|------|-------------|-----|
-| Decorative | 10 | Subtle edges — card boundaries, dividers |
-| Interactive | 30 | Visible boundaries — input outlines, active dividers |
-| Critical | 80 | High-contrast — focus rings, error outlines |
+| Tier        | APCA Target | Use                                                  |
+| ----------- | ----------- | ---------------------------------------------------- |
+| Decorative  | 10          | Subtle edges — card boundaries, dividers             |
+| Interactive | 30          | Visible boundaries — input outlines, active dividers |
+| Critical    | 80          | High-contrast — focus rings, error outlines          |
 
 ## Atmosphere
 
