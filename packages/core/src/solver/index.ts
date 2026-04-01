@@ -14,6 +14,7 @@ import type {
   SolverConfig,
   SolverOutput,
 } from "../types.js";
+import { TEXT_GRADES } from "../types.js";
 import { converter, parse } from "culori";
 import { planSurfacePlacements } from "./planner.js";
 import {
@@ -83,12 +84,11 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
         }
 
         // Diagnostics — flag unmet targets (the "noisy no")
-        const unmetTextGrades = validateTargets(planned.lightness, chroma, {
-          high: 100,
-          strong: 95,
-          subtle: 90,
-          subtlest: 75,
-        });
+        const unmetTextGrades = validateTargets(
+          planned.lightness,
+          chroma,
+          { ...TEXT_GRADES },
+        );
         const unmetBorderTiers = config.borderTargets
           ? validateTargets(planned.lightness, chroma, config.borderTargets)
           : [];
