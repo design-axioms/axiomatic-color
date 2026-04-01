@@ -9,3 +9,4 @@ demo.html
 demo.css
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+coverage/
