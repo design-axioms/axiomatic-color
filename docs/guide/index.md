@@ -1,8 +1,6 @@
 # Why Axiomatic?
 
-$$
-\text{Color} = f(\text{Context}, \text{Intent})
-$$
+> **Color** = *f*(**Context**, **Intent**)
 
 Axiomatic Color is not a paint set — a collection of static colors you pick from a palette. It's a **deterministic system** that generates accessible, harmonious, and adaptive interfaces from semantic intent.
 

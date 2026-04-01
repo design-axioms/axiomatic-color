@@ -1,0 +1,4 @@
+/* Hide MathJax assistive MathML — renders as duplicate visible text */
+mjx-assistive-mml {
+  display: none !important;
+}
