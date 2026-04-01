@@ -80,7 +80,11 @@ export function solveBorderValues(
   ctx: Context,
   surfaceLightness: number,
   chroma: number,
-  targets: { readonly decorative: number; readonly interactive: number; readonly critical: number },
+  targets: {
+    readonly decorative: number;
+    readonly interactive: number;
+    readonly critical: number;
+  },
 ): NonNullable<SolvedSurface["borderValues"]> {
   const margin = safetyMarginForChroma(chroma);
 

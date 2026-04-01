@@ -174,8 +174,12 @@ function swatchCardHTML(s: SwatchInfo): string {
       const darkUnmet = s.dark.unmetGrades.includes(g);
       const lightVal = s.light.apca[g]!.toFixed(1);
       const darkVal = s.dark.apca[g]!.toFixed(1);
-      const lightCell = lightUnmet ? `<span class="swatch-unmet">${lightVal} ⚠</span>` : lightVal;
-      const darkCell = darkUnmet ? `<span class="swatch-unmet">${darkVal} ⚠</span>` : darkVal;
+      const lightCell = lightUnmet
+        ? `<span class="swatch-unmet">${lightVal} ⚠</span>`
+        : lightVal;
+      const darkCell = darkUnmet
+        ? `<span class="swatch-unmet">${darkVal} ⚠</span>`
+        : darkVal;
       return `            <tr><td>${g}</td><td>${lightCell}</td><td>${darkCell}</td></tr>`;
     })
     .join("\n");

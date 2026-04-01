@@ -71,9 +71,7 @@ if (command === "build") {
       if (surface.diagnostics) {
         const { unmetTextGrades, unmetBorderTiers } = surface.diagnostics;
         if (unmetTextGrades.length > 0) {
-          console.log(
-            `    ⚠ unmet text grades: ${unmetTextGrades.join(", ")}`,
-          );
+          console.log(`    ⚠ unmet text grades: ${unmetTextGrades.join(", ")}`);
         }
         if (unmetBorderTiers.length > 0) {
           console.log(

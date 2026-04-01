@@ -16,7 +16,12 @@ import type {
 } from "../types.js";
 import { converter, parse } from "culori";
 import { planSurfacePlacements } from "./planner.js";
-import { classifyComposition, solveBorderValues, solveTextValues, validateTargets } from "./validator.js";
+import {
+  classifyComposition,
+  solveBorderValues,
+  solveTextValues,
+  validateTargets,
+} from "./validator.js";
 
 const toOklch = converter("oklch");
 
@@ -56,7 +61,12 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
 
         // Solve borders
         const borderValues = config.borderTargets
-          ? solveBorderValues(ctx, planned.lightness, chroma, config.borderTargets)
+          ? solveBorderValues(
+              ctx,
+              planned.lightness,
+              chroma,
+              config.borderTargets,
+            )
           : undefined;
 
         // Solve states
@@ -74,12 +84,16 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
 
         // Diagnostics — flag unmet targets (the "noisy no")
         const unmetTextGrades = validateTargets(planned.lightness, chroma, {
-          high: 100, strong: 95, subtle: 90, subtlest: 75,
+          high: 100,
+          strong: 95,
+          subtle: 90,
+          subtlest: 75,
         });
         const unmetBorderTiers = config.borderTargets
           ? validateTargets(planned.lightness, chroma, config.borderTargets)
           : [];
-        const hasDiagnostics = unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
+        const hasDiagnostics =
+          unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
 
         const solved: SolvedSurface = {
           slug: surface.slug,
@@ -87,7 +101,9 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
           lightness: planned.lightness,
           textValues,
           ...(borderValues ? { borderValues } : {}),
-          ...(hasDiagnostics ? { diagnostics: { unmetTextGrades, unmetBorderTiers } } : {}),
+          ...(hasDiagnostics
+            ? { diagnostics: { unmetTextGrades, unmetBorderTiers } }
+            : {}),
           ...(surface.hue ? { hue: resolveHue(surface.hue, config) } : {}),
           ...(surface.targetChroma !== undefined
             ? { chroma: surface.targetChroma }

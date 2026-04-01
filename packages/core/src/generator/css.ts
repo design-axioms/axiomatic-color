@@ -156,10 +156,14 @@ function generateSurfaceClass(
   --${prefix}-text-high: ${lightDarkColor(light.textValues.high, dark.textValues.high, prefix)};
   --${prefix}-text-strong: ${lightDarkColor(light.textValues.strong, dark.textValues.strong, prefix)};
   --${prefix}-text-subtle: ${lightDarkColor(light.textValues.subtle, dark.textValues.subtle, prefix)};
-  --${prefix}-text-subtlest: ${lightDarkColor(light.textValues.subtlest, dark.textValues.subtlest, prefix)};${light.borderValues && dark.borderValues ? `
+  --${prefix}-text-subtlest: ${lightDarkColor(light.textValues.subtlest, dark.textValues.subtlest, prefix)};${
+    light.borderValues && dark.borderValues
+      ? `
   --${prefix}-border-decorative: ${lightDarkColor(light.borderValues.decorative, dark.borderValues.decorative, prefix)};
   --${prefix}-border-interactive: ${lightDarkColor(light.borderValues.interactive, dark.borderValues.interactive, prefix)};
-  --${prefix}-border-critical: ${lightDarkColor(light.borderValues.critical, dark.borderValues.critical, prefix)};` : ""}
+  --${prefix}-border-critical: ${lightDarkColor(light.borderValues.critical, dark.borderValues.critical, prefix)};`
+      : ""
+  }
   background: var(--${prefix}-surface);
   transition: background 0.3s ease;
 }`;
