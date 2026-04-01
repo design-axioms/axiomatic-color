@@ -2,7 +2,107 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG } from "../defaults.js";
 import { generateCSS } from "../generator/css.js";
 import { contrastForPair, contrastWithChroma } from "../math.js";
+import type { SolverConfig } from "../types.js";
 import { solve } from "./index.js";
+
+/**
+ * Rich config fixture — exercises multiple key colors, status surfaces
+ * with independent hues, and a wider surface ladder than the default.
+ */
+const RICH_CONFIG: SolverConfig = {
+  anchors: {
+    page: {
+      light: { start: 1.0, end: 0.9 },
+      dark: { start: 0.1, end: 0.4 },
+    },
+    inverted: {
+      light: { start: 0.1, end: 0.0 },
+      dark: { start: 0.9, end: 1.0 },
+    },
+    keyColors: {
+      brand: "#6e56cf",
+      success: "#22c55e",
+      warning: "#eab308",
+      error: "#ef4444",
+    },
+  },
+  groups: [
+    {
+      name: "Base",
+      surfaces: [
+        { slug: "page", label: "Page", polarity: "page" },
+        { slug: "workspace", label: "Workspace", polarity: "page" },
+      ],
+    },
+    {
+      name: "Content",
+      surfaces: [
+        {
+          slug: "card",
+          label: "Card",
+          polarity: "page",
+          contrastOffset: { light: 15, dark: 15 },
+          states: [
+            { name: "hover", offset: -5 },
+            { name: "active", offset: -10 },
+          ],
+        },
+        {
+          slug: "input",
+          label: "Input",
+          polarity: "page",
+          contrastOffset: { light: 10, dark: 10 },
+        },
+        {
+          slug: "action-soft",
+          label: "Soft Action",
+          polarity: "page",
+          hue: "brand",
+          targetChroma: 0.08,
+          contrastOffset: { light: 20, dark: 20 },
+          states: [
+            { name: "hover", offset: -5 },
+            { name: "active", offset: -10 },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Status",
+      surfaces: [
+        {
+          slug: "success",
+          label: "Success",
+          polarity: "page",
+          hue: "success",
+          targetChroma: 0.08,
+        },
+        {
+          slug: "warning",
+          label: "Warning",
+          polarity: "page",
+          hue: "warning",
+          targetChroma: 0.10,
+        },
+        {
+          slug: "error",
+          label: "Error",
+          polarity: "page",
+          hue: "error",
+          targetChroma: 0.12,
+        },
+      ],
+    },
+    {
+      name: "Emphasis",
+      surfaces: [
+        { slug: "spotlight", label: "Spotlight", polarity: "inverted" },
+      ],
+    },
+  ],
+  borderTargets: { decorative: 10, interactive: 30, critical: 80 },
+  options: { prefix: "axm", selector: ":root" },
+};
 
 describe("solver", () => {
   const output = solve(DEFAULT_CONFIG);
@@ -171,6 +271,76 @@ describe("solver", () => {
 
   it("CSS output matches golden master", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).toMatchSnapshot();
+  });
+});
+
+describe("solver (rich config)", () => {
+  const output = solve(RICH_CONFIG);
+
+  it("places all 9 surfaces", () => {
+    const slugs = output.light.surfaces.map((s) => s.slug);
+    expect(slugs).toContain("page");
+    expect(slugs).toContain("workspace");
+    expect(slugs).toContain("card");
+    expect(slugs).toContain("input");
+    expect(slugs).toContain("action-soft");
+    expect(slugs).toContain("success");
+    expect(slugs).toContain("warning");
+    expect(slugs).toContain("error");
+    expect(slugs).toContain("spotlight");
+    expect(slugs).toHaveLength(9);
+  });
+
+  it("status surfaces have distinct hue angles", () => {
+    const success = output.light.surfaces.find((s) => s.slug === "success");
+    const warning = output.light.surfaces.find((s) => s.slug === "warning");
+    const error = output.light.surfaces.find((s) => s.slug === "error");
+
+    // Each should have a resolved hue from its key color
+    expect(success!.hue).toBeDefined();
+    expect(warning!.hue).toBeDefined();
+    expect(error!.hue).toBeDefined();
+
+    // All three hues should be distinct
+    const hues = new Set([success!.hue, warning!.hue, error!.hue]);
+    expect(hues.size).toBe(3);
+  });
+
+  it("action-soft has brand hue with chroma", () => {
+    const actionSoft = output.light.surfaces.find(
+      (s) => s.slug === "action-soft",
+    );
+    expect(actionSoft!.hue).toBeDefined();
+    expect(actionSoft!.chroma).toBe(0.08);
+  });
+
+  it("safety margin covers yellow hue (warning surface)", () => {
+    // Yellow hues have stronger HK effects — verify margin is sufficient
+    const warning = output.dark.surfaces.find((s) => s.slug === "warning");
+    const taperFactor = 1 - Math.abs(2 * warning!.lightness - 1);
+    const taperedChroma = (warning!.chroma ?? 0) * taperFactor;
+    const hue = warning!.hue ?? 0;
+
+    const achromatic = contrastForPair(
+      warning!.textValues.subtlest,
+      warning!.lightness,
+    );
+    const chromatic = contrastWithChroma(
+      warning!.textValues.subtlest,
+      0,
+      0,
+      warning!.lightness,
+      taperedChroma,
+      hue,
+    );
+
+    // Safety margin for C=0.10 is 3.0 pts
+    expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.0);
+  });
+
+  it("CSS output matches golden master for rich config", () => {
+    const css = generateCSS(output, RICH_CONFIG.options);
     expect(css).toMatchSnapshot();
   });
 });
