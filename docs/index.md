@@ -15,7 +15,7 @@ features:
   - title: Contrast Guarantees
     details: Every text grade and border tier is solved against APCA targets with hue-aware safety margins. The system tells you when targets can't be met.
   - title: light-dark() Native
-    details: Mode switching is pure CSS — light-dark() wraps complete oklch() colors. One line of JS flips color-scheme; transitions handle animation.
+    details: Mode switching is pure CSS — light-dark() wraps complete oklch() colors. Changing color-scheme flips modes; transitions handle animation.
   - title: Semantic Surfaces
     details: A card is always a card, regardless of DOM nesting. Surface lightness is name-determined, not position-determined.
   - title: Safe Bicone Taper

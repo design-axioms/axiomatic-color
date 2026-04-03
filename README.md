@@ -26,7 +26,10 @@ pnpm add @design-axioms/color
 import { DEFAULT_CONFIG, generateCSS, solve } from "@design-axioms/color";
 
 const output = solve(DEFAULT_CONFIG);
-const css = generateCSS(output, DEFAULT_CONFIG.options);
+const css = generateCSS(output, {
+  ...DEFAULT_CONFIG.options,
+  keyColors: DEFAULT_CONFIG.anchors.keyColors,
+});
 ```
 
 ## CLI

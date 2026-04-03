@@ -16,7 +16,11 @@ export function generateHTML(
   output: SolverOutput,
   config: SolverConfig,
 ): string {
-  const css = generateCSS(output, config.options);
+  const keyColors = config.anchors.keyColors;
+  const css = generateCSS(output, {
+    ...config.options,
+    ...(keyColors ? { keyColors } : {}),
+  });
   const prefix = config.options?.prefix ?? "axm";
   const swatches = buildSwatchData(output, config);
 

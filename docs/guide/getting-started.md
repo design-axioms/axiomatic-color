@@ -14,9 +14,16 @@ Generate CSS from the default configuration:
 import { DEFAULT_CONFIG, generateCSS, solve } from "@design-axioms/color";
 
 const output = solve(DEFAULT_CONFIG);
-const css = generateCSS(output, DEFAULT_CONFIG.options);
+const css = generateCSS(output, {
+  ...DEFAULT_CONFIG.options,
+  keyColors: DEFAULT_CONFIG.anchors.keyColors,
+});
 
-// css is a complete stylesheet with light-dark() mode switching
+// css is a complete stylesheet with:
+// - light-dark() mode switching
+// - .surface-* classes (lightness context)
+// - .hue-* utilities (atmosphere from key colors)
+// - .text-* and .border-* utilities (contrast intent)
 ```
 
 ## CLI
@@ -57,12 +64,23 @@ Apply surfaces and text grades using the generated classes:
 
 ```html
 <body class="surface-page">
-  <div class="surface-card border-decorative">
+  <!-- Neutral card -->
+  <div class="surface-card">
     <h2 class="text-high">Card Title</h2>
     <p class="text-strong">Body text at the strong grade.</p>
     <p class="text-subtle">Secondary information.</p>
   </div>
+
+  <!-- Brand-tinted card — same surface, different atmosphere -->
+  <div class="surface-card hue-brand">
+    <h2 class="text-high">Brand Card</h2>
+    <p class="text-strong">Same contrast, brand purple tint.</p>
+  </div>
 </body>
 ```
 
-Every surface class sets local custom properties for its background, text grades, and border tiers. Text and border utility classes consume the nearest ancestor surface's context.
+Three kinds of classes compose orthogonally:
+
+- **`.surface-*`** — sets lightness context (background, text values, borders)
+- **`.hue-*`** — overrides atmosphere (hue and chroma) without changing lightness
+- **`.text-*`** / **`.border-*`** — selects contrast grade from the current surface context

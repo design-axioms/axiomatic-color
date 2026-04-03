@@ -8,9 +8,9 @@ Axiomatic Color is not a paint set — a collection of static colors you pick fr
 
 ## The Problem
 
-Design systems face an inherent tension: **aesthetics vs. accessibility**. Beautiful color palettes break when you check them against contrast requirements. Accessible palettes feel lifeless when you strip away the creative freedom.
+Design systems face an inherent tension: **aesthetics vs. accessibility**. Static palettes require manual tradeoffs between visual goals and contrast targets.
 
-Most systems resolve this by hand-tuning — a designer picks colors, an engineer checks contrast, they iterate until both sides compromise. This doesn't scale, doesn't adapt to user preferences, and doesn't guarantee correctness.
+Most systems resolve this by hand-tuning — a designer picks colors, an engineer checks contrast, they iterate until both sides compromise. The result does not guarantee correctness.
 
 ## The Solution
 

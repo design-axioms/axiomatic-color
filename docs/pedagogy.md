@@ -23,7 +23,9 @@ The UI is not a static painting — it's a **signal processing system**.
 
 **Metaphor:** As a surface approaches pure black or pure white, its ability to carry color diminishes — like how objects lose their color in deep shadow or blinding light. "Neon black" doesn't exist in physics, and the taper encodes that reality.
 
-The taper is a linear bicone in the lightness-chroma space. At mid-lightness (L=0.5), full chroma is available. At the extremes, chroma fades to zero.
+The taper is a linear bicone in the lightness-chroma space. At mid-lightness (L=0.5), full chroma is available. At the extremes, chroma fades to zero. Drag along the curve to feel this — watch the color swatch lose saturation as you approach the edges:
+
+<TaperCurve />
 
 ### Atmosphere: Weather, Not Paint
 
@@ -39,4 +41,4 @@ When you ask for something the system can't deliver — "high" grade text (100 A
 2. Reports that the target was missed
 3. Tells you what the ceiling actually is
 
-This is the "noisy no." The system is always honest about its limitations, so you can make informed tradeoffs about surface placement, anchor ranges, and contrast targets.
+This is the "noisy no." The diagnostics report the missed target and the achievable ceiling, supporting informed tradeoffs about surface placement, anchor ranges, and contrast targets.

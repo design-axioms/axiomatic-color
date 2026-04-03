@@ -13,10 +13,14 @@
  */
 
 import type { SolvedSurface, SolverOutput } from "../types.js";
+import { converter, parse } from "culori";
+
+const toOklch = converter("oklch");
 
 interface GeneratorOptions {
   prefix?: string;
   selector?: string;
+  keyColors?: Record<string, string>;
 }
 
 /**
@@ -31,8 +35,10 @@ export function generateCSS(
 
   const sections: string[] = [];
 
-  // Root: color-scheme + registered properties
-  sections.push(generateRoot(selector, prefix));
+  const keyColors = options.keyColors;
+
+  // Root: color-scheme + registered properties + key color primitives
+  sections.push(generateRoot(selector, prefix, keyColors));
 
   // Engine: computation layer
   sections.push(generateEngine(prefix));
@@ -46,13 +52,25 @@ export function generateCSS(
   // Border utilities
   sections.push(generateBorderUtilities(prefix));
 
+  // Hue utilities — atmosphere modifiers from key colors
+  if (keyColors) {
+    sections.push(generateHueUtilities(prefix, keyColors));
+  }
+
   return sections.join("\n\n");
 }
 
-function generateRoot(selector: string, prefix: string): string {
+function generateRoot(
+  selector: string,
+  prefix: string,
+  keyColors?: Record<string, string>,
+): string {
+  const keyColorLines = keyColors
+    ? generateKeyColorPrimitives(prefix, keyColors)
+    : "";
   return `/* Root — color-scheme drives light-dark() */
 ${selector} {
-  color-scheme: light;
+  color-scheme: light;${keyColorLines}
 }
 
 /* Atmosphere properties — inheriting */
@@ -202,4 +220,51 @@ function generateBorderUtilities(prefix: string): string {
 .border-decorative { border-color: var(--${prefix}-border-decorative); }
 .border-interactive { border-color: var(--${prefix}-border-interactive); }
 .border-critical { border-color: var(--${prefix}-border-critical); }`;
+}
+
+/** Parse a key color to oklch hue and chroma. */
+function parseKeyColor(color: string): { hue: number; chroma: number } | null {
+  const parsed = parse(color);
+  if (!parsed) return null;
+  const oklch = toOklch(parsed);
+  return {
+    hue: (oklch as unknown as { h?: number }).h ?? 0,
+    chroma: (oklch as unknown as { c?: number }).c ?? 0,
+  };
+}
+
+/** Generate key color primitive variables for the root block. */
+function generateKeyColorPrimitives(
+  prefix: string,
+  keyColors: Record<string, string>,
+): string {
+  const lines: string[] = [];
+  for (const [name, value] of Object.entries(keyColors)) {
+    const parsed = parseKeyColor(value);
+    if (!parsed) continue;
+    lines.push(`  --${prefix}-key-${name}-hue: ${parsed.hue.toFixed(4)};`);
+    lines.push(
+      `  --${prefix}-key-${name}-chroma: ${parsed.chroma.toFixed(4)};`,
+    );
+  }
+  return lines.length > 0 ? "\n" + lines.join("\n") : "";
+}
+
+/**
+ * Generate .hue-* utility classes from key colors.
+ * These override atmosphere (hue/chroma) without touching lightness.
+ * Per the composition algebra: M(Sigma) -> <H_brand, C_brand, L>
+ */
+function generateHueUtilities(
+  prefix: string,
+  keyColors: Record<string, string>,
+): string {
+  const lines: string[] = ["/* Hue utilities — atmosphere modifiers */"];
+  for (const name of Object.keys(keyColors)) {
+    lines.push(`.hue-${name} {
+  --${prefix}-atm-hue: var(--${prefix}-key-${name}-hue);
+  --${prefix}-atm-chroma: var(--${prefix}-key-${name}-chroma);
+}`);
+  }
+  return lines.join("\n\n");
 }

@@ -49,7 +49,10 @@ const outputPath = outputFlag !== -1 ? args[outputFlag + 1] : undefined;
 if (command === "build") {
   const config = loadConfig(configPath);
   const output = solve(config);
-  const css = generateCSS(output, config.options);
+  const css = generateCSS(output, {
+    ...config.options,
+    keyColors: config.anchors.keyColors,
+  });
 
   if (outputPath) {
     writeFileSync(resolve(outputPath), css, "utf-8");

@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import { resolve } from "node:path";
 
 export default defineConfig({
   title: "Axiomatic Color",
@@ -6,6 +7,16 @@ export default defineConfig({
     "A physics engine for design — guarantees contrast correctness using APCA",
   markdown: {
     math: true,
+  },
+  vite: {
+    resolve: {
+      alias: {
+        "@design-axioms/color": resolve(
+          __dirname,
+          "../../packages/core/src/index.ts",
+        ),
+      },
+    },
   },
   themeConfig: {
     nav: [
@@ -26,6 +37,7 @@ export default defineConfig({
         text: "Reference",
         items: [
           { text: "Architecture", link: "/architecture" },
+          { text: "APCA Contrast", link: "/reference/apca" },
           { text: "Pedagogy", link: "/pedagogy" },
           { text: "CLI", link: "/reference/cli" },
         ],

@@ -6,66 +6,60 @@ A surface is a named region with a semantic identity. `card` always means `card`
 
 The default configuration defines five surfaces across two polarities:
 
-| Surface   | Polarity | Role                         |
-| --------- | -------- | ---------------------------- |
-| Page      | page     | Base background              |
-| Workspace | page     | Elevated work area           |
-| Card      | page     | Content container            |
-| Action    | page     | Interactive element (button) |
-| Spotlight | inverted | High-emphasis callout        |
+<SurfaceMap />
 
-Each surface class sets CSS custom properties that text and border utilities consume:
+Four surfaces share **page polarity** — light in light mode, dark in dark mode. Spotlight uses **inverted polarity** — always the opposite, so it contrasts with any page-polarity surface <ApcaBadge :value="87" :target="80" />. Toggle dark mode in the diagram to see both sides of the flip.
 
-```css
-.surface-card {
-  --axm-surface: light-dark(oklch(...), oklch(...));
-  --axm-text-high: light-dark(oklch(...), oklch(...));
-  --axm-text-strong: light-dark(oklch(...), oklch(...));
-  /* ...etc */
-  background: var(--axm-surface);
-}
+Apply surfaces with CSS classes like <Token name=".surface-page" /> and <Token name=".surface-card" />. A surface class sets the background and defines text grades and border tiers for its subtree:
+
+```html
+<body class="surface-page">
+  <div class="surface-card">
+    <h2 class="text-high">Title</h2>
+    <p class="text-strong">Body text.</p>
+  </div>
+</body>
 ```
 
-## Polarity
+## Text Grades and Border Tiers
 
-Surfaces belong to one of two independent **polarity ladders**:
+The same classes produce correct contrast on any surface. Here are the four text grades and three border tiers on a page-polarity surface (Page) and an inverted-polarity surface (Spotlight):
 
-- **Page polarity** — light surfaces in light mode, dark in dark mode
-- **Inverted polarity** — the opposite: dark in light mode, light in dark mode
+<GradePreview />
 
-Cross-polarity pairs (e.g., Page ↔ Spotlight) have massive APCA contrast gaps (80+ points). This is a **guarantee**, not an enhancement. Same-polarity pairs (Page ↔ Workspace) have small lightness differences — real but not load-bearing for hierarchy.
-
-## Text Grades
-
-Text on any surface is available in four contrast grades:
-
-| Grade    | APCA Target | Use                                                    |
-| -------- | ----------- | ------------------------------------------------------ |
-| High     | 100         | Maximum contrast — high contrast mode, critical labels |
-| Strong   | 95          | Body text — comfortable sustained reading              |
-| Subtle   | 90          | Secondary text — supporting information                |
-| Subtlest | 75          | Tertiary text — hints, timestamps, metadata            |
-
-The solver binary-searches for the text lightness that achieves each target. When the surface's APCA ceiling can't reach a target, the solver finds the best achievable value and flags it in diagnostics.
-
-## Border Tiers
-
-Borders follow the same pattern — three tiers solved per surface:
-
-| Tier        | APCA Target | Use                                                  |
-| ----------- | ----------- | ---------------------------------------------------- |
-| Decorative  | 10          | Subtle edges — card boundaries, dividers             |
-| Interactive | 30          | Visible boundaries — input outlines, active dividers |
-| Critical    | 80          | High-contrast — focus rings, error outlines          |
+The system solves each grade per surface per mode. When a target can't be fully met, the system reports the shortfall — the "noisy no."
 
 ## Atmosphere
 
-Atmosphere is the hue and chroma that permeate all surfaces. It's set via CSS custom properties (`--axm-atm-hue` and `--axm-atm-chroma`) that inherit through the DOM.
+Surfaces are achromatic by default. Atmosphere adds hue and chroma without affecting contrast:
 
-A key color (like a brand purple `#6e56cf`) seeds the atmosphere — the system extracts its oklch hue and chroma and applies them to every surface. The **safe bicone taper** automatically reduces chroma near lightness extremes:
+<TaperCurve />
+
+Apply atmosphere per surface with <Token name=".hue-brand" />, <Token name=".hue-success" />, or any <Token name=".hue-*" /> utility generated from your key colors:
+
+```html
+<div class="surface-card hue-brand">
+  <h2 class="text-high">Brand Card</h2>
+  <p class="text-subtle">This card is brand-tinted.</p>
+</div>
+```
+
+The same <Token name=".hue-brand" /> produces a faint tint on Page but vivid purple on Card because the **safe bicone taper** reduces chroma as surface lightness moves away from the midpoint:
 
 $$
 C_{\text{effective}} = C \times (1 - |2L - 1|)
 $$
 
-At L=0.5, full chroma shows through. At L=0 or L=1, chroma collapses to zero. This prevents out-of-gamut colors without manual intervention.
+The three class types compose independently:
+
+| Operator | Sets | Preserves |
+| -------- | ---- | --------- |
+| <Token name=".surface-*" /> | Lightness, background | — (resets context) |
+| <Token name=".hue-*" /> | Hue, chroma | Lightness |
+| <Token name=".text-*" /> | Contrast grade | Hue, chroma |
+
+## Putting It Together
+
+The demo renders each surface with its text grades, border tiers, and atmosphere controls. Use the dark-mode toggle to inspect both branches of `light-dark()`. Use the hue buttons to inspect how surface, atmosphere, and contrast compose:
+
+<SurfaceTile />

@@ -101,24 +101,39 @@ Page-polarity and inverted-polarity surfaces live on independent lightness ladde
 
 - Page surfaces share one contrast budget (solved against page anchors)
 - Inverted surfaces share a separate budget (solved against inverted anchors)
-- An inverted surface inside a page surface starts fresh on its own ladder
+- An inverted surface inside a page surface is solved independently on its own ladder
 
 ## 9. Atmosphere: Orthogonal to Lightness
 
 Two orthogonal composition axes:
 
 - **Lightness composition** — finite budget, semantic ladder, max ~2 distinguishable levels per polarity per mode
-- **Atmosphere composition** — hue/chroma tinting, inherited down the DOM, does not consume lightness budget
+- **Atmosphere composition** — hue/chroma tinting, does not consume lightness budget
 
-A key color seeds the atmosphere. The taper (§5) ensures it degrades gracefully at lightness extremes.
+Surfaces are achromatic by default. Each surface class writes `--axm-atm-hue: 0; --axm-atm-chroma: 0;`, establishing a neutral atmosphere context. Atmosphere is applied per-surface using `.hue-*` utility classes that override these values.
+
+This means atmosphere resets at surface boundaries (just like lightness context), but flows to text and border utilities within a surface. A `.hue-brand` on a card tints that card's text and borders — it does not cascade to child surfaces.
+
+Key colors in the config generate both primitive variables (`--axm-key-brand-hue`, `--axm-key-brand-chroma`) and utility classes (`.hue-brand`). The taper (§5) ensures atmosphere degrades gracefully at lightness extremes.
 
 ## 10. CSS Architecture
+
+**Three orthogonal operators** compose to produce any color:
+
+| Operator | CSS class | Modifies | Preserves |
+| -------- | --------- | -------- | --------- |
+| Surface | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
+| Mood | `.hue-*` | Atmosphere (hue, chroma) | Lightness |
+| Voice | `.text-*` | Contrast intent (grade) | Atmosphere |
+
+Because Mood and Voice modify disjoint components, they compose without N×M combinatorial explosion.
 
 **Inheritance model:**
 
 - Surface classes write local tokens: background, text values, border values, atmosphere
 - Text/border utilities consume the nearest ancestor surface's tokens
 - A child surface class resets the context — it does not additively compose
+- Hue utilities override atmosphere without touching lightness
 
 **`light-dark()` integration:**
 
@@ -129,4 +144,5 @@ A key color seeds the atmosphere. The taper (§5) ensures it degrades gracefully
 **Registered properties:**
 
 - `--axm-atm-hue` and `--axm-atm-chroma`: inheriting, initial value 0
+- Key color primitives: `--axm-key-{name}-hue`, `--axm-key-{name}-chroma`
 - Surface-local vars: scoped by class, not registered
