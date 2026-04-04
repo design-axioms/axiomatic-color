@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import Token from "./Token.vue";
+import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 interface SurfaceInfo {
   slug: string;
@@ -8,10 +10,13 @@ interface SurfaceInfo {
   lightness: { light: number; dark: number };
 }
 
+const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
 const isDark = ref(false);
 const ready = ref(false);
+
+useThemeBuilder(rootEl);
 
 onMounted(async () => {
   const { solve, DEFAULT_CONFIG, generateCSS } =
@@ -53,7 +58,7 @@ function surfaceBySlug(slug: string) {
 </script>
 
 <template>
-  <div v-if="ready" class="surface-map-root" :style="{ colorScheme: isDark ? 'dark' : 'light' }">
+  <div v-if="ready" ref="rootEl" class="surface-map-root" :style="{ colorScheme: isDark ? 'dark' : 'light' }">
     <component :is="'style'" v-text="css" />
 
     <div class="map-page surface-page">
@@ -61,6 +66,7 @@ function surfaceBySlug(slug: string) {
         <div class="map-title">
           <span class="map-name text-high">Page</span>
           <span class="map-role text-subtlest">Base background</span>
+          <Token name=".surface-page" />
         </div>
         <div class="map-right">
           <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('page')?.lightness[mode] ?? 0) }}</span>
@@ -75,6 +81,7 @@ function surfaceBySlug(slug: string) {
           <div class="map-title">
             <span class="map-name text-high">Workspace</span>
             <span class="map-role text-subtlest">Elevated work area</span>
+            <Token name=".surface-workspace" />
           </div>
           <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('workspace')?.lightness[mode] ?? 0) }}</span>
         </div>
@@ -84,6 +91,7 @@ function surfaceBySlug(slug: string) {
             <div class="map-title">
               <span class="map-name text-high">Card</span>
               <span class="map-role text-subtlest">Content container</span>
+              <Token name=".surface-card" />
             </div>
             <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('card')?.lightness[mode] ?? 0) }}</span>
           </div>
@@ -91,6 +99,7 @@ function surfaceBySlug(slug: string) {
             <div class="map-title">
               <span class="map-name text-high">Action</span>
               <span class="map-role text-subtlest">Interactive element</span>
+              <Token name=".surface-action" />
             </div>
             <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('action')?.lightness[mode] ?? 0) }}</span>
           </div>
@@ -100,6 +109,7 @@ function surfaceBySlug(slug: string) {
           <div class="map-title">
             <span class="map-name text-high">Spotlight</span>
             <span class="map-role text-subtlest">Inverted · High-emphasis callout</span>
+            <Token name=".surface-spotlight" />
           </div>
           <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('spotlight')?.lightness[mode] ?? 0) }}</span>
         </div>
@@ -140,6 +150,7 @@ function surfaceBySlug(slug: string) {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .map-name {

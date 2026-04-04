@@ -16,7 +16,21 @@ const status = props.target
 
 <template>
   <a class="apca-badge" :class="status" href="/reference/apca" :title="`APCA Lc ${value}${target ? ` (target: ${target})` : ''}`">
-    <span class="apca-icon">{{ status === 'met' ? '✓' : status === 'close' ? '~' : '⚠' }}</span>
+    <svg class="apca-icon" viewBox="0 0 12 12" fill="none">
+      <template v-if="status === 'met'">
+        <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2" fill="none" />
+        <path d="M3.5 6L5.5 8L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </template>
+      <template v-else-if="status === 'close'">
+        <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2" fill="none" />
+        <path d="M4 6.5Q6 5 8 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none" />
+      </template>
+      <template v-else>
+        <path d="M6 1.5L11 10.5H1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none" />
+        <path d="M6 5.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+        <circle cx="6" cy="8.5" r="0.6" fill="currentColor" />
+      </template>
+    </svg>
     <span class="apca-value">Lc {{ value }}</span>
     <span v-if="label" class="apca-label">{{ label }}</span>
   </a>
@@ -25,18 +39,19 @@ const status = props.target
 <style scoped>
 .apca-badge {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.25rem;
-  padding: 0.1rem 0.45rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem 0.1rem 0.3rem;
+  border-radius: 10rem;
+  font-size: 0.78em;
   font-family: var(--vp-font-family-mono);
   font-weight: 500;
   text-decoration: none;
   line-height: 1.4;
-  vertical-align: middle;
+  vertical-align: baseline;
   cursor: help;
   transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
 .apca-badge:hover {
@@ -44,7 +59,10 @@ const status = props.target
 }
 
 .apca-icon {
-  font-size: 0.6rem;
+  width: 0.7em;
+  height: 0.7em;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .apca-value {

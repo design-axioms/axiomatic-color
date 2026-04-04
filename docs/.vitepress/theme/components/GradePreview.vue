@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Token from "./Token.vue";
+import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
 const ready = ref(false);
+const rootEl = ref<HTMLElement | null>(null);
+
+useThemeBuilder(rootEl);
 
 onMounted(async () => {
   const { solve, DEFAULT_CONFIG, generateCSS } =
@@ -19,7 +23,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="ready" class="grade-preview-root" style="color-scheme: light">
+  <div v-if="ready" ref="rootEl" class="grade-preview-root" style="color-scheme: light">
     <component :is="'style'" v-text="css" />
 
     <div class="gp-row">

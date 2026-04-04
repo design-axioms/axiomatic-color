@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 interface SurfaceData {
   slug: string;
@@ -21,12 +22,15 @@ interface SurfaceData {
   chroma: number;
 }
 
+const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceData[]>([]);
 const css = ref("");
 const isDark = ref(false);
 const ready = ref(false);
 const keyColorNames = ref<string[]>([]);
 const selectedHue = ref<string | null>(null);
+
+useThemeBuilder(rootEl);
 
 onMounted(async () => {
   const { solve, DEFAULT_CONFIG, generateCSS } =
@@ -126,6 +130,7 @@ const hueClass = computed(() =>
 <template>
   <div
     v-if="ready"
+    ref="rootEl"
     class="surface-tile-root"
     :style="{ colorScheme: isDark ? 'dark' : 'light' }"
   >

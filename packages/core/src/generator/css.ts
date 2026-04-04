@@ -167,23 +167,33 @@ function generateSurfaceClass(
   const hue = light.hue ?? 0;
   const chroma = light.chroma ?? 0;
 
+  // Inverted surfaces swap branches so that light-dark() picks the
+  // opposite mode's values. Combined with color-scheme flipping,
+  // this makes nesting work: children inherit color-scheme and
+  // resolve their own light-dark() to the correct branch.
+  const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
+
+  const colorScheme = light.polarity === "inverted"
+    ? `\n  color-scheme: dark;`
+    : "";
+
   return `.surface-${slug} {
   --${prefix}-atm-hue: ${hue};
   --${prefix}-atm-chroma: ${chroma};
-  --${prefix}-surface: ${lightDarkColor(light.lightness, dark.lightness, prefix)};
-  --${prefix}-text-high: ${lightDarkColor(light.textValues.high, dark.textValues.high, prefix)};
-  --${prefix}-text-strong: ${lightDarkColor(light.textValues.strong, dark.textValues.strong, prefix)};
-  --${prefix}-text-subtle: ${lightDarkColor(light.textValues.subtle, dark.textValues.subtle, prefix)};
-  --${prefix}-text-subtlest: ${lightDarkColor(light.textValues.subtlest, dark.textValues.subtlest, prefix)};${
-    light.borderValues && dark.borderValues
+  --${prefix}-surface: ${lightDarkColor(lb.lightness, db.lightness, prefix)};
+  --${prefix}-text-high: ${lightDarkColor(lb.textValues.high, db.textValues.high, prefix)};
+  --${prefix}-text-strong: ${lightDarkColor(lb.textValues.strong, db.textValues.strong, prefix)};
+  --${prefix}-text-subtle: ${lightDarkColor(lb.textValues.subtle, db.textValues.subtle, prefix)};
+  --${prefix}-text-subtlest: ${lightDarkColor(lb.textValues.subtlest, db.textValues.subtlest, prefix)};${
+    lb.borderValues && db.borderValues
       ? `
-  --${prefix}-border-decorative: ${lightDarkColor(light.borderValues.decorative, dark.borderValues.decorative, prefix)};
-  --${prefix}-border-interactive: ${lightDarkColor(light.borderValues.interactive, dark.borderValues.interactive, prefix)};
-  --${prefix}-border-critical: ${lightDarkColor(light.borderValues.critical, dark.borderValues.critical, prefix)};`
+  --${prefix}-border-decorative: ${lightDarkColor(lb.borderValues.decorative, db.borderValues.decorative, prefix)};
+  --${prefix}-border-interactive: ${lightDarkColor(lb.borderValues.interactive, db.borderValues.interactive, prefix)};
+  --${prefix}-border-critical: ${lightDarkColor(lb.borderValues.critical, db.borderValues.critical, prefix)};`
       : ""
   }
   background: var(--${prefix}-surface);
-  transition: background 0.3s ease;
+  transition: background 0.3s ease;${colorScheme}
 }`;
 }
 
