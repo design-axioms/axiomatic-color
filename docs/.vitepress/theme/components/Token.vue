@@ -120,6 +120,7 @@ function buildShadow() {
       vertical-align: baseline;
       line-height: 1.4;
       white-space: nowrap;
+      border: 1px solid var(--axm-border-decorative);
     }
     code {
       font-family: ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
@@ -154,6 +155,7 @@ function buildShadow() {
           border-radius: 3px;
           align-self: center;
           flex-shrink: 0;
+          border: 1px solid var(--axm-border-decorative);
         }
       </style>
       <span class="swatch ${surfCls}"></span>
