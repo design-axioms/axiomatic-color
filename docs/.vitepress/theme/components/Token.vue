@@ -121,6 +121,7 @@ function buildShadow() {
       line-height: 1.4;
       white-space: nowrap;
       border: 1px solid var(--axm-border-decorative);
+      color-scheme: inherit;
     }
     code {
       font-family: ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
