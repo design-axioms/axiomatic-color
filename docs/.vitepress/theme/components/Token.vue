@@ -70,8 +70,20 @@ const hueColor = computed(() => {
 const shadowHost = ref<HTMLElement | null>(null);
 const systemCss = ref("");
 
+// Whether this token category uses shadow DOM
+const usesShadow = computed(() =>
+  ["text", "surface", "border"].includes(category.value),
+);
+
+// Extract the bare class name for surface/border tokens
+const bareClass = computed(() => {
+  if (!props.name.startsWith(".")) return null;
+  const cls = props.name.slice(1);
+  return cls.endsWith("*") ? null : cls;
+});
+
 onMounted(async () => {
-  if (category.value !== "text") return;
+  if (!usesShadow.value) return;
 
   const { solve, DEFAULT_CONFIG, generateCSS } =
     await import("@design-axioms/color");
@@ -86,7 +98,7 @@ onMounted(async () => {
 });
 
 watch([systemCss, () => props.name], () => {
-  if (category.value === "text" && systemCss.value) buildShadow();
+  if (usesShadow.value && systemCss.value) buildShadow();
 });
 
 function buildShadow() {
@@ -98,53 +110,97 @@ function buildShadow() {
     shadow = host.attachShadow({ mode: "open" });
   }
 
-  const cls = textClass.value ?? "";
-  shadow.innerHTML = `
-    <style>
-      ${systemCss.value}
-      :host {
-        display: inline-flex;
-        align-items: baseline;
-        gap: 0.25rem;
-        padding: 0.1rem 0.45rem 0.1rem 0.3rem;
-        border-radius: 10rem;
-        vertical-align: baseline;
-        line-height: 1.4;
-        white-space: nowrap;
-      }
-      .glyph {
-        font-weight: 700;
-        font-size: 0.7em;
-        line-height: 1;
-        align-self: center;
-      }
-      code {
-        font-family: ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
-        font-size: 0.78em;
-        font-weight: 500;
-      }
-    </style>
-    <span class="glyph ${cls}">A</span>
-    <code class="text-subtle">${props.name}</code>
+  const hostStyles = `
+    :host {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.25rem;
+      padding: 0.1rem 0.45rem 0.1rem 0.3rem;
+      border-radius: 10rem;
+      vertical-align: baseline;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    code {
+      font-family: ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.78em;
+      font-weight: 500;
+    }
   `;
+
+  let iconHtml = "";
+  const cat = category.value;
+
+  if (cat === "text") {
+    const cls = textClass.value ?? "";
+    iconHtml = `
+      <style>
+        ${systemCss.value}
+        ${hostStyles}
+        .glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }
+      </style>
+      <span class="glyph ${cls}">A</span>
+      <code class="text-subtle">${props.name}</code>
+    `;
+  } else if (cat === "surface") {
+    const surfCls = bareClass.value ?? "";
+    iconHtml = `
+      <style>
+        ${systemCss.value}
+        ${hostStyles}
+        .swatch {
+          width: 0.75em;
+          height: 0.75em;
+          border-radius: 3px;
+          align-self: center;
+          flex-shrink: 0;
+        }
+      </style>
+      <span class="swatch ${surfCls}"></span>
+      <code class="text-subtle">${props.name}</code>
+    `;
+  } else if (cat === "border") {
+    const borderCls = bareClass.value ?? "";
+    iconHtml = `
+      <style>
+        ${systemCss.value}
+        ${hostStyles}
+        .swatch {
+          width: 0.75em;
+          height: 0.75em;
+          border-radius: 2px;
+          align-self: center;
+          flex-shrink: 0;
+          border-width: 1.5px;
+          border-style: solid;
+        }
+      </style>
+      <span class="swatch ${borderCls}"></span>
+      <code class="text-subtle">${props.name}</code>
+    `;
+  }
+
+  shadow.innerHTML = iconHtml;
 }
 </script>
 
 <template>
-  <!-- Text tokens: shadow DOM host, styled as a surface-card -->
+  <!-- Text tokens: shadow DOM host on a card surface -->
   <span v-if="category === 'text'" ref="shadowHost"
     class="token-badge token-text surface-card" />
 
-  <!-- All other tokens: regular light DOM -->
+  <!-- Surface tokens: shadow DOM host on a card surface (swatch shows the named surface) -->
+  <span v-else-if="category === 'surface'" ref="shadowHost"
+    class="token-badge token-surface surface-card" />
+
+  <!-- Border tokens: shadow DOM host on a card surface (swatch shows the border tier) -->
+  <span v-else-if="category === 'border'" ref="shadowHost"
+    class="token-badge token-border surface-card" />
+
+  <!-- Hue and generic: light DOM with SVG icons -->
   <span v-else class="token-badge" :class="`token-${category}`">
     <svg class="token-icon" viewBox="0 0 12 12" fill="none">
-      <template v-if="category === 'surface'">
-        <rect x="1" y="1" width="10" height="10" rx="2"
-          :fill="`oklch(${surfaceLightness} 0 0)`"
-          stroke="#888" stroke-width="0.5" />
-      </template>
-
-      <template v-else-if="category === 'hue'">
+      <template v-if="category === 'hue'">
         <template v-if="hueColor">
           <circle cx="6" cy="6" r="5" :fill="hueColor" />
         </template>
@@ -159,13 +215,6 @@ function buildShadow() {
           </defs>
           <circle cx="6" cy="6" r="5" fill="url(#hue-rainbow)" />
         </template>
-      </template>
-
-      <template v-else-if="category === 'border'">
-        <rect x="1" y="1" width="10" height="10" rx="2" fill="#f0f0f3" />
-        <rect x="1" y="1" width="10" height="10" rx="2"
-          stroke="#555" :stroke-width="borderWeight" fill="none"
-          :opacity="borderOpacity" />
       </template>
 
       <template v-else>
@@ -204,26 +253,12 @@ function buildShadow() {
   border-radius: 0 !important;
 }
 
-/* Non-text category colors */
-.token-surface {
-  background: rgba(142, 150, 170, 0.12);
-}
-.token-surface .token-name {
-  color: var(--vp-c-text-2);
-}
-
+/* Hue tokens: light DOM with SVG */
 .token-hue {
   background: rgba(159, 122, 234, 0.10);
 }
 .token-hue .token-name {
   color: var(--vp-c-purple-1);
-}
-
-.token-border {
-  background: rgba(234, 179, 8, 0.10);
-}
-.token-border .token-name {
-  color: var(--vp-c-yellow-1);
 }
 
 .token-generic {
