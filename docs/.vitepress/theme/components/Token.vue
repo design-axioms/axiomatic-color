@@ -14,19 +14,6 @@ const category = computed(() => {
   return "generic";
 });
 
-// Surface: lightness value for the swatch
-const surfaceLightness = computed(() => {
-  const map: Record<string, number> = {
-    ".surface-page": 0.975,
-    ".surface-workspace": 0.957,
-    ".surface-card": 0.902,
-    ".surface-action": 0.902,
-    ".surface-spotlight": 0.1,
-    ".surface-*": 0.5,
-  };
-  return map[props.name] ?? 0.5;
-});
-
 // Text: extract class name without the dot
 const textClass = computed(() => {
   if (category.value !== "text") return null;
@@ -34,45 +21,13 @@ const textClass = computed(() => {
   return cls.endsWith("*") ? null : cls;
 });
 
-// Border: stroke weight/opacity by tier
-const borderWeight = computed(() => {
-  const map: Record<string, number> = {
-    ".border-decorative": 0.8,
-    ".border-interactive": 1.4,
-    ".border-critical": 2.2,
-    ".border-*": 1.4,
-  };
-  return map[props.name] ?? 1.4;
-});
-
-const borderOpacity = computed(() => {
-  const map: Record<string, number> = {
-    ".border-decorative": 0.3,
-    ".border-interactive": 0.6,
-    ".border-critical": 1.0,
-    ".border-*": 0.6,
-  };
-  return map[props.name] ?? 0.6;
-});
-
-// Hue: actual CSS color
-const hueColor = computed(() => {
-  const map: Record<string, string> = {
-    ".hue-brand": "#6e56cf",
-    ".hue-success": "#22c55e",
-    ".hue-warning": "#eab308",
-    ".hue-error": "#ef4444",
-  };
-  return map[props.name] ?? null;
-});
-
-// Shadow DOM for text tokens
+// Shadow DOM for system tokens
 const shadowHost = ref<HTMLElement | null>(null);
 const systemCss = ref("");
 
 // Whether this token category uses shadow DOM
 const usesShadow = computed(() =>
-  ["text", "surface", "border"].includes(category.value),
+  ["text", "surface", "border", "hue"].includes(category.value),
 );
 
 // Extract the bare class name for surface/border tokens
@@ -181,6 +136,24 @@ function buildShadow() {
       <span class="swatch ${borderCls}"></span>
       <code class="text-subtle">${props.name}</code>
     `;
+  } else if (cat === "hue") {
+    const hueCls = bareClass.value ?? "";
+    iconHtml = `
+      <style>
+        ${systemCss.value}
+        ${hostStyles}
+        .swatch {
+          width: 0.75em;
+          height: 0.75em;
+          border-radius: 50%;
+          align-self: center;
+          flex-shrink: 0;
+          border: 1px solid var(--axm-border-decorative);
+        }
+      </style>
+      <span class="swatch surface-card ${hueCls}"></span>
+      <code class="text-subtle">${props.name}</code>
+    `;
   }
 
   shadow.innerHTML = iconHtml;
@@ -200,29 +173,14 @@ function buildShadow() {
   <span v-else-if="category === 'border'" ref="shadowHost"
     class="token-badge token-border surface-card" />
 
-  <!-- Hue and generic: light DOM with SVG icons -->
-  <span v-else class="token-badge" :class="`token-${category}`">
-    <svg class="token-icon" viewBox="0 0 12 12" fill="none">
-      <template v-if="category === 'hue'">
-        <template v-if="hueColor">
-          <circle cx="6" cy="6" r="5" :fill="hueColor" />
-        </template>
-        <template v-else>
-          <defs>
-            <linearGradient id="hue-rainbow" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ef4444" />
-              <stop offset="33%" stop-color="#eab308" />
-              <stop offset="66%" stop-color="#22c55e" />
-              <stop offset="100%" stop-color="#6e56cf" />
-            </linearGradient>
-          </defs>
-          <circle cx="6" cy="6" r="5" fill="url(#hue-rainbow)" />
-        </template>
-      </template>
+  <!-- Hue tokens: shadow DOM host on a card surface -->
+  <span v-else-if="category === 'hue'" ref="shadowHost"
+    class="token-badge token-hue surface-card" />
 
-      <template v-else>
-        <circle cx="6" cy="6" r="4" fill="currentColor" opacity="0.3" />
-      </template>
+  <!-- Generic: light DOM -->
+  <span v-else class="token-badge token-generic">
+    <svg class="token-icon" viewBox="0 0 12 12" fill="none">
+      <circle cx="6" cy="6" r="4" fill="currentColor" opacity="0.3" />
     </svg>
     <code class="token-name">{{ name }}</code>
   </span>
@@ -254,14 +212,6 @@ function buildShadow() {
   background: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
-}
-
-/* Hue tokens: light DOM with SVG */
-.token-hue {
-  background: rgba(159, 122, 234, 0.10);
-}
-.token-hue .token-name {
-  color: var(--vp-c-purple-1);
 }
 
 .token-generic {
