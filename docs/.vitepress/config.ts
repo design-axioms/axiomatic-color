@@ -27,25 +27,27 @@ export default defineConfig({
   },
   themeConfig: {
     nav: [
-      { text: "Guide", link: "/guide/getting-started" },
-      { text: "Why?", link: "/guide/" },
+      { text: "Docs", link: "/" },
       { text: "Demo", link: "/demo" },
     ],
     sidebar: [
       {
-        text: "Guide",
+        text: "System",
         items: [
-          { text: "Why Axiomatic?", link: "/guide/" },
-          { text: "Getting Started", link: "/guide/getting-started" },
-          { text: "Concepts", link: "/guide/concepts" },
+          { text: "Introduction", link: "/" },
+          { text: "Surfaces", link: "/surfaces" },
+          { text: "Text", link: "/text" },
+          { text: "Borders", link: "/borders" },
+          { text: "Atmosphere", link: "/atmosphere" },
+          { text: "Composition", link: "/composition" },
         ],
       },
       {
-        text: "Reference",
+        text: "More",
         items: [
+          { text: "Why Axiomatic?", link: "/why" },
+          { text: "Getting Started", link: "/getting-started" },
           { text: "Architecture", link: "/architecture" },
-          { text: "APCA Contrast", link: "/reference/apca" },
-          { text: "Pedagogy", link: "/pedagogy" },
           { text: "CLI", link: "/reference/cli" },
         ],
       },
