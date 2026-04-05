@@ -2,6 +2,8 @@
 
 A color system that guarantees contrast correctness. Surfaces set backgrounds, text grades set contrast, borders have tiers, atmosphere adds hue. Toggle dark mode and it all works.
 
+<SurfaceTile />
+
 ## Quick Start
 
 ```html
