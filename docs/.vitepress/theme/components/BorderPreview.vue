@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import Token from "./Token.vue";
-import ApcaBadge from "./ApcaBadge.vue";
+import { ref, onMounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
@@ -22,17 +20,6 @@ onMounted(async () => {
   });
   ready.value = true;
 });
-
-const tiers = [
-  { cls: "border-decorative", label: "Decorative", target: 10, desc: "Subtle container outlines" },
-  { cls: "border-interactive", label: "Interactive", target: 30, desc: "Buttons, inputs, clickable" },
-  { cls: "border-critical", label: "Critical", target: 80, desc: "Error states, required fields" },
-];
-
-const surfaces = [
-  { cls: "surface-page", label: "Page" },
-  { cls: "surface-spotlight", label: "Spotlight" },
-];
 </script>
 
 <template>
@@ -45,22 +32,59 @@ const surfaces = [
       </button>
     </div>
 
-    <div class="bp-grid">
-      <div v-for="surface in surfaces" :key="surface.cls" class="bp-surface" :class="surface.cls">
-        <span class="bp-surface-name text-high">{{ surface.label }}</span>
-        <div class="bp-specimens">
-          <div
-            v-for="tier in tiers" :key="tier.cls"
-            class="bp-specimen"
-            :class="tier.cls"
-          >
-            <div class="bp-specimen-header">
-              <span class="bp-tier-name text-high">{{ tier.label }}</span>
-              <ApcaBadge :value="tier.target" :target="tier.target" />
-            </div>
-            <span class="bp-tier-desc text-subtle">{{ tier.desc }}</span>
-            <Token :name="'.' + tier.cls" />
+    <div class="bp-panels">
+      <!-- Page polarity -->
+      <div class="bp-panel surface-page">
+        <!-- Decorative: a content card -->
+        <div class="bp-card surface-card border-decorative">
+          <span class="text-high bp-card-title">Project Settings</span>
+          <span class="text-subtle bp-card-desc">General configuration</span>
+        </div>
+
+        <!-- Interactive: a button and an input -->
+        <div class="bp-controls">
+          <button class="bp-button surface-action border-interactive text-high">Deploy</button>
+          <div class="bp-input border-interactive">
+            <span class="text-subtlest">Search...</span>
           </div>
+        </div>
+
+        <!-- Critical: an error state -->
+        <div class="bp-alert border-critical">
+          <span class="text-high bp-alert-title">Build Failed</span>
+          <span class="text-subtle bp-alert-desc">Exit code 1 at step 3</span>
+        </div>
+
+        <div class="bp-legend">
+          <span class="bp-legend-item text-subtlest"><code>.border-decorative</code> Lc 10</span>
+          <span class="bp-legend-item text-subtlest"><code>.border-interactive</code> Lc 30</span>
+          <span class="bp-legend-item text-subtlest"><code>.border-critical</code> Lc 80</span>
+        </div>
+      </div>
+
+      <!-- Spotlight polarity -->
+      <div class="bp-panel surface-spotlight">
+        <div class="bp-card surface-card border-decorative">
+          <span class="text-high bp-card-title">Quick Actions</span>
+          <span class="text-subtle bp-card-desc">Frequently used</span>
+        </div>
+
+        <div class="bp-controls">
+          <button class="bp-button surface-action border-interactive text-high">Promote</button>
+          <div class="bp-input border-interactive">
+            <span class="text-subtlest">Filter...</span>
+          </div>
+        </div>
+
+        <div class="bp-alert border-critical">
+          <span class="text-high bp-alert-title">Rate Limited</span>
+          <span class="text-subtle bp-alert-desc">Try again in 30s</span>
+        </div>
+
+        <div class="bp-legend">
+          <span class="bp-legend-item text-subtlest"><code>.border-decorative</code></span>
+          <span class="bp-legend-item text-subtlest"><code>.border-interactive</code></span>
+          <span class="bp-legend-item text-subtlest"><code>.border-critical</code></span>
         </div>
       </div>
     </div>
@@ -94,56 +118,105 @@ const surfaces = [
   font-family: var(--vp-font-family-base);
 }
 
-.bp-grid {
+.bp-panels {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
-.bp-surface {
+.bp-panel {
   padding: 1rem;
-}
-
-.bp-surface-name {
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.bp-specimens {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  transition: background 0.3s ease;
 }
 
-.bp-specimen {
-  border-width: 2px;
+/* Decorative: card container */
+.bp-card {
+  border-width: 1px;
   border-style: solid;
   border-radius: 6px;
   padding: 0.75rem;
+  transition: background 0.3s ease;
 }
 
-.bp-specimen-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.25rem;
-}
-
-.bp-tier-name {
+.bp-card-title {
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.125rem;
 }
 
-.bp-tier-desc {
-  font-size: 0.65rem;
+.bp-card-desc {
+  font-size: 0.7rem;
   display: block;
-  margin-bottom: 0.5rem;
+}
+
+/* Interactive: controls */
+.bp-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bp-button {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.bp-input {
+  flex: 1;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.75rem;
+}
+
+/* Critical: alert */
+.bp-alert {
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 6px;
+  padding: 0.625rem 0.75rem;
+}
+
+.bp-alert-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.125rem;
+}
+
+.bp-alert-desc {
+  font-size: 0.7rem;
+  display: block;
+}
+
+/* Legend */
+.bp-legend {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--axm-border-decorative);
+}
+
+.bp-legend-item {
+  font-size: 0.6rem;
+}
+
+.bp-legend-item code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.6rem;
 }
 
 @media (max-width: 640px) {
-  .bp-grid {
-    grid-template-columns: 1fr;
-  }
+  .bp-panels { grid-template-columns: 1fr; }
 }
 </style>
