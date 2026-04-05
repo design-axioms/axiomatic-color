@@ -146,3 +146,39 @@ Because Mood and Voice modify disjoint components, they compose without N×M com
 - `--axm-atm-hue` and `--axm-atm-chroma`: inheriting, initial value 0
 - Key color primitives: `--axm-key-{name}-hue`, `--axm-key-{name}-chroma`
 - Surface-local vars: scoped by class, not registered
+
+## 11. Runtime: ThemeBuilder
+
+The generated CSS handles mode switching via `light-dark()` and `color-scheme`. One case requires JavaScript: **polarity inversion on mode toggle**.
+
+When the root is light, inverted surfaces (spotlight) have `color-scheme: dark` in the generated CSS. When the user toggles to dark mode, spotlight needs `color-scheme: light`. The CSS generator cannot express "opposite of root" in static CSS.
+
+`createThemeBuilder()` handles this:
+
+- Watches root element for `style` and `class` attribute changes (covers both inline `color-scheme` and class-based toggles like VitePress's `.dark`)
+- On change, queries all inverted-selector elements and flips their `color-scheme`
+- Handles nesting depth: even depth = flip from root, odd depth = same as root
+- Returns a `destroy()` function for cleanup
+
+ThemeBuilder is framework-agnostic. Vue integration uses a `useThemeBuilder(rootRef)` composable that watches a template ref and manages the lifecycle.
+
+## 12. Runtime: Constructible Stylesheets
+
+Shadow DOM components (Token pills in the docs, potentially consumer components) need the system CSS inside their shadow roots. Injecting a `<style>` element per shadow root duplicates parsing work.
+
+`getSystemStyleSheet()` returns a singleton `Promise<CSSStyleSheet>`:
+
+- Lazily solves the default config and generates CSS with `:host` as the selector
+- Creates one `CSSStyleSheet` via `new CSSStyleSheet()` + `replaceSync()`
+- The same sheet instance is adopted by all shadow roots via `adoptedStyleSheets`
+- Baseline 2023 (Chrome 73+, Firefox 101+, Safari 16.4+)
+
+Per-component styles (host layout, icon sizing) use separate small `CSSStyleSheet` instances, also shared across instances of the same component type.
+
+## 13. Runtime: Custom Elements
+
+The package exports web components for UI primitives that both the docs site and standalone consumers use.
+
+**`<color-slider>`** — a styled range input with oklch gradient track and colored thumb. Registered via `registerColorSlider()`. Attributes: `type` (hue/chroma), `value`, `hue`, `chroma`, `min`, `max`, `step`. Uses shadow DOM with a single shared `CSSStyleSheet`. Fires `CustomEvent` with `detail.value` on input.
+
+Custom elements are framework-agnostic — they work in Vue templates, vanilla HTML, and any other context. Vue needs `isCustomElement` configured in the template compiler to avoid treating them as unknown Vue components.
