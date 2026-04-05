@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Token from "./Token.vue";
+import ApcaBadge from "./ApcaBadge.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
@@ -34,58 +35,55 @@ onMounted(async () => {
     </div>
 
     <div class="bp-panels">
-      <!-- Page polarity -->
       <div class="bp-panel surface-page">
-        <!-- Decorative: a content card -->
-        <div class="bp-card surface-card border-decorative">
-          <span class="text-high bp-card-title">Project Settings</span>
-          <span class="text-subtle bp-card-desc">General configuration</span>
-        </div>
-
-        <!-- Interactive: a button and an input -->
-        <div class="bp-controls">
-          <button class="bp-button surface-action border-interactive text-high">Deploy</button>
-          <div class="bp-input border-interactive">
-            <span class="text-subtlest">Search...</span>
+        <div class="bp-specimen border-decorative">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Decorative</span>
+            <Token name=".border-decorative" />
           </div>
+          <span class="text-subtle bp-specimen-desc">Subtle container outlines</span>
         </div>
 
-        <!-- Critical: an error state -->
-        <div class="bp-alert border-critical">
-          <span class="text-high bp-alert-title">Build Failed</span>
-          <span class="text-subtle bp-alert-desc">Exit code 1 at step 3</span>
+        <div class="bp-specimen border-interactive">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Interactive</span>
+            <Token name=".border-interactive" />
+          </div>
+          <span class="text-subtle bp-specimen-desc">Buttons, inputs, clickable elements</span>
         </div>
 
-        <div class="bp-legend">
-          <span class="bp-legend-item text-subtlest"><Token name=".border-decorative" /> Lc 10</span>
-          <span class="bp-legend-item text-subtlest"><Token name=".border-interactive" /> Lc 30</span>
-          <span class="bp-legend-item text-subtlest"><Token name=".border-critical" /> Lc 80</span>
+        <div class="bp-specimen border-critical">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Critical</span>
+            <Token name=".border-critical" />
+          </div>
+          <span class="text-subtle bp-specimen-desc">Error states, required fields</span>
         </div>
       </div>
 
-      <!-- Spotlight polarity -->
       <div class="bp-panel surface-spotlight">
-        <div class="bp-card surface-card border-decorative">
-          <span class="text-high bp-card-title">Quick Actions</span>
-          <span class="text-subtle bp-card-desc">Frequently used</span>
-        </div>
-
-        <div class="bp-controls">
-          <button class="bp-button surface-action border-interactive text-high">Promote</button>
-          <div class="bp-input border-interactive">
-            <span class="text-subtlest">Filter...</span>
+        <div class="bp-specimen border-decorative">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Decorative</span>
+            <Token name=".border-decorative" />
           </div>
+          <span class="text-subtle bp-specimen-desc">Same class, inverted surface</span>
         </div>
 
-        <div class="bp-alert border-critical">
-          <span class="text-high bp-alert-title">Rate Limited</span>
-          <span class="text-subtle bp-alert-desc">Try again in 30s</span>
+        <div class="bp-specimen border-interactive">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Interactive</span>
+            <Token name=".border-interactive" />
+          </div>
+          <span class="text-subtle bp-specimen-desc">Resolves per surface</span>
         </div>
 
-        <div class="bp-legend">
-          <span class="bp-legend-item text-subtlest"><Token name=".border-decorative" /></span>
-          <span class="bp-legend-item text-subtlest"><Token name=".border-interactive" /></span>
-          <span class="bp-legend-item text-subtlest"><Token name=".border-critical" /></span>
+        <div class="bp-specimen border-critical">
+          <div class="bp-specimen-header">
+            <span class="text-high bp-specimen-title">Critical</span>
+            <Token name=".border-critical" />
+          </div>
+          <span class="text-subtle bp-specimen-desc">Contrast target met on both</span>
         </div>
       </div>
     </div>
@@ -128,93 +126,32 @@ onMounted(async () => {
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
-  transition: background 0.3s ease;
-}
-
-/* Decorative: card container */
-.bp-card {
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 6px;
-  padding: 0.75rem;
-  transition: background 0.3s ease;
-}
-
-.bp-card-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 0.125rem;
-}
-
-.bp-card-desc {
-  font-size: 0.7rem;
-  display: block;
-}
-
-/* Interactive: controls */
-.bp-controls {
-  display: flex;
   gap: 0.5rem;
-}
-
-.bp-button {
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.375rem 0.75rem;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 5px;
-  cursor: pointer;
   transition: background 0.3s ease;
 }
 
-.bp-input {
-  flex: 1;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 5px;
-  padding: 0.375rem 0.625rem;
-  font-size: 0.75rem;
-}
-
-/* Critical: alert */
-.bp-alert {
+.bp-specimen {
   border-width: 2px;
   border-style: solid;
   border-radius: 6px;
-  padding: 0.625rem 0.75rem;
+  padding: 0.75rem;
 }
 
-.bp-alert-title {
+.bp-specimen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.bp-specimen-title {
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.bp-specimen-desc {
+  font-size: 0.65rem;
   display: block;
-  margin-bottom: 0.125rem;
-}
-
-.bp-alert-desc {
-  font-size: 0.7rem;
-  display: block;
-}
-
-/* Legend */
-.bp-legend {
-  display: flex;
-  gap: 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--axm-border-decorative);
-}
-
-.bp-legend-item {
-  font-size: 0.6rem;
-}
-
-.bp-legend-item code {
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.6rem;
 }
 
 @media (max-width: 640px) {
