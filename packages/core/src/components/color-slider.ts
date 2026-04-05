@@ -69,7 +69,15 @@ function thumbColor(hue: number, chroma: number): string {
 }
 
 export class ColorSlider extends HTMLElement {
-  static observedAttributes = ["type", "value", "hue", "chroma", "min", "max", "step"];
+  static observedAttributes = [
+    "type",
+    "value",
+    "hue",
+    "chroma",
+    "min",
+    "max",
+    "step",
+  ];
 
   #input: HTMLInputElement;
   #shadow: ShadowRoot;
@@ -87,7 +95,9 @@ export class ColorSlider extends HTMLElement {
       e.stopPropagation();
       const val = parseFloat(this.#input.value);
       this.setAttribute("value", String(val));
-      this.dispatchEvent(new CustomEvent("input", { detail: { value: val }, bubbles: true }));
+      this.dispatchEvent(
+        new CustomEvent("input", { detail: { value: val }, bubbles: true }),
+      );
     });
   }
 
@@ -113,14 +123,16 @@ export class ColorSlider extends HTMLElement {
 
   #syncAttributes(): void {
     const type = this.getAttribute("type") ?? "hue";
-    const defaults = type === "hue"
-      ? { min: "0", max: "360", step: "1" }
-      : { min: "0", max: "0.4", step: "0.005" };
+    const defaults =
+      type === "hue"
+        ? { min: "0", max: "360", step: "1" }
+        : { min: "0", max: "0.4", step: "0.005" };
 
     this.#input.min = this.getAttribute("min") ?? defaults.min;
     this.#input.max = this.getAttribute("max") ?? defaults.max;
     this.#input.step = this.getAttribute("step") ?? defaults.step;
-    this.#input.value = this.getAttribute("value") ?? (type === "hue" ? "0" : "0.1");
+    this.#input.value =
+      this.getAttribute("value") ?? (type === "hue" ? "0" : "0.1");
   }
 
   #updateStyles(): void {
@@ -136,9 +148,7 @@ export class ColorSlider extends HTMLElement {
   }
 }
 
-export function registerColorSlider(
-  name = "color-slider",
-): void {
+export function registerColorSlider(name = "color-slider"): void {
   if (!customElements.get(name)) {
     customElements.define(name, ColorSlider);
   }

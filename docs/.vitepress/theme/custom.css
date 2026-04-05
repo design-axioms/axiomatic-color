@@ -1,9 +1,48 @@
-/* Override VitePress font variables — fontsource handles @font-face */
+/* Override VitePress variables toward Geist feel */
 :root {
-  --vp-font-family-base: "Geist Sans", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --vp-font-family-mono: "Geist Mono", ui-monospace, "Menlo", "Monaco",
-    "Consolas", "Liberation Mono", "Courier New", monospace;
+  --vp-font-family-base:
+    "Geist Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --vp-font-family-mono:
+    "Geist Mono", ui-monospace, "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
+
+  /* Tighter content density */
+  --vp-nav-height: 56px;
+}
+
+/* Tighter body text */
+.vp-doc p {
+  font-size: 14px;
+  line-height: 24px;
+}
+
+/* Tighter headings */
+.vp-doc h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.vp-doc h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding-top: 24px;
+  border-top: 1px solid var(--vp-c-divider);
+  margin-top: 32px;
+}
+
+.vp-doc h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Inline code: subtler, Geist-style */
+.vp-doc :not(pre) > code {
+  font-size: 13px;
+  padding: 2px 5px;
+  border-radius: 4px;
 }
 
 .nowrap {

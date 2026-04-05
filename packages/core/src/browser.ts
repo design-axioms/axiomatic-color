@@ -37,9 +37,9 @@ interface ThemeBuilderOptions {
   invertedSelector?: string;
 }
 
-export function createThemeBuilder(
-  options?: ThemeBuilderOptions,
-): { destroy(): void } {
+export function createThemeBuilder(options?: ThemeBuilderOptions): {
+  destroy(): void;
+} {
   const root = options?.root ?? document.documentElement;
   const selector = options?.invertedSelector ?? ".surface-spotlight";
 

@@ -5,7 +5,13 @@ import "@fontsource/geist-sans/700.css";
 import "@fontsource/geist-mono/400.css";
 import "@fontsource/geist-mono/500.css";
 import "@fontsource/geist-mono/600.css";
-import { solve, DEFAULT_CONFIG, generateCSS, createThemeBuilder, registerColorSlider } from "@design-axioms/color";
+import {
+  solve,
+  DEFAULT_CONFIG,
+  generateCSS,
+  createThemeBuilder,
+  registerColorSlider,
+} from "@design-axioms/color";
 
 // Register <color-slider> custom element
 registerColorSlider();
@@ -37,7 +43,9 @@ const hueVal = document.getElementById("hue-val")!;
 const chromaVal = document.getElementById("chroma-val")!;
 
 function applyAtmosphere(h: number, c: number): void {
-  const surfaces = document.querySelectorAll<HTMLElement>('[class*="surface-"]');
+  const surfaces = document.querySelectorAll<HTMLElement>(
+    '[class*="surface-"]',
+  );
   for (const el of surfaces) {
     el.style.setProperty("--axm-atm-hue", String(h));
     el.style.setProperty("--axm-atm-chroma", String(c));

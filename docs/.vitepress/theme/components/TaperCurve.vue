@@ -99,7 +99,9 @@ function connectorPath(l: number, index: number): string {
           :value="maxChroma"
           :hue="hue"
           :chroma="maxChroma"
-          min="0.02" max="0.3" step="0.01"
+          min="0.02"
+          max="0.3"
+          step="0.01"
           @input="maxChroma = $event.detail.value"
         />
         <span class="taper-control-val">{{ maxChroma.toFixed(2) }}</span>
@@ -115,19 +117,28 @@ function connectorPath(l: number, index: number): string {
       <div class="taper-strip" :style="{ background: stripGradient }">
         <!-- Surface markers -->
         <div
-          v-for="s in surfaces" :key="s.name"
+          v-for="s in surfaces"
+          :key="s.name"
           class="taper-marker"
           :style="{ left: surfaceLeft(s.l) }"
         >
-          <div class="taper-tick" :class="s.l > 0.5 ? 'tick-dark' : 'tick-light'"></div>
+          <div
+            class="taper-tick"
+            :class="s.l > 0.5 ? 'tick-dark' : 'tick-light'"
+          ></div>
         </div>
       </div>
     </div>
 
     <!-- Connector lines from strip ticks to swatches -->
-    <svg class="taper-connectors" viewBox="0 0 400 30" preserveAspectRatio="none">
+    <svg
+      class="taper-connectors"
+      viewBox="0 0 400 30"
+      preserveAspectRatio="none"
+    >
       <path
-        v-for="(s, i) in surfaces" :key="s.name"
+        v-for="(s, i) in surfaces"
+        :key="s.name"
         :d="connectorPath(s.l, i)"
         class="taper-connector"
       />
@@ -138,7 +149,10 @@ function connectorPath(l: number, index: number): string {
       <div v-for="s in surfaces" :key="s.name" class="taper-surface">
         <div class="taper-swatch-pair">
           <div class="taper-swatch" :style="{ background: colorAt(s.l) }"></div>
-          <div class="taper-swatch neutral" :style="{ background: surfaceNeutral(s.l) }"></div>
+          <div
+            class="taper-swatch neutral"
+            :style="{ background: surfaceNeutral(s.l) }"
+          ></div>
         </div>
         <div class="taper-surface-info">
           <span class="taper-surface-name">{{ s.name }}</span>
@@ -146,8 +160,6 @@ function connectorPath(l: number, index: number): string {
         </div>
       </div>
     </div>
-
-
   </div>
 </template>
 
@@ -193,11 +205,11 @@ function connectorPath(l: number, index: number): string {
 }
 
 .tick-light {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .tick-dark {
-  background: rgba(0,0,0,0.25);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .taper-strip-labels {
@@ -250,7 +262,10 @@ function connectorPath(l: number, index: number): string {
   flex: 1;
 }
 
-.taper-swatch-pair { display: flex; gap: 2px; }
+.taper-swatch-pair {
+  display: flex;
+  gap: 2px;
+}
 
 .taper-swatch {
   width: 28px;
@@ -267,8 +282,16 @@ function connectorPath(l: number, index: number): string {
   gap: 0.1rem;
 }
 
-.taper-surface-name { font-size: 0.7rem; font-weight: 600; color: var(--vp-c-text-1); }
-.taper-surface-pct { font-size: 0.6rem; color: var(--vp-c-text-3); font-family: var(--vp-font-family-mono); }
+.taper-surface-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+.taper-surface-pct {
+  font-size: 0.6rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+}
 
 /* --- Controls --- */
 
@@ -289,5 +312,9 @@ function connectorPath(l: number, index: number): string {
   color: var(--vp-c-text-2);
 }
 
-.taper-control-val { font-family: var(--vp-font-family-mono); min-width: 3em; font-size: 0.7rem; }
+.taper-control-val {
+  font-family: var(--vp-font-family-mono);
+  min-width: 3em;
+  font-size: 0.7rem;
+}
 </style>

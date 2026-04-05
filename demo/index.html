@@ -1,75 +1,226 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Axiomatic Color System — Demo</title>
-<link rel="stylesheet" href="./layout.css">
-</head>
-<body class="surface-page">
-<div class="demo">
-  <header class="demo-header">
-    <h1 class="text-high">Axiomatic Color System</h1>
-    <div class="demo-controls">
-      <button id="mode-toggle" class="surface-action text-high demo-toggle">● Dark Mode</button>
-    </div>
-    <div class="demo-sliders text-subtle">
-      <label class="demo-slider-label">
-        Hue <output id="hue-val">288</output>
-        <color-slider id="hue-slider" type="hue" value="288" hue="288" chroma="0.17"></color-slider>
-      </label>
-      <label class="demo-slider-label">
-        Chroma <output id="chroma-val">0.17</output>
-        <color-slider id="chroma-slider" type="chroma" value="0.17" hue="288" chroma="0.17"></color-slider>
-      </label>
-    </div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Axiomatic Color System</title>
+    <link rel="stylesheet" href="./layout.css" />
+  </head>
+  <body class="surface-page">
+    <header class="header">
+      <div class="header-left">
+        <h1 class="header-title text-high">Axiomatic Color</h1>
+        <span class="header-badge text-subtlest">Design System</span>
+      </div>
+      <div class="header-right">
+        <button
+          id="mode-toggle"
+          class="mode-toggle border-decorative text-high"
+        >
+          Dark
+        </button>
+      </div>
+    </header>
 
-  <section class="demo-section">
-    <h2 class="text-strong">Composition</h2>
-    <p class="text-subtle comp-intro">The body is the page surface. Below: workspace → card → action nesting.</p>
-    <div class="surface-workspace comp-panel">
-      <p class="text-subtle comp-label">Workspace</p>
-      <div class="surface-card comp-card border-decorative">
-        <h3 class="text-high">Card Title</h3>
-        <p class="text-strong">Body text on a card surface — strong grade for comfortable reading.</p>
-        <p class="text-subtle">Secondary details use the subtle grade.</p>
-        <p class="text-subtlest">Tertiary hint text at the subtlest grade.</p>
-        <div class="comp-buttons">
-          <button class="surface-spotlight comp-button text-high">Primary</button>
-          <button class="comp-button comp-button-ghost border-interactive text-high">Secondary</button>
+    <main class="main">
+      <!-- Atmosphere controls -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title text-high">Atmosphere</h2>
+          <p class="section-desc text-subtle">
+            Tint surfaces with hue and chroma. Contrast guarantees are
+            unaffected.
+          </p>
         </div>
-      </div>
-      <div class="surface-card comp-card border-decorative">
-        <h3 class="text-high">Another Card</h3>
-        <p class="text-strong">Cards are siblings, not nested. Same lightness, same text contrast.</p>
-      </div>
-    </div>
-    <div class="surface-spotlight comp-spotlight">
-      <h3 class="text-high">Spotlight</h3>
-      <p class="text-strong">Inverted polarity — massive APCA gap from page surfaces.</p>
-      <p class="text-subtle">Secondary text on inverted surface.</p>
-      <div class="comp-buttons">
-        <button class="surface-page comp-button text-high">Primary</button>
-        <button class="comp-button comp-button-ghost border-interactive text-high">Secondary</button>
-      </div>
-    </div>
-    <div class="comp-border-showcase">
-      <h3 class="text-strong">Border Tiers</h3>
-      <div class="comp-border-row">
-        <div class="surface-card comp-border-box border-decorative">
-          <span class="text-subtle">Decorative (10)</span>
+        <div class="atmosphere-controls">
+          <label class="control">
+            <span class="control-label text-subtle">Hue</span>
+            <color-slider
+              id="hue-slider"
+              type="hue"
+              value="288"
+              hue="288"
+              chroma="0.17"
+            ></color-slider>
+            <output id="hue-val" class="control-value text-subtlest"
+              >288</output
+            >
+          </label>
+          <label class="control">
+            <span class="control-label text-subtle">Chroma</span>
+            <color-slider
+              id="chroma-slider"
+              type="chroma"
+              value="0.17"
+              hue="288"
+              chroma="0.17"
+            ></color-slider>
+            <output id="chroma-val" class="control-value text-subtlest"
+              >0.17</output
+            >
+          </label>
         </div>
-        <div class="surface-card comp-border-box border-interactive">
-          <span class="text-subtle">Interactive (30)</span>
+      </section>
+
+      <!-- Surfaces -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title text-high">Surfaces</h2>
+          <p class="section-desc text-subtle">
+            Named regions with fixed lightness. Each surface establishes text
+            and border tokens for its contents.
+          </p>
         </div>
-        <div class="surface-card comp-border-box border-critical">
-          <span class="text-subtle">Critical (80)</span>
+        <div class="surface-grid">
+          <div class="surface-specimen surface-page border-decorative">
+            <div class="specimen-content">
+              <span class="specimen-name text-high">Page</span>
+              <code class="specimen-class text-subtlest">.surface-page</code>
+            </div>
+            <span class="specimen-role text-subtle">Base background</span>
+          </div>
+          <div class="surface-specimen surface-workspace border-decorative">
+            <div class="specimen-content">
+              <span class="specimen-name text-high">Workspace</span>
+              <code class="specimen-class text-subtlest"
+                >.surface-workspace</code
+              >
+            </div>
+            <span class="specimen-role text-subtle">Elevated work area</span>
+          </div>
+          <div class="surface-specimen surface-card border-decorative">
+            <div class="specimen-content">
+              <span class="specimen-name text-high">Card</span>
+              <code class="specimen-class text-subtlest">.surface-card</code>
+            </div>
+            <span class="specimen-role text-subtle">Content container</span>
+          </div>
+          <div class="surface-specimen surface-action border-decorative">
+            <div class="specimen-content">
+              <span class="specimen-name text-high">Action</span>
+              <code class="specimen-class text-subtlest">.surface-action</code>
+            </div>
+            <span class="specimen-role text-subtle">Interactive element</span>
+          </div>
+          <div class="surface-specimen surface-spotlight border-decorative">
+            <div class="specimen-content">
+              <span class="specimen-name text-high">Spotlight</span>
+              <code class="specimen-class text-subtlest"
+                >.surface-spotlight</code
+              >
+            </div>
+            <span class="specimen-role text-subtle">Inverted polarity</span>
+          </div>
         </div>
-      </div>
-    </div>
-  </section>
-</div>
-<script type="module" src="./main.ts"></script>
-</body>
+      </section>
+
+      <!-- Text Grades -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title text-high">Text</h2>
+          <p class="section-desc text-subtle">
+            Four contrast grades, solved per surface per mode to meet APCA
+            targets.
+          </p>
+        </div>
+        <div class="grade-stack surface-card border-decorative">
+          <div class="grade-row">
+            <span class="grade-sample text-high">High contrast text</span>
+            <div class="grade-meta">
+              <code class="grade-class text-subtlest">.text-high</code>
+              <span class="grade-target text-subtlest">Lc 100</span>
+            </div>
+          </div>
+          <div class="grade-row">
+            <span class="grade-sample text-strong">Body text for reading</span>
+            <div class="grade-meta">
+              <code class="grade-class text-subtlest">.text-strong</code>
+              <span class="grade-target text-subtlest">Lc 95</span>
+            </div>
+          </div>
+          <div class="grade-row">
+            <span class="grade-sample text-subtle">Secondary information</span>
+            <div class="grade-meta">
+              <code class="grade-class text-subtlest">.text-subtle</code>
+              <span class="grade-target text-subtlest">Lc 90</span>
+            </div>
+          </div>
+          <div class="grade-row">
+            <span class="grade-sample text-subtlest">Hints and metadata</span>
+            <div class="grade-meta">
+              <code class="grade-class text-subtlest">.text-subtlest</code>
+              <span class="grade-target text-subtlest">Lc 75</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Border Tiers -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title text-high">Borders</h2>
+          <p class="section-desc text-subtle">
+            Three tiers for decorative, interactive, and critical use.
+          </p>
+        </div>
+        <div class="border-row-grid">
+          <div class="border-specimen surface-card border-decorative">
+            <span class="text-subtle">Decorative</span>
+            <code class="text-subtlest">.border-decorative</code>
+          </div>
+          <div class="border-specimen surface-card border-interactive">
+            <span class="text-subtle">Interactive</span>
+            <code class="text-subtlest">.border-interactive</code>
+          </div>
+          <div class="border-specimen surface-card border-critical">
+            <span class="text-subtle">Critical</span>
+            <code class="text-subtlest">.border-critical</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Composition -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title text-high">Composition</h2>
+          <p class="section-desc text-subtle">
+            Surface, text, and border tokens compose independently. Primary
+            buttons use opposite polarity.
+          </p>
+        </div>
+        <div class="comp-pair">
+          <div class="comp-panel surface-workspace border-decorative">
+            <div class="comp-card surface-card border-decorative">
+              <h3 class="text-high">Card Title</h3>
+              <p class="text-strong">Body text on a card surface.</p>
+              <p class="text-subtle">Secondary details use the subtle grade.</p>
+              <div class="comp-buttons">
+                <button class="btn btn-primary surface-spotlight text-high">
+                  Primary
+                </button>
+                <button class="btn btn-ghost border-interactive text-high">
+                  Secondary
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="comp-panel surface-spotlight border-decorative">
+            <h3 class="text-high">Spotlight</h3>
+            <p class="text-strong">Inverted polarity surface.</p>
+            <p class="text-subtle">Text grades resolve correctly here too.</p>
+            <div class="comp-buttons">
+              <button class="btn btn-primary surface-page text-high">
+                Primary
+              </button>
+              <button class="btn btn-ghost border-interactive text-high">
+                Secondary
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
 </html>

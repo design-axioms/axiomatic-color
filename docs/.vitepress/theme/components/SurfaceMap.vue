@@ -46,7 +46,9 @@ onMounted(async () => {
   ready.value = true;
 });
 
-const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
+const mode = computed<"light" | "dark">(() =>
+  isDark.value ? "dark" : "light",
+);
 
 function fmt(n: number): string {
   return n.toFixed(3);
@@ -58,7 +60,12 @@ function surfaceBySlug(slug: string) {
 </script>
 
 <template>
-  <div v-if="ready" ref="rootEl" class="surface-map-root" :style="{ colorScheme: isDark ? 'dark' : 'light' }">
+  <div
+    v-if="ready"
+    ref="rootEl"
+    class="surface-map-root"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+  >
     <component :is="'style'" v-text="css" />
 
     <div class="map-page surface-page">
@@ -69,7 +76,9 @@ function surfaceBySlug(slug: string) {
           <Token name=".surface-page" />
         </div>
         <div class="map-right">
-          <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('page')?.lightness[mode] ?? 0) }}</span>
+          <span class="map-l text-subtlest"
+            >L={{ fmt(surfaceBySlug("page")?.lightness[mode] ?? 0) }}</span
+          >
           <button class="map-toggle" @click="isDark = !isDark">
             {{ isDark ? "☀ Light" : "● Dark" }}
           </button>
@@ -83,7 +92,9 @@ function surfaceBySlug(slug: string) {
             <span class="map-role text-subtlest">Elevated work area</span>
             <Token name=".surface-workspace" />
           </div>
-          <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('workspace')?.lightness[mode] ?? 0) }}</span>
+          <span class="map-l text-subtlest"
+            >L={{ fmt(surfaceBySlug("workspace")?.lightness[mode] ?? 0) }}</span
+          >
         </div>
 
         <div class="map-cards">
@@ -93,7 +104,9 @@ function surfaceBySlug(slug: string) {
               <span class="map-role text-subtlest">Content container</span>
               <Token name=".surface-card" />
             </div>
-            <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('card')?.lightness[mode] ?? 0) }}</span>
+            <span class="map-l text-subtlest"
+              >L={{ fmt(surfaceBySlug("card")?.lightness[mode] ?? 0) }}</span
+            >
           </div>
           <div class="map-card surface-action">
             <div class="map-title">
@@ -101,20 +114,25 @@ function surfaceBySlug(slug: string) {
               <span class="map-role text-subtlest">Interactive element</span>
               <Token name=".surface-action" />
             </div>
-            <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('action')?.lightness[mode] ?? 0) }}</span>
+            <span class="map-l text-subtlest"
+              >L={{ fmt(surfaceBySlug("action")?.lightness[mode] ?? 0) }}</span
+            >
           </div>
         </div>
 
         <div class="map-spotlight surface-spotlight">
           <div class="map-title">
             <span class="map-name text-high">Spotlight</span>
-            <span class="map-role text-subtlest">Inverted · High-emphasis callout</span>
+            <span class="map-role text-subtlest"
+              >Inverted · High-emphasis callout</span
+            >
             <Token name=".surface-spotlight" />
           </div>
-          <span class="map-l text-subtlest">L={{ fmt(surfaceBySlug('spotlight')?.lightness[mode] ?? 0) }}</span>
+          <span class="map-l text-subtlest"
+            >L={{ fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0) }}</span
+          >
         </div>
       </div>
-
     </div>
   </div>
 </template>
