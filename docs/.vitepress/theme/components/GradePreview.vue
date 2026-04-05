@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import Token from "./Token.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
@@ -44,19 +45,19 @@ onMounted(async () => {
         <div class="gp-legend">
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-high">High</span>
-            <code class="gp-legend-class text-subtlest">.text-high</code>
+            <Token name=".text-high" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-strong">Strong</span>
-            <code class="gp-legend-class text-subtlest">.text-strong</code>
+            <Token name=".text-strong" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-subtle">Subtle</span>
-            <code class="gp-legend-class text-subtlest">.text-subtle</code>
+            <Token name=".text-subtle" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-subtlest">Subtlest</span>
-            <code class="gp-legend-class text-subtlest">.text-subtlest</code>
+            <Token name=".text-subtlest" />
           </div>
         </div>
       </div>
@@ -72,19 +73,19 @@ onMounted(async () => {
         <div class="gp-legend">
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-high">High</span>
-            <code class="gp-legend-class text-subtlest">.text-high</code>
+            <Token name=".text-high" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-strong">Strong</span>
-            <code class="gp-legend-class text-subtlest">.text-strong</code>
+            <Token name=".text-strong" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-subtle">Subtle</span>
-            <code class="gp-legend-class text-subtlest">.text-subtle</code>
+            <Token name=".text-subtle" />
           </div>
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-subtlest">Subtlest</span>
-            <code class="gp-legend-class text-subtlest">.text-subtlest</code>
+            <Token name=".text-subtlest" />
           </div>
         </div>
       </div>
@@ -174,10 +175,5 @@ onMounted(async () => {
 .gp-legend-grade {
   font-size: 0.7rem;
   font-weight: 500;
-}
-
-.gp-legend-class {
-  font-size: 0.65rem;
-  font-family: var(--vp-font-family-mono);
 }
 </style>

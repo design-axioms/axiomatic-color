@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import Token from "./Token.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
@@ -56,9 +57,9 @@ onMounted(async () => {
         </div>
 
         <div class="bp-legend">
-          <span class="bp-legend-item text-subtlest"><code>.border-decorative</code> Lc 10</span>
-          <span class="bp-legend-item text-subtlest"><code>.border-interactive</code> Lc 30</span>
-          <span class="bp-legend-item text-subtlest"><code>.border-critical</code> Lc 80</span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-decorative" /> Lc 10</span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-interactive" /> Lc 30</span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-critical" /> Lc 80</span>
         </div>
       </div>
 
@@ -82,9 +83,9 @@ onMounted(async () => {
         </div>
 
         <div class="bp-legend">
-          <span class="bp-legend-item text-subtlest"><code>.border-decorative</code></span>
-          <span class="bp-legend-item text-subtlest"><code>.border-interactive</code></span>
-          <span class="bp-legend-item text-subtlest"><code>.border-critical</code></span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-decorative" /></span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-interactive" /></span>
+          <span class="bp-legend-item text-subtlest"><Token name=".border-critical" /></span>
         </div>
       </div>
     </div>
