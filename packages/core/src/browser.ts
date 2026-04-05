@@ -1,5 +1,29 @@
 /// <reference lib="dom" />
 
+import { DEFAULT_CONFIG } from "./defaults.js";
+import { generateCSS } from "./generator/index.js";
+import { solve } from "./solver/index.js";
+
+let systemSheetPromise: Promise<CSSStyleSheet> | undefined;
+
+/**
+ * Returns a shared CSSStyleSheet containing the solved system CSS
+ * with `:host` as the selector. Singleton per document — all shadow
+ * roots can adopt the same sheet instance.
+ */
+export function getSystemStyleSheet(): Promise<CSSStyleSheet> {
+  return (systemSheetPromise ??= Promise.resolve().then(() => {
+    const output = solve(DEFAULT_CONFIG);
+    const cssText = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      selector: ":host",
+    });
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(cssText);
+    return sheet;
+  }));
+}
+
 /**
  * ThemeBuilder — runtime polarity flip for inverted surfaces.
  *

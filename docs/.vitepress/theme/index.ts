@@ -23,5 +23,11 @@ export default {
     app.component("ApcaBadge", ApcaBadge);
     app.component("Token", Token);
     app.component("GradePreview", GradePreview);
+
+    if (typeof window !== "undefined") {
+      import("@design-axioms/color").then(({ registerColorSlider }) => {
+        registerColorSlider();
+      });
+    }
   },
 };

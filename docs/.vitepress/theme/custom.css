@@ -5,3 +5,7 @@
   --vp-font-family-mono: "Geist Mono", ui-monospace, "Menlo", "Monaco",
     "Consolas", "Liberation Mono", "Courier New", monospace;
 }
+
+.nowrap {
+  white-space: nowrap;
+}

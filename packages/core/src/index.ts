@@ -5,7 +5,8 @@
  * elements on semantic surfaces, using APCA as the contrast metric.
  */
 
-export { createThemeBuilder } from "./browser.js";
+export { createThemeBuilder, getSystemStyleSheet } from "./browser.js";
+export { ColorSlider, registerColorSlider } from "./components/color-slider.js";
 export { DEFAULT_CONFIG } from "./defaults.js";
 export { generateCSS, generateHTML } from "./generator/index.js";
 export { solve } from "./solver/index.js";

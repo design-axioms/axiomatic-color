@@ -4,9 +4,9 @@
 
 <SurfaceMap />
 
-A surface is a named region with a fixed lightness. `card` always means `card`, regardless of where it appears in the DOM. Its lightness comes from its name, not from nesting depth.
+<Token name=".surface-card" /> behaves the same regardless of DOM position. Its lightness comes from its name, not from nesting depth.
 
-The default configuration has five surfaces across two polarities. Four share **page polarity**: light in light mode, dark in dark mode. Spotlight uses **inverted polarity**, always the opposite, so it stands out against any page-polarity surface <ApcaBadge :value="87" :target="80" />. Toggle dark mode in the map above to see both sides of the flip.
+The map above shows five surfaces across two polarities. Four share **page polarity**: light in light mode, dark in dark mode. <Token name=".surface-spotlight" /> uses **inverted polarity**, so it stays opposite page-polarity surfaces <ApcaBadge :value="87" :target="80" />.
 
 Apply a surface with a single class:
 
@@ -19,15 +19,15 @@ Apply a surface with a single class:
 </body>
 ```
 
-The <Token name=".surface-card" /> class sets the background and establishes text and border tokens for everything inside it.
+The <Token name=".surface-card" /> class sets the background and establishes text and border tokens for its contents.
 
 ## Text Grades and Border Tiers
 
 <GradePreview />
 
-Four text grades (<Token name=".text-high" />, <Token name=".text-strong" />, <Token name=".text-subtle" />, <Token name=".text-subtlest" />) and three border tiers (<Token name=".border-decorative" />, <Token name=".border-interactive" />, <Token name=".border-critical" />).
+The preview above shows the four text grades (<span class="nowrap"><Token name=".text-high" />,</span> <span class="nowrap"><Token name=".text-strong" />,</span> <span class="nowrap"><Token name=".text-subtle" />,</span> <Token name=".text-subtlest" />) and the three border tiers (<span class="nowrap"><Token name=".border-decorative" />,</span> <span class="nowrap"><Token name=".border-interactive" />,</span> <Token name=".border-critical" />).
 
-The same class produces correct contrast on every surface. The system solves each grade per surface per mode, so <Token name=".text-high" /> on Page and <Token name=".text-high" /> on Spotlight both hit their APCA target, with different solved lightness values. When a target can't be fully met, the solver reports the shortfall.
+The system solves each grade for each surface and mode. <Token name=".text-high" /> on Page and <Token name=".text-high" /> on Spotlight both meet their APCA target with different solved lightness values. If a target can't be fully met, the solver reports the shortfall.
 
 ## Atmosphere
 
@@ -35,7 +35,13 @@ The same class produces correct contrast on every surface. The system solves eac
 
 Surfaces are achromatic by default. Atmosphere tints a surface with hue and chroma without affecting any contrast guarantees.
 
-Drag the sliders above: the gradient shows how chroma changes across the lightness range. Near the extremes (very light, very dark), chroma fades to zero. This is the **safe bicone taper**. Surfaces near the midpoint get vivid color; surfaces near the edges stay nearly neutral. The tick marks show where each surface sits on the curve.
+The curve above shows the shape: chroma fades to zero near the lightness extremes, and the tick marks show where each surface sits.
+
+::: details
+We call this shape the **safe bicone taper**: wide at mid-lightness, zero at the extremes. The formula below captures it in one expression.
+
+**Bicone** because the chroma envelope forms a double cone in oklch, widest at the midpoint. **Taper** because chroma gradually fades toward the extremes. **Safe** because the fade keeps the solver from placing high chroma where contrast would suffer.
+:::
 
 Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 
@@ -46,7 +52,7 @@ Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 </div>
 ```
 
-The taper is one expression:
+The taper is defined by one expression:
 
 $$
 C_{\text{effective}} = C \times (1 - |2L - 1|)
@@ -56,4 +62,4 @@ $$
 
 <SurfaceTile />
 
-Three independent axes: surface (lightness), atmosphere (hue), and grade (contrast). Pick a surface, pick a hue, pick a grade. Each choice modifies one axis without disturbing the others. Toggle dark mode and the hue buttons above to see this in action: text grades stay correct, borders stay visible, and the tint changes independently.
+Surface, atmosphere, and grade are independent axes: lightness, hue, and contrast. Each choice modifies one axis without disturbing the others. The tile above demonstrates: dark mode and hue changes do not affect grade behavior or border visibility.

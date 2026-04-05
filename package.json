@@ -12,11 +12,13 @@
     "check": "tsc --build",
     "lint": "eslint .",
     "clean": "pnpm --filter './packages/*' clean",
+    "demo:dev": "vite --config demo/vite.config.ts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
+    "@design-axioms/color": "workspace:^",
     "@fontsource/geist-mono": "^5.2.7",
     "@fontsource/geist-sans": "^5.2.5",
     "@vitest/coverage-v8": "^4.1.2",

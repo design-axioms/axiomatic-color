@@ -48,21 +48,6 @@ function surfaceLeft(l: number): string {
   return `${(l * 100).toFixed(1)}%`;
 }
 
-// Gradient slider computed styles
-const hueGradient = computed(() => {
-  const stops = [0, 60, 120, 180, 240, 300, 360]
-    .map(h => `oklch(0.7 0.15 ${h})`)
-    .join(", ");
-  return `linear-gradient(to right, ${stops})`;
-});
-
-const chromaGradient = computed(() => {
-  const h = hue.value;
-  return `linear-gradient(to right, oklch(0.6 0 ${h}), oklch(0.6 0.15 ${h}), oklch(0.6 0.3 ${h}))`;
-});
-
-const thumbColor = computed(() => `oklch(0.6 ${maxChroma.value} ${hue.value})`);
-
 // Connector paths: from tick position to evenly-spaced swatch center
 // SVG viewBox is 0 0 100 20, so x is in percentage units
 function connectorPath(l: number, index: number): string {
@@ -98,19 +83,24 @@ function connectorPath(l: number, index: number): string {
     <div class="taper-controls">
       <label class="taper-control">
         <span>Hue</span>
-        <input
-          type="range" v-model.number="hue" min="0" max="360" step="1"
-          class="color-slider"
-          :style="{ '--slider-bg': hueGradient, '--thumb-color': thumbColor }"
+        <color-slider
+          type="hue"
+          :value="hue"
+          :hue="hue"
+          :chroma="maxChroma"
+          @input="hue = $event.detail.value"
         />
         <span class="taper-control-val">{{ hue }}°</span>
       </label>
       <label class="taper-control">
         <span>Chroma</span>
-        <input
-          type="range" v-model.number="maxChroma" min="0.02" max="0.3" step="0.01"
-          class="color-slider"
-          :style="{ '--slider-bg': chromaGradient, '--thumb-color': thumbColor }"
+        <color-slider
+          type="chroma"
+          :value="maxChroma"
+          :hue="hue"
+          :chroma="maxChroma"
+          min="0.02" max="0.3" step="0.01"
+          @input="maxChroma = $event.detail.value"
         />
         <span class="taper-control-val">{{ maxChroma.toFixed(2) }}</span>
       </label>
@@ -297,37 +287,6 @@ function connectorPath(l: number, index: number): string {
   gap: 0.5rem;
   font-size: 0.7rem;
   color: var(--vp-c-text-2);
-}
-
-.color-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 120px;
-  height: 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--slider-bg);
-  outline: none;
-}
-
-.color-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--thumb-color);
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  cursor: pointer;
-}
-
-.color-slider::-moz-range-thumb {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--thumb-color);
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  cursor: pointer;
 }
 
 .taper-control-val { font-family: var(--vp-font-family-mono); min-width: 3em; font-size: 0.7rem; }

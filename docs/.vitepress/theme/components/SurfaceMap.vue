@@ -135,7 +135,7 @@ function surfaceBySlug(slug: string) {
 .map-page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   padding: 0.35rem 0.25rem;
 }
 
@@ -189,7 +189,7 @@ function surfaceBySlug(slug: string) {
 .map-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   padding: 0.65rem 0.75rem;
   border-radius: 6px;
   transition: background 0.3s ease;
@@ -198,7 +198,7 @@ function surfaceBySlug(slug: string) {
 .map-spotlight {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   margin-top: 0.6rem;
   padding: 0.65rem 0.75rem;
   border-radius: 6px;

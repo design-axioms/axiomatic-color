@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axiomatic Color System — Demo</title>
+<link rel="stylesheet" href="./layout.css">
+</head>
+<body class="surface-page">
+<div class="demo">
+  <header class="demo-header">
+    <h1 class="text-high">Axiomatic Color System</h1>
+    <div class="demo-controls">
+      <button id="mode-toggle" class="surface-action text-high demo-toggle">● Dark Mode</button>
+    </div>
+    <div class="demo-sliders text-subtle">
+      <label class="demo-slider-label">
+        Hue <output id="hue-val">288</output>
+        <color-slider id="hue-slider" type="hue" value="288" hue="288" chroma="0.17"></color-slider>
+      </label>
+      <label class="demo-slider-label">
+        Chroma <output id="chroma-val">0.17</output>
+        <color-slider id="chroma-slider" type="chroma" value="0.17" hue="288" chroma="0.17"></color-slider>
+      </label>
+    </div>
+  </header>
+
+  <section class="demo-section">
+    <h2 class="text-strong">Composition</h2>
+    <p class="text-subtle comp-intro">The body is the page surface. Below: workspace → card → action nesting.</p>
+    <div class="surface-workspace comp-panel">
+      <p class="text-subtle comp-label">Workspace</p>
+      <div class="surface-card comp-card border-decorative">
+        <h3 class="text-high">Card Title</h3>
+        <p class="text-strong">Body text on a card surface — strong grade for comfortable reading.</p>
+        <p class="text-subtle">Secondary details use the subtle grade.</p>
+        <p class="text-subtlest">Tertiary hint text at the subtlest grade.</p>
+        <div class="comp-buttons">
+          <button class="surface-spotlight comp-button text-high">Primary</button>
+          <button class="comp-button comp-button-ghost border-interactive text-high">Secondary</button>
+        </div>
+      </div>
+      <div class="surface-card comp-card border-decorative">
+        <h3 class="text-high">Another Card</h3>
+        <p class="text-strong">Cards are siblings, not nested. Same lightness, same text contrast.</p>
+      </div>
+    </div>
+    <div class="surface-spotlight comp-spotlight">
+      <h3 class="text-high">Spotlight</h3>
+      <p class="text-strong">Inverted polarity — massive APCA gap from page surfaces.</p>
+      <p class="text-subtle">Secondary text on inverted surface.</p>
+      <div class="comp-buttons">
+        <button class="surface-page comp-button text-high">Primary</button>
+        <button class="comp-button comp-button-ghost border-interactive text-high">Secondary</button>
+      </div>
+    </div>
+    <div class="comp-border-showcase">
+      <h3 class="text-strong">Border Tiers</h3>
+      <div class="comp-border-row">
+        <div class="surface-card comp-border-box border-decorative">
+          <span class="text-subtle">Decorative (10)</span>
+        </div>
+        <div class="surface-card comp-border-box border-interactive">
+          <span class="text-subtle">Interactive (30)</span>
+        </div>
+        <div class="surface-card comp-border-box border-critical">
+          <span class="text-subtle">Critical (80)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -8,6 +8,13 @@ export default defineConfig({
   markdown: {
     math: true,
   },
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag === "color-slider",
+      },
+    },
+  },
   vite: {
     resolve: {
       alias: {

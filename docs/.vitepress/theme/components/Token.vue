@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from "vue";
+import { useShadowRoot } from "../composables/useShadowRoot";
 
 const props = defineProps<{
   name: string;
@@ -14,56 +15,31 @@ const category = computed(() => {
   return "generic";
 });
 
-// Text: extract class name without the dot
 const textClass = computed(() => {
   if (category.value !== "text") return null;
   const cls = props.name.startsWith(".") ? props.name.slice(1) : props.name;
   return cls.endsWith("*") ? null : cls;
 });
 
-// Shadow DOM for system tokens
-const shadowHost = ref<HTMLElement | null>(null);
-const systemCss = ref("");
-
-// Whether this token category uses shadow DOM
 const usesShadow = computed(() =>
   ["text", "surface", "border", "hue"].includes(category.value),
 );
 
-// Extract the bare class name for surface/border tokens
 const bareClass = computed(() => {
   if (!props.name.startsWith(".")) return null;
   const cls = props.name.slice(1);
   return cls.endsWith("*") ? null : cls;
 });
 
-onMounted(async () => {
-  if (!usesShadow.value) return;
+// Shared stylesheets
+const shadowHost = ref<HTMLElement | null>(null);
+const systemSheet = ref<CSSStyleSheet | null>(null);
 
-  const { solve, DEFAULT_CONFIG, generateCSS } =
-    await import("@design-axioms/color");
+const localSheetCache = new Map<string, CSSStyleSheet>();
 
-  const output = solve(DEFAULT_CONFIG);
-  systemCss.value = generateCSS(output, {
-    ...DEFAULT_CONFIG.options,
-    selector: ":host",
-  });
-
-  buildShadow();
-});
-
-watch([systemCss, () => props.name], () => {
-  if (usesShadow.value && systemCss.value) buildShadow();
-});
-
-function buildShadow() {
-  const host = shadowHost.value;
-  if (!host || !systemCss.value) return;
-
-  let shadow = host.shadowRoot;
-  if (!shadow) {
-    shadow = host.attachShadow({ mode: "open" });
-  }
+function getLocalSheet(cat: string): CSSStyleSheet {
+  let sheet = localSheetCache.get(cat);
+  if (sheet) return sheet;
 
   const hostStyles = `
     :host {
@@ -72,7 +48,7 @@ function buildShadow() {
       gap: 0.25rem;
       padding: 0.1rem 0.45rem 0.1rem 0.3rem;
       border-radius: 10rem;
-      vertical-align: baseline;
+      vertical-align: middle;
       line-height: 1.4;
       white-space: nowrap;
       border: 1px solid var(--axm-border-decorative);
@@ -85,79 +61,68 @@ function buildShadow() {
     }
   `;
 
-  let iconHtml = "";
-  const cat = category.value;
-
+  let extra = "";
   if (cat === "text") {
-    const cls = textClass.value ?? "";
-    iconHtml = `
-      <style>
-        ${systemCss.value}
-        ${hostStyles}
-        .glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }
-      </style>
-      <span class="glyph ${cls}">A</span>
-      <code class="text-subtle">${props.name}</code>
-    `;
+    extra = `.glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }`;
   } else if (cat === "surface") {
-    const surfCls = bareClass.value ?? "";
-    iconHtml = `
-      <style>
-        ${systemCss.value}
-        ${hostStyles}
-        .swatch {
-          width: 0.75em;
-          height: 0.75em;
-          border-radius: 3px;
-          align-self: center;
-          flex-shrink: 0;
-          border: 1px solid var(--axm-border-decorative);
-        }
-      </style>
-      <span class="swatch ${surfCls}"></span>
-      <code class="text-subtle">${props.name}</code>
-    `;
+    extra = `.swatch {
+      width: 0.75em; height: 0.75em; border-radius: 3px;
+      align-self: center; flex-shrink: 0;
+      border: 1px solid var(--axm-border-decorative);
+    }`;
   } else if (cat === "border") {
-    const borderCls = bareClass.value ?? "";
-    iconHtml = `
-      <style>
-        ${systemCss.value}
-        ${hostStyles}
-        .swatch {
-          width: 0.75em;
-          height: 0.75em;
-          border-radius: 2px;
-          align-self: center;
-          flex-shrink: 0;
-          border-width: 1.5px;
-          border-style: solid;
-        }
-      </style>
-      <span class="swatch ${borderCls}"></span>
-      <code class="text-subtle">${props.name}</code>
-    `;
+    extra = `.swatch {
+      width: 0.75em; height: 0.75em; border-radius: 2px;
+      align-self: center; flex-shrink: 0;
+      border-width: 1.5px; border-style: solid;
+    }`;
   } else if (cat === "hue") {
-    const hueCls = bareClass.value ?? "";
-    iconHtml = `
-      <style>
-        ${systemCss.value}
-        ${hostStyles}
-        .swatch {
-          width: 0.75em;
-          height: 0.75em;
-          border-radius: 50%;
-          align-self: center;
-          flex-shrink: 0;
-          border: 1px solid var(--axm-border-decorative);
-        }
-      </style>
-      <span class="swatch surface-card ${hueCls}"></span>
-      <code class="text-subtle">${props.name}</code>
-    `;
+    extra = `.swatch {
+      width: 0.75em; height: 0.75em; border-radius: 50%;
+      align-self: center; flex-shrink: 0;
+      border: 1px solid var(--axm-border-decorative);
+    }`;
   }
 
-  shadow.innerHTML = iconHtml;
+  sheet = new CSSStyleSheet();
+  sheet.replaceSync(hostStyles + extra);
+  localSheetCache.set(cat, sheet);
+  return sheet;
 }
+
+const sheets = computed(() =>
+  systemSheet.value ? [systemSheet.value, getLocalSheet(category.value)] : [],
+);
+
+const shadow = useShadowRoot(shadowHost, sheets);
+
+onMounted(async () => {
+  if (!usesShadow.value) return;
+  const { getSystemStyleSheet } = await import("@design-axioms/color");
+  systemSheet.value = await getSystemStyleSheet();
+});
+
+function buildMarkup(): string {
+  const cat = category.value;
+  if (cat === "text") {
+    const cls = textClass.value ?? "";
+    return `<span class="glyph ${cls}">A</span><code class="text-subtle">${props.name}</code>`;
+  } else if (cat === "surface") {
+    const surfCls = bareClass.value ?? "";
+    return `<span class="swatch ${surfCls}"></span><code class="text-subtle">${props.name}</code>`;
+  } else if (cat === "border") {
+    const borderCls = bareClass.value ?? "";
+    return `<span class="swatch ${borderCls}"></span><code class="text-subtle">${props.name}</code>`;
+  } else if (cat === "hue") {
+    const hueCls = bareClass.value ?? "";
+    return `<span class="swatch surface-card ${hueCls}"></span><code class="text-subtle">${props.name}</code>`;
+  }
+  return "";
+}
+
+watch([shadow, systemSheet, () => props.name], () => {
+  if (shadow.value && systemSheet.value) shadow.value.innerHTML = buildMarkup();
+});
 </script>
 
 <template>
@@ -193,7 +158,7 @@ function buildShadow() {
   gap: 0.25rem;
   padding: 0.1rem 0.45rem 0.1rem 0.3rem;
   border-radius: 10rem;
-  vertical-align: baseline;
+  vertical-align: middle;
   line-height: 1.4;
   white-space: nowrap;
 }

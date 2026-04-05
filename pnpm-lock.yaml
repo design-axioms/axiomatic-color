@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@design-axioms/color':
+        specifier: workspace:^
+        version: link:packages/core
       '@fontsource/geist-mono':
         specifier: ^5.2.7
         version: 5.2.7
