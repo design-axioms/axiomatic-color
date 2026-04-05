@@ -14,6 +14,7 @@ import ApcaBadge from "./components/ApcaBadge.vue";
 import Token from "./components/Token.vue";
 import GradePreview from "./components/GradePreview.vue";
 import BorderPreview from "./components/BorderPreview.vue";
+import PipelineDiagram from "./components/PipelineDiagram.vue";
 
 export default {
   extends: DefaultTheme,
@@ -25,6 +26,7 @@ export default {
     app.component("Token", Token);
     app.component("GradePreview", GradePreview);
     app.component("BorderPreview", BorderPreview);
+    app.component("PipelineDiagram", PipelineDiagram);
 
     if (typeof window !== "undefined") {
       import("@design-axioms/color").then(({ registerColorSlider }) => {

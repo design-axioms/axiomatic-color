@@ -25,7 +25,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="ready" ref="rootEl" class="border-preview-root" :style="{ colorScheme: isDark ? 'dark' : 'light' }">
+  <div
+    v-if="ready"
+    ref="rootEl"
+    class="border-preview-root"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+  >
     <component :is="'style'" v-text="css" />
 
     <div class="bp-toolbar">
@@ -41,7 +46,9 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Decorative</span>
             <Token name=".border-decorative" />
           </div>
-          <span class="text-subtle bp-specimen-desc">Subtle container outlines</span>
+          <span class="text-subtle bp-specimen-desc"
+            >Subtle container outlines</span
+          >
         </div>
 
         <div class="bp-specimen border-interactive">
@@ -49,7 +56,9 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Interactive</span>
             <Token name=".border-interactive" />
           </div>
-          <span class="text-subtle bp-specimen-desc">Buttons, inputs, clickable elements</span>
+          <span class="text-subtle bp-specimen-desc"
+            >Buttons, inputs, clickable elements</span
+          >
         </div>
 
         <div class="bp-specimen border-critical">
@@ -57,7 +66,9 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Critical</span>
             <Token name=".border-critical" />
           </div>
-          <span class="text-subtle bp-specimen-desc">Error states, required fields</span>
+          <span class="text-subtle bp-specimen-desc"
+            >Error states, required fields</span
+          >
         </div>
       </div>
 
@@ -67,7 +78,9 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Decorative</span>
             <Token name=".border-decorative" />
           </div>
-          <span class="text-subtle bp-specimen-desc">Same class, inverted surface</span>
+          <span class="text-subtle bp-specimen-desc"
+            >Same class, inverted surface</span
+          >
         </div>
 
         <div class="bp-specimen border-interactive">
@@ -83,7 +96,9 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Critical</span>
             <Token name=".border-critical" />
           </div>
-          <span class="text-subtle bp-specimen-desc">Contrast target met on both</span>
+          <span class="text-subtle bp-specimen-desc"
+            >Contrast target met on both</span
+          >
         </div>
       </div>
     </div>
@@ -155,6 +170,8 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
-  .bp-panels { grid-template-columns: 1fr; }
+  .bp-panels {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

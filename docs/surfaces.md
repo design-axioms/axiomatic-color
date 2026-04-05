@@ -38,5 +38,3 @@ Primary actions use the opposite polarity to pop against their container:
 <!-- On spotlight -->
 <button class="surface-page text-high">Primary</button>
 ```
-
-

@@ -1,6 +1,8 @@
 # Architecture
 
-This document describes the architecture decisions validated through experiment-driven development. Each decision is backed by evidence from the experiment scripts in the original research repository.
+This document describes the architecture decisions validated through experiment-driven development.
+
+<PipelineDiagram />
 
 ## Core Thesis
 
@@ -120,11 +122,11 @@ Key colors in the config generate both primitive variables (`--axm-key-brand-hue
 
 **Three orthogonal operators** compose to produce any color:
 
-| Operator | CSS class | Modifies | Preserves |
-| -------- | --------- | -------- | --------- |
-| Surface | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
-| Mood | `.hue-*` | Atmosphere (hue, chroma) | Lightness |
-| Voice | `.text-*` | Contrast intent (grade) | Atmosphere |
+| Operator | CSS class    | Modifies                                                         | Preserves  |
+| -------- | ------------ | ---------------------------------------------------------------- | ---------- |
+| Surface  | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
+| Mood     | `.hue-*`     | Atmosphere (hue, chroma)                                         | Lightness  |
+| Voice    | `.text-*`    | Contrast intent (grade)                                          | Atmosphere |
 
 Because Mood and Voice modify disjoint components, they compose without N×M combinatorial explosion.
 
