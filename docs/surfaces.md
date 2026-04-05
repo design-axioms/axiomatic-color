@@ -39,12 +39,4 @@ Primary actions use the opposite polarity to pop against their container:
 <button class="surface-page text-high">Primary</button>
 ```
 
-## Default Surfaces
 
-| Surface | Class | Polarity | Role |
-|---------|-------|----------|------|
-| Page | `.surface-page` | Page | Base background |
-| Workspace | `.surface-workspace` | Page | Elevated work area |
-| Card | `.surface-card` | Page | Content container |
-| Action | `.surface-action` | Page | Interactive element |
-| Spotlight | `.surface-spotlight` | Inverted | High-emphasis callout |

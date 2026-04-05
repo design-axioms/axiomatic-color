@@ -6,18 +6,9 @@ Four contrast grades, solved per surface per mode to meet APCA targets.
 
 <GradePreview />
 
-## Grades
-
-| Grade | Class | APCA Target | Use |
-|-------|-------|-------------|-----|
-| High | `.text-high` | Lc 100 | Headings, primary labels |
-| Strong | `.text-strong` | Lc 95 | Body text for reading |
-| Subtle | `.text-subtle` | Lc 90 | Secondary information |
-| Subtlest | `.text-subtlest` | Lc 75 | Hints and metadata |
-
 ## How It Works
 
-The system solves each grade for each surface and mode. <Token name=".text-high" /> on Page and <Token name=".text-high" /> on Spotlight both meet their APCA target with different solved lightness values.
+The preview shows all four grades on both page and spotlight surfaces. The system solves each grade for each surface and mode. <Token name=".text-high" /> on Page and <Token name=".text-high" /> on Spotlight both meet their APCA target with different solved lightness values.
 
 If a target can't be fully met, the solver reports the shortfall.
 

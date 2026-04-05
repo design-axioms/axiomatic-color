@@ -2,13 +2,7 @@
 
 Three contrast tiers for different purposes.
 
-## Tiers
-
-| Tier | Class | APCA Target | Use |
-|------|-------|-------------|-----|
-| Decorative | `.border-decorative` | Lc 10 | Subtle container outlines |
-| Interactive | `.border-interactive` | Lc 30 | Buttons, inputs, clickable elements |
-| Critical | `.border-critical` | Lc 80 | Error states, required fields |
+<BorderPreview />
 
 ## Usage
 
@@ -17,9 +11,7 @@ Three contrast tiers for different purposes.
   <p class="text-strong">A card with a subtle outline.</p>
 </div>
 
-<button class="surface-action border-interactive text-high">
-  Submit
-</button>
+<button class="surface-action border-interactive text-high">Submit</button>
 
 <div class="surface-card border-critical">
   <p class="text-high">Required field.</p>

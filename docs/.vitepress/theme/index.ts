@@ -13,6 +13,7 @@ import TaperCurve from "./components/TaperCurve.vue";
 import ApcaBadge from "./components/ApcaBadge.vue";
 import Token from "./components/Token.vue";
 import GradePreview from "./components/GradePreview.vue";
+import BorderPreview from "./components/BorderPreview.vue";
 
 export default {
   extends: DefaultTheme,
@@ -23,6 +24,7 @@ export default {
     app.component("ApcaBadge", ApcaBadge);
     app.component("Token", Token);
     app.component("GradePreview", GradePreview);
+    app.component("BorderPreview", BorderPreview);
 
     if (typeof window !== "undefined") {
       import("@design-axioms/color").then(({ registerColorSlider }) => {

@@ -130,28 +130,28 @@ watch([shadow, systemSheet, () => props.name], () => {
   <span
     v-if="category === 'text'"
     ref="shadowHost"
-    class="token-badge token-text surface-card"
+    class="token-badge token-text surface-workspace"
   />
 
   <!-- Surface tokens: shadow DOM host on a card surface (swatch shows the named surface) -->
   <span
     v-else-if="category === 'surface'"
     ref="shadowHost"
-    class="token-badge token-surface surface-card"
+    class="token-badge token-surface surface-workspace"
   />
 
   <!-- Border tokens: shadow DOM host on a card surface (swatch shows the border tier) -->
   <span
     v-else-if="category === 'border'"
     ref="shadowHost"
-    class="token-badge token-border surface-card"
+    class="token-badge token-border surface-workspace"
   />
 
   <!-- Hue tokens: shadow DOM host on a card surface -->
   <span
     v-else-if="category === 'hue'"
     ref="shadowHost"
-    class="token-badge token-hue surface-card"
+    class="token-badge token-hue surface-workspace"
   />
 
   <!-- Generic: light DOM -->
