@@ -233,7 +233,7 @@ function generateBorderUtilities(prefix: string): string {
 }
 
 /** Parse a key color to oklch hue and chroma. */
-function parseKeyColor(color: string): { hue: number; chroma: number } | null {
+export function parseKeyColor(color: string): { hue: number; chroma: number } | null {
   const parsed = parse(color);
   if (!parsed) return null;
   const oklch = toOklch(parsed);

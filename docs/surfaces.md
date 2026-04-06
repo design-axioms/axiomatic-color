@@ -19,11 +19,11 @@ Apply a surface with a single class:
 </div>
 ```
 
-<Token name=".surface-card" /> sets the background and establishes text and border tokens for its contents.
+<Token name=".surface-card" /> sets the background and scopes the text and border tokens.
 
 ## Surface Identity
 
-<Token name=".surface-card" /> behaves the same regardless of DOM position. Its lightness comes from its name, not from nesting depth. There is no nesting depth tracking.
+<Token name=".surface-card" /> behaves the same regardless of DOM position. Its lightness comes from its name, not from nesting depth.
 
 ## Polarity
 

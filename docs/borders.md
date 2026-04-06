@@ -1,6 +1,6 @@
 # Borders
 
-Three contrast tiers for different purposes.
+Three contrast tiers.
 
 <BorderPreview />
 
@@ -8,7 +8,7 @@ Three contrast tiers for different purposes.
 
 ```html
 <div class="surface-card border-decorative">
-  <p class="text-strong">A card with a subtle outline.</p>
+  <p class="text-strong">Card content.</p>
 </div>
 
 <button class="surface-action border-interactive text-high">Submit</button>

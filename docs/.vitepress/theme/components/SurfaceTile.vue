@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
+import PreviewControls from "./PreviewControls.vue";
 
 interface SurfaceData {
   slug: string;
@@ -27,8 +28,9 @@ const surfaces = ref<SurfaceData[]>([]);
 const css = ref("");
 const isDark = ref(false);
 const ready = ref(false);
-const keyColorNames = ref<string[]>([]);
-const selectedHue = ref<string | null>(null);
+const hue = ref(0);
+const chroma = ref(0);
+const parsedKeyColors = ref<Record<string, { hue: number; chroma: number }>>({});
 
 useThemeBuilder(rootEl);
 
@@ -100,19 +102,23 @@ onMounted(async () => {
   }
 
   surfaces.value = result;
-  keyColorNames.value = DEFAULT_CONFIG.anchors.keyColors
-    ? Object.keys(DEFAULT_CONFIG.anchors.keyColors)
-    : [];
+
+  if (DEFAULT_CONFIG.anchors.keyColors) {
+    const { parseKeyColor } = await import("@design-axioms/color");
+    const parsed: Record<string, { hue: number; chroma: number }> = {};
+    for (const [name, value] of Object.entries(DEFAULT_CONFIG.anchors.keyColors)) {
+      const kc = parseKeyColor(value);
+      if (kc) parsed[name] = kc;
+    }
+    parsedKeyColors.value = parsed;
+  }
+
   ready.value = true;
 });
 
 const mode = computed<"light" | "dark">(() =>
   isDark.value ? "dark" : "light",
 );
-
-function toggleMode() {
-  isDark.value = !isDark.value;
-}
 
 function surfaceBySlug(slug: string) {
   return surfaces.value.find((s) => s.slug === slug);
@@ -122,8 +128,10 @@ function fmt(n: number): string {
   return n.toFixed(3);
 }
 
-const hueClass = computed(() =>
-  selectedHue.value ? `hue-${selectedHue.value}` : "",
+const hueOverride = computed(() =>
+  hue.value > 0 || chroma.value > 0
+    ? { "--axm-atm-hue": String(hue.value), "--axm-atm-chroma": String(chroma.value) }
+    : {},
 );
 </script>
 
@@ -136,25 +144,15 @@ const hueClass = computed(() =>
   >
     <component :is="'style'" v-text="css" />
 
-    <div class="tile-controls">
-      <div class="hue-controls">
-        <button
-          v-for="name in keyColorNames"
-          :key="name"
-          class="hue-btn"
-          :class="{ active: selectedHue === name }"
-          @click="selectedHue = selectedHue === name ? null : name"
-        >
-          {{ name }}
-        </button>
-      </div>
-      <button class="mode-toggle" @click="toggleMode">
-        {{ isDark ? "☀ Light" : "● Dark" }}
-      </button>
-    </div>
+    <PreviewControls
+      v-model:hue="hue"
+      v-model:chroma="chroma"
+      v-model:is-dark="isDark"
+      :key-colors="parsedKeyColors"
+    />
 
     <!-- Nested composition — how surfaces actually stack -->
-    <div class="composition surface-page" :class="hueClass">
+    <div class="composition surface-page" :style="hueOverride">
       <div class="comp-label">
         <span class="comp-name text-high">Page</span>
         <span class="comp-meta text-subtlest"
@@ -168,7 +166,7 @@ const hueClass = computed(() =>
           <span class="text-subtle">Subtle</span>
           <span class="text-subtlest">Subtlest</span>
         </div>
-        <div class="comp-nested surface-workspace" :class="hueClass">
+        <div class="comp-nested surface-workspace" :style="hueOverride">
           <div class="comp-label">
             <span class="comp-name text-high">Workspace</span>
             <span class="comp-meta text-subtlest"
@@ -185,7 +183,7 @@ const hueClass = computed(() =>
               <span class="text-subtlest">Subtlest</span>
             </div>
             <div class="comp-cards">
-              <div class="comp-card surface-card" :class="hueClass">
+              <div class="comp-card surface-card" :style="hueOverride">
                 <div class="comp-label">
                   <span class="comp-name text-high">Card</span>
                   <span class="comp-meta text-subtlest"
@@ -205,7 +203,7 @@ const hueClass = computed(() =>
                   <span class="comp-border border-critical"></span>
                 </div>
               </div>
-              <div class="comp-card surface-action" :class="hueClass">
+              <div class="comp-card surface-action" :style="hueOverride">
                 <div class="comp-label">
                   <span class="comp-name text-high">Action</span>
                   <span class="comp-meta text-subtlest"
@@ -220,7 +218,7 @@ const hueClass = computed(() =>
                 </div>
               </div>
             </div>
-            <div class="comp-nested surface-spotlight" :class="hueClass">
+            <div class="comp-nested surface-spotlight" :style="hueOverride">
               <div class="comp-label">
                 <span class="comp-name text-high">Spotlight</span>
                 <span class="comp-meta text-subtlest"
@@ -250,56 +248,6 @@ const hueClass = computed(() =>
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--vp-c-divider);
-}
-
-.tile-controls {
-  padding: 0.75rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--vp-c-bg-soft);
-}
-
-.hue-controls {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.hue-btn {
-  padding: 0.25rem 0.65rem;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-2);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-family: var(--vp-font-family-base);
-  text-transform: capitalize;
-}
-
-.hue-btn:hover {
-  background: var(--vp-c-bg-soft);
-}
-
-.hue-btn.active {
-  background: var(--vp-c-brand-1);
-  color: var(--vp-c-white);
-  border-color: var(--vp-c-brand-1);
-}
-
-.mode-toggle {
-  padding: 0.35rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-family: var(--vp-font-family-base);
-}
-
-.mode-toggle:hover {
-  background: var(--vp-c-bg-soft);
 }
 
 /* --- Composition layout --- */
