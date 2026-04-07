@@ -9,6 +9,7 @@ const props = withDefaults(
     keyColors?: Record<string, { hue: number; chroma: number }>;
     hideChroma?: boolean;
     hideHue?: boolean;
+    hideToggle?: boolean;
   }>(),
   {
     hue: 0,
@@ -91,7 +92,7 @@ function onLandmarkClick(e: Event) {
       />
     </div>
 
-    <button class="preview-toggle" @click="emit('update:isDark', !isDark)">
+    <button v-if="!hideToggle" class="preview-toggle" @click="emit('update:isDark', !isDark)">
       {{ isDark ? "☀ Light" : "● Dark" }}
     </button>
   </div>
@@ -104,7 +105,7 @@ function onLandmarkClick(e: Event) {
   grid-template:
     "hue-label  chroma-label  ."      auto
     "hue-slider chroma-slider toggle" auto
-    / 1fr       0.6fr         auto;
+    / 1fr       0.6fr         minmax(0, auto);
   align-items: center;
   gap: 0.25rem 1rem;
   background: var(--vp-c-bg-soft);

@@ -31,6 +31,7 @@ const indicatorStyle = computed(() => {
         v-model:chroma="chroma"
         v-model:is-dark="isDark"
         :key-colors="keyColors"
+        hide-toggle
       />
     </div>
   </div>
