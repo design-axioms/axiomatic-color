@@ -6,7 +6,7 @@ Surface, atmosphere, and grade are independent axes: lightness, hue, and contras
 
 <SurfaceTile />
 
-Dark mode and hue changes do not affect grade behavior or border visibility.
+Toggle dark mode or change the hue. Grade behavior and border visibility hold.
 
 ## Nesting
 

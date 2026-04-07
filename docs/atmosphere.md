@@ -6,10 +6,10 @@ Tint surfaces with hue and chroma. Contrast guarantees are unaffected.
 
 <TaperCurve />
 
-Chroma fades to zero near the lightness extremes, and the tick marks show where each surface sits.
+Chroma fades to zero near the lightness extremes.
 
-::: details
-We call this shape the **safe bicone taper**: wide at mid-lightness, zero at the extremes. The formula below captures it in one expression.
+::: details Why does chroma fade at the extremes?
+This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extremes.
 
 **Bicone** because the chroma envelope forms a double cone in oklch, widest at the midpoint. **Taper** because chroma gradually fades toward the extremes. **Safe** because the fade keeps the solver from placing high chroma where contrast would suffer.
 :::
