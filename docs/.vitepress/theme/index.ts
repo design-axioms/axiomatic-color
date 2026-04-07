@@ -7,6 +7,7 @@ import "@fontsource/geist-mono/500.css";
 import "@fontsource/geist-mono/600.css";
 import DefaultTheme from "vitepress/theme";
 import "./custom.css";
+import Layout from "./Layout.vue";
 import SurfaceTile from "./components/SurfaceTile.vue";
 import SurfaceMap from "./components/SurfaceMap.vue";
 import TaperCurve from "./components/TaperCurve.vue";
@@ -18,6 +19,7 @@ import PipelineDiagram from "./components/PipelineDiagram.vue";
 
 export default {
   extends: DefaultTheme,
+  Layout,
   enhanceApp({ app }) {
     app.component("SurfaceTile", SurfaceTile);
     app.component("SurfaceMap", SurfaceMap);
