@@ -5,11 +5,12 @@ import ApcaBadge from "./ApcaBadge.vue";
 import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useKeyColors } from "../composables/useKeyColors";
 
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
-const parsedKeyColors = ref<Record<string, { hue: number; chroma: number }>>({});
+const parsedKeyColors = useKeyColors();
 const { hue, chroma, isDark } = useAtmosphereState();
 
 useThemeBuilder(rootEl);
@@ -23,16 +24,6 @@ onMounted(async () => {
     ...DEFAULT_CONFIG.options,
     selector: ".border-preview-root",
   });
-
-  if (DEFAULT_CONFIG.anchors.keyColors) {
-    const { parseKeyColor } = await import("@design-axioms/color");
-    const parsed: Record<string, { hue: number; chroma: number }> = {};
-    for (const [name, value] of Object.entries(DEFAULT_CONFIG.anchors.keyColors)) {
-      const kc = parseKeyColor(value);
-      if (kc) parsed[name] = kc;
-    }
-    parsedKeyColors.value = parsed;
-  }
 
   ready.value = true;
 });
