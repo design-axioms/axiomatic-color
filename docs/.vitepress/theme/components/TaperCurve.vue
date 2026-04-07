@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import PreviewControls from "./PreviewControls.vue";
 
 const hue = ref(288);
 const maxChroma = ref(0.18);
@@ -79,34 +80,15 @@ function connectorPath(l: number, index: number): string {
 
 <template>
   <div class="taper-root">
-    <!-- Controls above the strip -->
-    <div class="taper-controls">
-      <label class="taper-control">
-        <span>Hue</span>
-        <color-slider
-          type="hue"
-          :value="hue"
-          :hue="hue"
-          :chroma="maxChroma"
-          @input="hue = $event.detail.value"
-        />
-        <span class="taper-control-val">{{ hue }}°</span>
-      </label>
-      <label class="taper-control">
-        <span>Chroma</span>
-        <color-slider
-          type="chroma"
-          :value="maxChroma"
-          :hue="hue"
-          :chroma="maxChroma"
-          min="0.02"
-          max="0.3"
-          step="0.01"
-          @input="maxChroma = $event.detail.value"
-        />
-        <span class="taper-control-val">{{ maxChroma.toFixed(2) }}</span>
-      </label>
-    </div>
+    <PreviewControls
+      v-model:hue="hue"
+      v-model:chroma="maxChroma"
+      vivid
+      hide-toggle
+      :chroma-min="0.02"
+      :chroma-max="0.3"
+      :chroma-step="0.01"
+    />
 
     <!-- The gradient strip -->
     <div class="taper-strip-area">
@@ -293,28 +275,4 @@ function connectorPath(l: number, index: number): string {
   font-family: var(--vp-font-family-mono);
 }
 
-/* --- Controls --- */
-
-.taper-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 0.6rem 1rem;
-  background: var(--vp-c-bg-soft);
-  border-bottom: 1px solid var(--vp-c-divider);
-}
-
-.taper-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.7rem;
-  color: var(--vp-c-text-2);
-}
-
-.taper-control-val {
-  font-family: var(--vp-font-family-mono);
-  min-width: 3em;
-  font-size: 0.7rem;
-}
 </style>

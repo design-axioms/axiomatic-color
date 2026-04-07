@@ -10,6 +10,10 @@ const props = withDefaults(
     hideChroma?: boolean;
     hideHue?: boolean;
     hideToggle?: boolean;
+    vivid?: boolean;
+    chromaMin?: number;
+    chromaMax?: number;
+    chromaStep?: number;
   }>(),
   {
     hue: 0,
@@ -65,13 +69,10 @@ function onLandmarkClick(e: Event) {
 
 <template>
   <div class="preview-controls">
-    <label v-if="!hideHue" class="slider-label hue-label">Hue</label>
-    <label v-if="!hideChroma" class="slider-label chroma-label">Chroma</label>
-
-    <div v-if="!hideHue" class="slider-wrapper hue-slider">
+    <label v-if="!hideHue" class="slider-group">
       <color-slider
         type="hue"
-        muted
+        :muted="!vivid || undefined"
         :value="String(hue)"
         :hue="String(hue)"
         :chroma="String(chroma)"
@@ -79,18 +80,23 @@ function onLandmarkClick(e: Event) {
         @input="onHueInput"
         @landmark-click="onLandmarkClick"
       />
-    </div>
+      <span class="slider-val">{{ Math.round(hue) }}°</span>
+    </label>
 
-    <div v-if="!hideChroma" class="slider-wrapper chroma-slider">
+    <label v-if="!hideChroma" class="slider-group slider-group--chroma">
       <color-slider
         type="chroma"
-        muted
+        :muted="!vivid || undefined"
         :value="String(chroma)"
         :hue="String(hue)"
         :chroma="String(chroma)"
+        :min="chromaMin != null ? String(chromaMin) : undefined"
+        :max="chromaMax != null ? String(chromaMax) : undefined"
+        :step="chromaStep != null ? String(chromaStep) : undefined"
         @input="onChromaInput"
       />
-    </div>
+      <span class="slider-val">{{ chroma.toFixed(2) }}</span>
+    </label>
 
     <button v-if="!hideToggle" class="preview-toggle" @click="emit('update:isDark', !isDark)">
       {{ isDark ? "☀ Light" : "● Dark" }}
@@ -100,41 +106,42 @@ function onLandmarkClick(e: Event) {
 
 <style scoped>
 .preview-controls {
-  padding: 0.75rem 1rem;
-  display: grid;
-  grid-template:
-    "hue-label  chroma-label  ."      auto
-    "hue-slider chroma-slider toggle" auto
-    / 1fr       0.6fr         minmax(0, auto);
+  padding: 0.5rem 1rem;
+  display: flex;
   align-items: center;
-  gap: 0.25rem 1rem;
+  gap: 1rem;
   background: var(--vp-c-bg-soft);
   border-bottom: 1px solid var(--vp-c-divider);
   font-family: var(--vp-font-family-base);
 }
 
-.slider-label {
-  font-size: 11px;
-  color: var(--vp-c-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  cursor: default;
 }
 
-.hue-label { grid-area: hue-label; }
-.chroma-label { grid-area: chroma-label; }
+.slider-group--chroma {
+  flex: 0.5;
+}
 
-.slider-wrapper {
-  position: relative;
+.slider-group color-slider {
+  display: flex;
+  flex: 1;
   min-width: 0;
 }
 
-.slider-wrapper color-slider {
-  display: flex;
-  width: 100%;
+.slider-val {
+  font-size: 11px;
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-3);
+  min-width: 2.5em;
+  text-align: right;
+  flex-shrink: 0;
 }
-
-.hue-slider { grid-area: hue-slider; }
-.chroma-slider { grid-area: chroma-slider; }
 
 .preview-toggle {
   grid-area: toggle;
