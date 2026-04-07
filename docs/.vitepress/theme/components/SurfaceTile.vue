@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
+import { useAtmosphereState } from "../composables/useAtmosphereState";
 import PreviewControls from "./PreviewControls.vue";
 
 interface SurfaceData {
@@ -26,11 +27,9 @@ interface SurfaceData {
 const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceData[]>([]);
 const css = ref("");
-const isDark = ref(false);
 const ready = ref(false);
-const hue = ref(0);
-const chroma = ref(0);
 const parsedKeyColors = ref<Record<string, { hue: number; chroma: number }>>({});
+const { hue, chroma, isDark } = useAtmosphereState();
 
 useThemeBuilder(rootEl);
 

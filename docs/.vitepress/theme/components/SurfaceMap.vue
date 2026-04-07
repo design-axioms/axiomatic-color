@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
+import { useAtmosphereState } from "../composables/useAtmosphereState";
 
 interface SurfaceInfo {
   slug: string;
@@ -13,8 +14,8 @@ interface SurfaceInfo {
 const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
-const isDark = ref(false);
 const ready = ref(false);
+const { isDark } = useAtmosphereState();
 
 useThemeBuilder(rootEl);
 
