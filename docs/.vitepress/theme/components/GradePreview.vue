@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
+import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
 const isDark = ref(false);
+const hue = ref(0);
+const chroma = ref(0);
+const parsedKeyColors = ref<Record<string, { hue: number; chroma: number }>>({});
 
 useThemeBuilder(rootEl);
 
@@ -19,8 +23,25 @@ onMounted(async () => {
     ...DEFAULT_CONFIG.options,
     selector: ".grade-preview-root",
   });
+
+  if (DEFAULT_CONFIG.anchors.keyColors) {
+    const { parseKeyColor } = await import("@design-axioms/color");
+    const parsed: Record<string, { hue: number; chroma: number }> = {};
+    for (const [name, value] of Object.entries(DEFAULT_CONFIG.anchors.keyColors)) {
+      const kc = parseKeyColor(value);
+      if (kc) parsed[name] = kc;
+    }
+    parsedKeyColors.value = parsed;
+  }
+
   ready.value = true;
 });
+
+const hueOverride = computed(() =>
+  hue.value > 0 || chroma.value > 0
+    ? { '--axm-atm-hue': String(hue.value), '--axm-atm-chroma': String(chroma.value) }
+    : {},
+);
 </script>
 
 <template>
@@ -32,15 +53,16 @@ onMounted(async () => {
   >
     <component :is="'style'" v-text="css" />
 
-    <div class="gp-toolbar">
-      <button class="gp-toggle" @click="isDark = !isDark">
-        {{ isDark ? "☀ Light" : "● Dark" }}
-      </button>
-    </div>
+    <PreviewControls
+      v-model:hue="hue"
+      v-model:chroma="chroma"
+      v-model:is-dark="isDark"
+      :key-colors="parsedKeyColors"
+    />
 
     <div class="gp-panels">
       <!-- Page polarity: realistic content block -->
-      <div class="gp-panel surface-card">
+      <div class="gp-panel surface-card" :style="hueOverride">
         <div class="gp-article">
           <h3 class="text-high gp-heading">Dashboard Overview</h3>
           <p class="text-strong gp-body">
@@ -74,7 +96,7 @@ onMounted(async () => {
       </div>
 
       <!-- Spotlight polarity: same structure, inverted -->
-      <div class="gp-panel surface-spotlight">
+      <div class="gp-panel surface-spotlight" :style="hueOverride">
         <div class="gp-article">
           <h3 class="text-high gp-heading">New Feature Available</h3>
           <p class="text-strong gp-body">
@@ -115,25 +137,6 @@ onMounted(async () => {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--vp-c-divider);
-}
-
-.gp-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-}
-
-.gp-toggle {
-  padding: 0.2rem 0.6rem;
-  border-radius: 5px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-family: var(--vp-font-family-base);
 }
 
 .gp-panels {
