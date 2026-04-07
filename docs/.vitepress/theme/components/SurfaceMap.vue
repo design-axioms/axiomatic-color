@@ -15,7 +15,13 @@ const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
 const ready = ref(false);
-const { isDark } = useAtmosphereState();
+const { hue, chroma, isDark } = useAtmosphereState();
+
+const hueOverride = computed(() =>
+  hue.value > 0 || chroma.value > 0
+    ? { '--axm-atm-hue': String(hue.value), '--axm-atm-chroma': String(chroma.value) }
+    : {},
+);
 
 useThemeBuilder(rootEl);
 
@@ -65,7 +71,7 @@ function surfaceBySlug(slug: string) {
     v-if="ready"
     ref="rootEl"
     class="surface-map-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
   >
     <component :is="'style'" v-text="css" />
 
