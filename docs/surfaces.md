@@ -10,14 +10,13 @@ The map shows five surfaces across two polarities. Four share **page polarity**:
 
 ## Usage
 
-Apply a surface with a single class:
+Apply a surface with a single class. The specimen below uses the system CSS and responds to the site's atmosphere controls:
 
-```html
-<div class="surface-card">
-  <h2 class="text-high">Title</h2>
-  <p class="text-strong">Body text.</p>
-</div>
-```
+<LiveExample
+  surface="surface-page"
+  :html='`<div class=\"surface-card\" style=\"padding: 1.25rem; border-radius: 6px;\">\n  <h2 class=\"text-high\" style=\"font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;\">Title</h2>\n  <p class=\"text-strong\" style=\"font-size: 0.875rem; margin: 0;\">Body text.</p>\n</div>`'
+  :code='`<div class=\"surface-card\">\n  <h2 class=\"text-high\">Title</h2>\n  <p class=\"text-strong\">Body text.</p>\n</div>`'
+/>
 
 <Token name=".surface-card" /> sets the background and scopes the text and border tokens.
 
