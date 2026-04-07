@@ -23,4 +23,5 @@ declare module "culori" {
   ): (color: OklchColor | RgbColor | { mode: string }) => RgbColor;
   export function clampChroma(color: OklchColor, mode: string): OklchColor;
   export function parse(color: string): { mode: string } | undefined;
+  export function formatHex(color: OklchColor | RgbColor | { mode: string }): string | undefined;
 }

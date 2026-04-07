@@ -13,7 +13,7 @@
  */
 
 import type { SolvedSurface, SolverOutput } from "../types.js";
-import { converter, parse } from "culori";
+import { converter, formatHex, parse } from "culori";
 
 const toOklch = converter("oklch");
 
@@ -241,6 +241,11 @@ export function parseKeyColor(color: string): { hue: number; chroma: number } | 
     hue: (oklch as unknown as { h?: number }).h ?? 0,
     chroma: (oklch as unknown as { c?: number }).c ?? 0,
   };
+}
+
+/** Convert oklch components to a hex string. */
+export function formatOklchHex(l: number, c: number, h: number): string {
+  return formatHex({ mode: "oklch", l, c, h }) ?? "#000000";
 }
 
 /** Generate key color primitive variables for the root block. */

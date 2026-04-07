@@ -8,7 +8,7 @@
 export { createThemeBuilder, getSystemStyleSheet } from "./browser.js";
 export { ColorSlider, registerColorSlider } from "./components/color-slider.js";
 export { DEFAULT_CONFIG } from "./defaults.js";
-export { generateCSS, generateHTML, parseKeyColor } from "./generator/index.js";
+export { formatOklchHex, generateCSS, generateHTML, parseKeyColor } from "./generator/index.js";
 export { solve } from "./solver/index.js";
 
 export type {
