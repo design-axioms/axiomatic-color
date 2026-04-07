@@ -319,7 +319,8 @@ const hueOverride = computed(() =>
 .comp-border {
   flex: 1;
   height: 0;
-  border-top: 3px solid;
+  border-top-width: 3px;
+  border-top-style: solid;
   border-radius: 2px;
 }
 
