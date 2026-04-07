@@ -48,3 +48,11 @@
 .nowrap {
   white-space: nowrap;
 }
+
+/* Place atmosphere dot between dark toggle and social links */
+.VPSocialLinks {
+  order: 1;
+}
+.VPNavBarExtra {
+  order: 2;
+}

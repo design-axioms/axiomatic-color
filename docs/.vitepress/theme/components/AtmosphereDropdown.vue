@@ -21,6 +21,7 @@ const indicatorStyle = computed(() => {
       class="atmosphere-btn"
       popovertarget="atmosphere-popover"
       aria-label="Atmosphere controls"
+      title="Atmosphere"
     >
       <span class="atmosphere-indicator" :style="indicatorStyle" />
     </button>
@@ -36,15 +37,18 @@ const indicatorStyle = computed(() => {
 </template>
 
 <style scoped>
+.atmosphere-dropdown {
+  display: flex;
+  align-items: center;
+}
+
 .atmosphere-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0 8px;
-  color: var(--vp-c-text-2);
+  padding: 0 4px;
 }
 
 .atmosphere-indicator {
