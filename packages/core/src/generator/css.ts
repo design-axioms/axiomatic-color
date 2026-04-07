@@ -163,9 +163,13 @@ function generateSurfaceClass(
   dark: SolvedSurface,
   prefix: string,
 ): string {
-  // Atmosphere
-  const hue = light.hue ?? 0;
-  const chroma = light.chroma ?? 0;
+  // Atmosphere: only emit hue/chroma when configured, so unconfigured
+  // surfaces inherit from their parent instead of resetting to 0.
+  const hue = light.hue ?? null;
+  const chroma = light.chroma ?? null;
+  const atmLines = hue !== null || chroma !== null
+    ? `\n  --${prefix}-atm-hue: ${hue ?? 0};\n  --${prefix}-atm-chroma: ${chroma ?? 0};`
+    : "";
 
   // Inverted surfaces swap branches so that light-dark() picks the
   // opposite mode's values. Combined with color-scheme flipping,
@@ -177,9 +181,7 @@ function generateSurfaceClass(
     ? `\n  color-scheme: dark;`
     : "";
 
-  return `.surface-${slug} {
-  --${prefix}-atm-hue: ${hue};
-  --${prefix}-atm-chroma: ${chroma};
+  return `.surface-${slug} {${atmLines}
   --${prefix}-surface: ${lightDarkColor(lb.lightness, db.lightness, prefix)};
   --${prefix}-text-high: ${lightDarkColor(lb.textValues.high, db.textValues.high, prefix)};
   --${prefix}-text-strong: ${lightDarkColor(lb.textValues.strong, db.textValues.strong, prefix)};

@@ -40,7 +40,7 @@ const hueOverride = computed(() =>
     v-if="ready"
     ref="rootEl"
     class="border-preview-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
   >
     <component :is="'style'" v-text="css" />
 
@@ -53,7 +53,7 @@ const hueOverride = computed(() =>
     />
 
     <div class="bp-panels">
-      <div class="bp-panel surface-page" :style="hueOverride">
+      <div class="bp-panel surface-page">
         <div class="bp-specimen border-decorative">
           <div class="bp-specimen-header">
             <span class="text-high bp-specimen-title">Decorative</span>
@@ -85,7 +85,7 @@ const hueOverride = computed(() =>
         </div>
       </div>
 
-      <div class="bp-panel surface-spotlight" :style="hueOverride">
+      <div class="bp-panel surface-spotlight">
         <div class="bp-specimen border-decorative">
           <div class="bp-specimen-header">
             <span class="text-high bp-specimen-title">Decorative</span>

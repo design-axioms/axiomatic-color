@@ -39,7 +39,7 @@ const hueOverride = computed(() =>
     v-if="ready"
     ref="rootEl"
     class="grade-preview-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
   >
     <component :is="'style'" v-text="css" />
 
@@ -53,7 +53,7 @@ const hueOverride = computed(() =>
 
     <div class="gp-panels">
       <!-- Page polarity: realistic content block -->
-      <div class="gp-panel surface-card" :style="hueOverride">
+      <div class="gp-panel surface-card">
         <div class="gp-article">
           <h3 class="text-high gp-heading">Dashboard Overview</h3>
           <p class="text-strong gp-body">
@@ -87,7 +87,7 @@ const hueOverride = computed(() =>
       </div>
 
       <!-- Spotlight polarity: same structure, inverted -->
-      <div class="gp-panel surface-spotlight" :style="hueOverride">
+      <div class="gp-panel surface-spotlight">
         <div class="gp-article">
           <h3 class="text-high gp-heading">New Feature Available</h3>
           <p class="text-strong gp-body">

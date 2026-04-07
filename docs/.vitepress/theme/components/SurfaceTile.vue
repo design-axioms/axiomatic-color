@@ -130,7 +130,7 @@ const hueOverride = computed(() =>
     v-if="ready"
     ref="rootEl"
     class="surface-tile-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
   >
     <component :is="'style'" v-text="css" />
 
@@ -143,7 +143,7 @@ const hueOverride = computed(() =>
     />
 
     <!-- Nested composition — how surfaces actually stack -->
-    <div class="composition surface-page" :style="hueOverride">
+    <div class="composition surface-page">
       <div class="comp-label">
         <span class="comp-name text-high">Page</span>
         <span class="comp-meta text-subtlest"
@@ -157,7 +157,7 @@ const hueOverride = computed(() =>
           <span class="text-subtle">Subtle</span>
           <span class="text-subtlest">Subtlest</span>
         </div>
-        <div class="comp-nested surface-workspace" :style="hueOverride">
+        <div class="comp-nested surface-workspace">
           <div class="comp-label">
             <span class="comp-name text-high">Workspace</span>
             <span class="comp-meta text-subtlest"
@@ -174,7 +174,7 @@ const hueOverride = computed(() =>
               <span class="text-subtlest">Subtlest</span>
             </div>
             <div class="comp-cards">
-              <div class="comp-card surface-card" :style="hueOverride">
+              <div class="comp-card surface-card">
                 <div class="comp-label">
                   <span class="comp-name text-high">Card</span>
                   <span class="comp-meta text-subtlest"
@@ -194,7 +194,7 @@ const hueOverride = computed(() =>
                   <span class="comp-border border-critical"></span>
                 </div>
               </div>
-              <div class="comp-card surface-action" :style="hueOverride">
+              <div class="comp-card surface-action">
                 <div class="comp-label">
                   <span class="comp-name text-high">Action</span>
                   <span class="comp-meta text-subtlest"
@@ -209,7 +209,7 @@ const hueOverride = computed(() =>
                 </div>
               </div>
             </div>
-            <div class="comp-nested surface-spotlight" :style="hueOverride">
+            <div class="comp-nested surface-spotlight">
               <div class="comp-label">
                 <span class="comp-name text-high">Spotlight</span>
                 <span class="comp-meta text-subtlest"
