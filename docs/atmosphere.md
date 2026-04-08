@@ -18,12 +18,17 @@ This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extr
 
 Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 
-```html
-<div class="surface-card hue-brand">
+<LiveExample
+  surface="surface-page"
+  :html='`<div class="surface-card hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+  <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Brand Card</h2>
+  <p class="text-subtle" style="font-size: 0.875rem; margin: 0;">Tinted, same contrast.</p>
+</div>`'
+  :code='`<div class="surface-card hue-brand">
   <h2 class="text-high">Brand Card</h2>
   <p class="text-subtle">Tinted, same contrast.</p>
-</div>
-```
+</div>`'
+/>
 
 ## Key Colors
 

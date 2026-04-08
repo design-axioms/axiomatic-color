@@ -17,6 +17,7 @@ export function getSystemStyleSheet(): Promise<CSSStyleSheet> {
     const cssText = generateCSS(output, {
       ...DEFAULT_CONFIG.options,
       selector: ":host",
+      keyColors: DEFAULT_CONFIG.anchors.keyColors,
     });
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(cssText);
