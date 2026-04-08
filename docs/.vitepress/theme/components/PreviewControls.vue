@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import DarkToggle from "./DarkToggle.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -9,7 +10,6 @@ const props = withDefaults(
     keyColors?: Record<string, { hue: number; chroma: number }>;
     hideChroma?: boolean;
     hideHue?: boolean;
-    hideToggle?: boolean;
     vivid?: boolean;
     chromaMin?: number;
     chromaMax?: number;
@@ -72,6 +72,7 @@ function onLandmarkClick(e: Event) {
     <label v-if="!hideHue" class="slider-group">
       <color-slider
         type="hue"
+        aria-label="Hue"
         :muted="!vivid || undefined"
         :value="String(hue)"
         :hue="String(hue)"
@@ -86,6 +87,7 @@ function onLandmarkClick(e: Event) {
     <label v-if="!hideChroma" class="slider-group slider-group--chroma">
       <color-slider
         type="chroma"
+        aria-label="Chroma"
         :muted="!vivid || undefined"
         :value="String(chroma)"
         :hue="String(hue)"
@@ -98,13 +100,10 @@ function onLandmarkClick(e: Event) {
       <span class="slider-val">{{ chroma.toFixed(2) }}</span>
     </label>
 
-    <button
-      v-if="!hideToggle"
-      class="preview-toggle"
-      @click="emit('update:isDark', !isDark)"
-    >
-      {{ isDark ? "☀ Light" : "● Dark" }}
-    </button>
+    <DarkToggle
+      :model-value="isDark"
+      @update:model-value="emit('update:isDark', $event)"
+    />
   </div>
 </template>
 
@@ -147,21 +146,4 @@ function onLandmarkClick(e: Event) {
   flex-shrink: 0;
 }
 
-.preview-toggle {
-  grid-area: toggle;
-  padding: 0.35rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-family: var(--vp-font-family-base);
-  white-space: nowrap;
-  justify-self: end;
-}
-
-.preview-toggle:hover {
-  background: var(--vp-c-bg-soft);
-}
 </style>

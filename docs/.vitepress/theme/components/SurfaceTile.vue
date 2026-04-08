@@ -142,7 +142,6 @@ const hueOverride = computed(() =>
       v-model:chroma="chroma"
       v-model:is-dark="isDark"
       :key-colors="parsedKeyColors"
-      hide-toggle
     />
 
     <!-- Nested composition — how surfaces actually stack -->

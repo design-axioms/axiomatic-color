@@ -52,7 +52,6 @@ const hueOverride = computed(() =>
       v-model:chroma="chroma"
       v-model:is-dark="isDark"
       :key-colors="parsedKeyColors"
-      hide-toggle
     />
 
     <div class="bp-panels">

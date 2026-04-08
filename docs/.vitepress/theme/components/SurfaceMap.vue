@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
+import DarkToggle from "./DarkToggle.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useAtmosphereState } from "../composables/useAtmosphereState";
 
@@ -89,9 +90,7 @@ function surfaceBySlug(slug: string) {
           <span class="map-l text-subtlest"
             >L={{ fmt(surfaceBySlug("page")?.lightness[mode] ?? 0) }}</span
           >
-          <button class="map-toggle" @click="isDark = !isDark">
-            {{ isDark ? "☀ Light" : "● Dark" }}
-          </button>
+          <DarkToggle v-model="isDark" />
         </div>
       </div>
 
@@ -233,18 +232,4 @@ function surfaceBySlug(slug: string) {
   transition: background 0.3s ease;
 }
 
-.map-toggle {
-  padding: 0.2rem 0.6rem;
-  border-radius: 5px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-family: var(--vp-font-family-base);
-}
-
-.map-toggle:hover {
-  background: var(--vp-c-bg-soft);
-}
 </style>

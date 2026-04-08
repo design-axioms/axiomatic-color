@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import PreviewControls from "./PreviewControls.vue";
+import DarkToggle from "./DarkToggle.vue";
+import { useAtmosphereState } from "../composables/useAtmosphereState";
 
-const hue = ref(288);
-const maxChroma = ref(0.18);
+const { hue, chroma: maxChroma, isDark } = useAtmosphereState();
 
 const STRIP_STEPS = 80;
 
@@ -20,22 +20,32 @@ function colorAt(l: number): string {
   return `oklch(${l.toFixed(3)} ${c.toFixed(4)} ${hue.value})`;
 }
 
-const surfaces = ref<Array<{ name: string; l: number }>>([]);
+const lightSurfaces = ref<Array<{ name: string; l: number }>>([]);
+const darkSurfaces = ref<Array<{ name: string; l: number }>>([]);
+
+const surfaces = computed(() =>
+  isDark.value ? darkSurfaces.value : lightSurfaces.value,
+);
 
 onMounted(async () => {
   const { solve, DEFAULT_CONFIG } = await import("@design-axioms/color");
   const output = solve(DEFAULT_CONFIG);
 
-  const result: Array<{ name: string; l: number }> = [];
-  for (const group of DEFAULT_CONFIG.groups) {
-    for (const s of group.surfaces) {
-      const solved = output.light.surfaces.find((x) => x.slug === s.slug);
-      if (!solved) continue;
-      result.push({ name: s.label, l: solved.lightness });
+  for (const [mode, target] of [
+    ["light", lightSurfaces] as const,
+    ["dark", darkSurfaces] as const,
+  ]) {
+    const result: Array<{ name: string; l: number }> = [];
+    for (const group of DEFAULT_CONFIG.groups) {
+      for (const s of group.surfaces) {
+        const solved = output[mode].surfaces.find((x) => x.slug === s.slug);
+        if (!solved) continue;
+        result.push({ name: s.label, l: solved.lightness });
+      }
     }
+    result.sort((a, b) => a.l - b.l);
+    target.value = result;
   }
-  result.sort((a, b) => a.l - b.l);
-  surfaces.value = result;
 });
 
 // Build CSS gradient stops for the strip
@@ -61,12 +71,10 @@ function surfaceLeft(l: number): string {
 }
 
 // Connector paths: from tick position to evenly-spaced swatch center
-// SVG viewBox is 0 0 100 20, so x is in percentage units
 function connectorPath(l: number, index: number): string {
   const W = 400;
   const H = 30;
   const fromX = l * W;
-  // Swatch centers: evenly spaced flex items across the container
   const count = surfaces.value.length;
   const toX = ((2 * index + 1) / (2 * count)) * W;
   const r = 6;
@@ -91,15 +99,9 @@ function connectorPath(l: number, index: number): string {
 
 <template>
   <div class="taper-root">
-    <PreviewControls
-      v-model:hue="hue"
-      v-model:chroma="maxChroma"
-      vivid
-      hide-toggle
-      :chroma-min="0.02"
-      :chroma-max="0.3"
-      :chroma-step="0.01"
-    />
+    <div class="taper-toolbar">
+      <DarkToggle v-model="isDark" />
+    </div>
 
     <!-- The gradient strip -->
     <div v-if="surfaces.length > 0" class="taper-strip-area">
@@ -107,7 +109,12 @@ function connectorPath(l: number, index: number): string {
         <span class="taper-label-dark">Dark</span>
         <span class="taper-label-light">Light</span>
       </div>
-      <div class="taper-strip" :style="{ background: stripGradient }">
+      <div
+        class="taper-strip"
+        role="img"
+        :aria-label="`Taper gradient from L=0 to L=1 at hue ${Math.round(hue)}°`"
+        :style="{ background: stripGradient }"
+      >
         <!-- Surface markers -->
         <div
           v-for="s in surfaces"
@@ -129,6 +136,8 @@ function connectorPath(l: number, index: number): string {
       class="taper-connectors"
       viewBox="0 0 400 30"
       preserveAspectRatio="none"
+      role="img"
+      aria-label="Connector lines from lightness positions to surface swatches"
     >
       <path
         v-for="(s, i) in surfaces"
@@ -164,6 +173,14 @@ function connectorPath(l: number, index: number): string {
   overflow: hidden;
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
+}
+
+.taper-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem;
+  background: var(--vp-c-bg-soft);
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 /* --- Strip --- */
