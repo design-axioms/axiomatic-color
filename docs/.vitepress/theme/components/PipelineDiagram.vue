@@ -35,7 +35,12 @@ const stages = [
   },
   {
     name: "Runtime",
-    items: ["ThemeBuilder", "color-scheme", "Constructible sheets", "Custom elements"],
+    items: [
+      "ThemeBuilder",
+      "color-scheme",
+      "Constructible sheets",
+      "Custom elements",
+    ],
   },
 ];
 </script>
@@ -45,10 +50,20 @@ const stages = [
     <component :is="'style'" v-text="css" />
 
     <div class="pl-flow">
-      <div v-for="(stage, i) in stages" :key="stage.name" class="pl-stage surface-card border-decorative">
+      <div
+        v-for="(stage, i) in stages"
+        :key="stage.name"
+        class="pl-stage surface-card border-decorative"
+      >
         <span class="text-high pl-stage-name">{{ stage.name }}</span>
         <ul class="pl-items">
-          <li v-for="item in stage.items" :key="item" class="text-subtle pl-item">{{ item }}</li>
+          <li
+            v-for="item in stage.items"
+            :key="item"
+            class="text-subtle pl-item"
+          >
+            {{ item }}
+          </li>
         </ul>
       </div>
     </div>

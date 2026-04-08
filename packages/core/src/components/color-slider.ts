@@ -172,7 +172,8 @@ export class ColorSlider extends HTMLElement {
     const chroma = parseFloat(this.getAttribute("chroma") ?? "0.15");
     const muted = this.hasAttribute("muted");
 
-    const track = type === "hue" ? hueGradient(muted) : chromaGradient(hue, muted);
+    const track =
+      type === "hue" ? hueGradient(muted) : chromaGradient(hue, muted);
     const thumb = thumbColor(hue, chroma);
 
     this.#input.style.setProperty("--_track", track);

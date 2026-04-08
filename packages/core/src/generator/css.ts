@@ -172,11 +172,11 @@ function generateSurfaceClass(
   // opposite mode's values. Combined with color-scheme flipping,
   // this makes nesting work: children inherit color-scheme and
   // resolve their own light-dark() to the correct branch.
-  const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
+  const [lb, db] =
+    light.polarity === "inverted" ? [dark, light] : [light, dark];
 
-  const colorScheme = light.polarity === "inverted"
-    ? `\n  color-scheme: dark;`
-    : "";
+  const colorScheme =
+    light.polarity === "inverted" ? `\n  color-scheme: dark;` : "";
 
   return `.surface-${slug} {
   --${prefix}-surface: ${lightDarkColor(lb.lightness, db.lightness, prefix)};
@@ -232,7 +232,9 @@ function generateBorderUtilities(prefix: string): string {
 }
 
 /** Parse a key color to oklch hue and chroma. */
-export function parseKeyColor(color: string): { hue: number; chroma: number } | null {
+export function parseKeyColor(
+  color: string,
+): { hue: number; chroma: number } | null {
   const parsed = parse(color);
   if (!parsed) return null;
   const oklch = toOklch(parsed);

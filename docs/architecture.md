@@ -45,11 +45,11 @@ At C = 0.30, APCA shifts by at most ~0.6 points, so chroma does not materially c
 The solver applies the following safety margins before validation so that targets hold at the worst-case hue:
 
 | Chroma | Safety Margin |
-|--------|--------------|
-| 0.05   | 2 APCA pts   |
-| 0.10   | 3 APCA pts   |
-| 0.15   | 4 APCA pts   |
-| 0.20   | 5 APCA pts   |
+| ------ | ------------- |
+| 0.05   | 2 APCA pts    |
+| 0.10   | 3 APCA pts    |
+| 0.15   | 4 APCA pts    |
+| 0.20   | 5 APCA pts    |
 
 ## 5. Safe bicone taper
 
@@ -111,11 +111,11 @@ Key colors in the config generate both primitive variables, such as `--axm-key-b
 
 The CSS architecture uses three orthogonal operators to produce any color:
 
-| Operator | CSS class | Modifies | Preserves |
-|----------|-----------|----------|-----------|
+| Operator | CSS class    | Modifies                                                         | Preserves  |
+| -------- | ------------ | ---------------------------------------------------------------- | ---------- |
 | Surface  | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
-| Mood     | `.hue-*`     | Atmosphere (hue, chroma) | Lightness |
-| Voice    | `.text-*`    | Contrast intent (grade) | Atmosphere |
+| Mood     | `.hue-*`     | Atmosphere (hue, chroma)                                         | Lightness  |
+| Voice    | `.text-*`    | Contrast intent (grade)                                          | Atmosphere |
 
 Because Mood and Voice modify disjoint components, they compose without N×M combinatorial explosion.
 

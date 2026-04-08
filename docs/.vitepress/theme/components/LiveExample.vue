@@ -53,7 +53,9 @@ const tokenPillTransformer = {
 };
 
 // Lazy-load Shiki and highlight on first open or code change
-let highlighterPromise: ReturnType<typeof import("shiki")["createHighlighter"]> | null = null;
+let highlighterPromise: ReturnType<
+  (typeof import("shiki"))["createHighlighter"]
+> | null = null;
 
 async function ensureHighlighted() {
   if (!highlighterPromise) {
@@ -110,15 +112,15 @@ watch(displayCode, () => {
           stroke-linejoin="round"
         />
       </svg>
-      <span>{{ codeOpen ? 'Hide code' : 'Show code' }}</span>
+      <span>{{ codeOpen ? "Hide code" : "Show code" }}</span>
     </button>
-    <div
-      ref="codeEl"
-      class="live-example-code"
-      :class="{ open: codeOpen }"
-    >
+    <div ref="codeEl" class="live-example-code" :class="{ open: codeOpen }">
       <div class="live-example-code-inner">
-        <div v-if="highlightedHtml" class="shiki-wrapper" v-html="highlightedHtml" />
+        <div
+          v-if="highlightedHtml"
+          class="shiki-wrapper"
+          v-html="highlightedHtml"
+        />
         <pre v-else><code>{{ displayCode }}</code></pre>
       </div>
     </div>

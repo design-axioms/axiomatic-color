@@ -98,7 +98,11 @@ function onLandmarkClick(e: Event) {
       <span class="slider-val">{{ chroma.toFixed(2) }}</span>
     </label>
 
-    <button v-if="!hideToggle" class="preview-toggle" @click="emit('update:isDark', !isDark)">
+    <button
+      v-if="!hideToggle"
+      class="preview-toggle"
+      @click="emit('update:isDark', !isDark)"
+    >
       {{ isDark ? "☀ Light" : "● Dark" }}
     </button>
   </div>

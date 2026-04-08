@@ -120,7 +120,10 @@ function fmt(n: number): string {
 
 const hueOverride = computed(() =>
   hue.value > 0 || chroma.value > 0
-    ? { "--axm-atm-hue": String(hue.value), "--axm-atm-chroma": String(chroma.value) }
+    ? {
+        "--axm-atm-hue": String(hue.value),
+        "--axm-atm-chroma": String(chroma.value),
+      }
     : {},
 );
 </script>

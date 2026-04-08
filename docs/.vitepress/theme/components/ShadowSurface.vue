@@ -59,7 +59,9 @@ watch([shadow, systemSheet, () => props.html], () => {
 
 function updateAtmosphere() {
   if (!shadow.value) return;
-  const outer = shadow.value.querySelector(".shadow-surface-outer") as HTMLElement | null;
+  const outer = shadow.value.querySelector(
+    ".shadow-surface-outer",
+  ) as HTMLElement | null;
   if (!outer) return;
   outer.style.colorScheme = isDark.value ? "dark" : "light";
   if (hue.value > 0 || chroma.value > 0) {

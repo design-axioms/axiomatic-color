@@ -274,5 +274,4 @@ function connectorPath(l: number, index: number): string {
   color: var(--vp-c-text-3);
   font-family: var(--vp-font-family-mono);
 }
-
 </style>

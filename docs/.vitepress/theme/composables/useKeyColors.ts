@@ -11,7 +11,9 @@ export function useKeyColors(): Ref<ParsedKeyColors> {
   import("@design-axioms/color").then(({ DEFAULT_CONFIG, parseKeyColor }) => {
     if (!DEFAULT_CONFIG.anchors.keyColors) return;
     const result: ParsedKeyColors = {};
-    for (const [name, value] of Object.entries(DEFAULT_CONFIG.anchors.keyColors)) {
+    for (const [name, value] of Object.entries(
+      DEFAULT_CONFIG.anchors.keyColors,
+    )) {
       const kc = parseKeyColor(value);
       if (kc) result[name] = kc;
     }

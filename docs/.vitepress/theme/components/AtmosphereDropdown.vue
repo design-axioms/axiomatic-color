@@ -8,11 +8,16 @@ const { hue, chroma, isDark } = useAtmosphereState();
 const keyColors = useKeyColors();
 
 // Async-loaded core functions
-const formatFn = ref<((l: number, c: number, h: number) => string) | null>(null);
-const parseFn = ref<((color: string) => { hue: number; chroma: number } | null) | null>(null);
+const formatFn = ref<((l: number, c: number, h: number) => string) | null>(
+  null,
+);
+const parseFn = ref<
+  ((color: string) => { hue: number; chroma: number } | null) | null
+>(null);
 
 onMounted(async () => {
-  const { formatOklchHex, parseKeyColor } = await import("@design-axioms/color");
+  const { formatOklchHex, parseKeyColor } =
+    await import("@design-axioms/color");
   formatFn.value = formatOklchHex;
   parseFn.value = parseKeyColor;
 });
@@ -54,7 +59,10 @@ function commitEdit() {
 function isActivePreset(name: string): boolean {
   const kc = keyColors.value[name];
   if (!kc) return false;
-  return Math.abs(hue.value - kc.hue) < 0.5 && Math.abs(chroma.value - kc.chroma) < 0.005;
+  return (
+    Math.abs(hue.value - kc.hue) < 0.5 &&
+    Math.abs(chroma.value - kc.chroma) < 0.005
+  );
 }
 
 function selectPreset(name: string, kc: { hue: number; chroma: number }) {
@@ -90,7 +98,10 @@ const indicatorStyle = computed(() => {
           :value="isEditing ? editText : displayHex"
           @focus="isEditing = true"
           @blur="commitEdit"
-          @input="editText = ($event.target as HTMLInputElement).value; tryParse(($event.target as HTMLInputElement).value)"
+          @input="
+            editText = ($event.target as HTMLInputElement).value;
+            tryParse(($event.target as HTMLInputElement).value);
+          "
           @keydown.enter="($event.target as HTMLInputElement).blur()"
           spellcheck="false"
         />

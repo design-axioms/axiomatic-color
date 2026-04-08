@@ -15,8 +15,12 @@ export function useAtmosphereState() {
     try {
       const { isDark: vpDark } = useData();
       isDark.value = vpDark.value;
-      watch(vpDark, (v) => { isDark.value = v; });
-      watch(isDark, (v) => { vpDark.value = v; });
+      watch(vpDark, (v) => {
+        isDark.value = v;
+      });
+      watch(isDark, (v) => {
+        vpDark.value = v;
+      });
     } catch {
       // useData() may fail outside VitePress context (SSR, tests)
     }
