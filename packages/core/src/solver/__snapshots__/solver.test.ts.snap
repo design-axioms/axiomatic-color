@@ -87,8 +87,6 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 }
 
 .surface-action-soft {
-  --axm-atm-hue: 288.0332139382555;
-  --axm-atm-chroma: 0.08;
   --axm-surface: light-dark(oklch(0.9016 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9016 - 1))) var(--axm-atm-hue)), oklch(0.3999 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.3999 - 1))) var(--axm-atm-hue)));
   --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
   --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
@@ -110,8 +108,6 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 }
 
 .surface-success {
-  --axm-atm-hue: 149.57933770959528;
-  --axm-atm-chroma: 0.08;
   --axm-surface: light-dark(oklch(0.9016 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9016 - 1))) var(--axm-atm-hue)), oklch(0.3999 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.3999 - 1))) var(--axm-atm-hue)));
   --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
   --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
@@ -125,8 +121,6 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 }
 
 .surface-warning {
-  --axm-atm-hue: 86.04678770349452;
-  --axm-atm-chroma: 0.1;
   --axm-surface: light-dark(oklch(0.9016 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9016 - 1))) var(--axm-atm-hue)), oklch(0.3999 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.3999 - 1))) var(--axm-atm-hue)));
   --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
   --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
@@ -140,8 +134,6 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 }
 
 .surface-error {
-  --axm-atm-hue: 25.33132148989956;
-  --axm-atm-chroma: 0.12;
   --axm-surface: light-dark(oklch(0.9016 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9016 - 1))) var(--axm-atm-hue)), oklch(0.3999 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.3999 - 1))) var(--axm-atm-hue)));
   --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
   --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
@@ -254,8 +246,6 @@ exports[`solver > CSS output matches golden master 1`] = `
 }
 
 .surface-action {
-  --axm-atm-hue: 288.0332139382555;
-  --axm-atm-chroma: 0.12;
   --axm-surface: light-dark(oklch(0.9016 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9016 - 1))) var(--axm-atm-hue)), oklch(0.3999 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.3999 - 1))) var(--axm-atm-hue)));
   --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
   --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-atm-hue)), oklch(0.9985 calc(var(--axm-atm-chroma) * (1 - abs(2 * 0.9985 - 1))) var(--axm-atm-hue)));
