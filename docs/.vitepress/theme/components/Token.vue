@@ -55,7 +55,7 @@ function getLocalSheet(cat: string): CSSStyleSheet {
       color-scheme: inherit;
     }
     code {
-      font-family: ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
+      font-family: var(--vp-font-family-mono);
       font-size: 0.78em;
       font-weight: 500;
     }
