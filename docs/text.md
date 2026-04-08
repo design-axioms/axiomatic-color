@@ -1,6 +1,6 @@
 # Text
 
-Four contrast grades, solved per surface per mode to meet APCA targets.
+Four contrast grades, solved per surface per mode to meet [APCA](/reference/apca) targets.
 
 ## Preview
 

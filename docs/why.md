@@ -10,13 +10,13 @@ When you add a surface, you re-check every text grade on that surface in both mo
 
 Axiomatic Color starts from semantic intent instead of a fixed palette. You declare surfaces, text grades, and atmosphere. The solver generates CSS custom properties that handle contrast and mode switching together.
 
-The output uses `oklch()` colors wrapped in `light-dark()` for mode switching. It works in browsers that support those functions and does not require runtime JavaScript or a build step at consumption time.
+The output uses [`oklch()`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch) wrapped in `light-dark()` for mode switching. It works in browsers that support those functions and does not require runtime JavaScript or a build step at consumption time.
 
 ## The contract
 
 The system makes three kinds of claims.
 
-**Guaranteed:** Text grades meet their APCA targets on every surface that can support them. "Strong" text targets 95+ APCA. Page and Spotlight maintain an 80+ APCA gap. Border tiers resolve at their target contrast (decorative at 10, interactive at 30, critical at 80).
+**Guaranteed:** Text grades meet their [APCA](/reference/apca) targets on every surface that can support them. "Strong" text targets 95+ APCA. Page and Spotlight maintain an 80+ APCA gap. Border tiers resolve at their target contrast (decorative at 10, interactive at 30, critical at 80).
 
 **Enhanced:** Page is lighter than Workspace, and Workspace is lighter than Card. These differences are real, but hierarchy should not depend on them alone.
 

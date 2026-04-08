@@ -1,6 +1,6 @@
 # Axiomatic Color
 
-Surfaces, text, and borders with APCA contrast targets solved per surface per mode.
+Surfaces, text, and borders with [APCA](/reference/apca) contrast targets solved per surface per mode.
 
 <SurfaceTile />
 
