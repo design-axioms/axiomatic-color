@@ -30,10 +30,14 @@ Page-polarity surfaces share the same lightness range: light in light mode, dark
 
 Primary actions use the opposite polarity to pop against their container:
 
-```html
-<!-- On a page-polarity surface -->
-<button class="surface-spotlight text-high">Primary</button>
+<LiveExample
+  surface="surface-card"
+  :html='`<button class=\"surface-spotlight text-high\" style=\"padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;\">Primary</button>`'
+  :code='`<!-- On a page-polarity surface -->\n<button class=\"surface-spotlight text-high\">Primary</button>`'
+/>
 
-<!-- On spotlight -->
-<button class="surface-page text-high">Primary</button>
-```
+<LiveExample
+  surface="surface-spotlight"
+  :html='`<button class=\"surface-page text-high\" style=\"padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;\">Primary</button>`'
+  :code='`<!-- On spotlight -->\n<button class=\"surface-page text-high\">Primary</button>`'
+/>

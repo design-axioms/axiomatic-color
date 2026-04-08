@@ -46,25 +46,28 @@ onMounted(async () => {
   systemSheet.value = await getSystemStyleSheet();
 });
 
-// Render HTML into shadow DOM
+// Render HTML into shadow DOM.
+// Two-level structure: outer sets the site's color-scheme mode,
+// inner has the surface class. This lets inverted surfaces like
+// .surface-spotlight override color-scheme without fighting inline styles.
 watch([shadow, systemSheet, () => props.html], () => {
   if (!shadow.value || !systemSheet.value) return;
   const surface = props.surface ?? "surface-page";
-  shadow.value.innerHTML = `<div class="shadow-surface-root ${surface}">${props.html}</div>`;
+  shadow.value.innerHTML = `<div class="shadow-surface-outer"><div class="shadow-surface-root ${surface}">${props.html}</div></div>`;
   updateAtmosphere();
 });
 
 function updateAtmosphere() {
   if (!shadow.value) return;
-  const wrapper = shadow.value.querySelector(".shadow-surface-root") as HTMLElement | null;
-  if (!wrapper) return;
-  wrapper.style.colorScheme = isDark.value ? "dark" : "light";
+  const outer = shadow.value.querySelector(".shadow-surface-outer") as HTMLElement | null;
+  if (!outer) return;
+  outer.style.colorScheme = isDark.value ? "dark" : "light";
   if (hue.value > 0 || chroma.value > 0) {
-    wrapper.style.setProperty("--axm-atm-hue", String(hue.value));
-    wrapper.style.setProperty("--axm-atm-chroma", String(chroma.value));
+    outer.style.setProperty("--axm-atm-hue", String(hue.value));
+    outer.style.setProperty("--axm-atm-chroma", String(chroma.value));
   } else {
-    wrapper.style.removeProperty("--axm-atm-hue");
-    wrapper.style.removeProperty("--axm-atm-chroma");
+    outer.style.removeProperty("--axm-atm-hue");
+    outer.style.removeProperty("--axm-atm-chroma");
   }
 }
 
