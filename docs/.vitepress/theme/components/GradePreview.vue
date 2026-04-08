@@ -69,7 +69,7 @@ const hueOverride = computed(() =>
           </p>
           <span class="text-subtlest gp-meta">Updated 2 minutes ago</span>
         </div>
-        <div class="gp-legend">
+        <div class="gp-legend border-decorative">
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-high">High</span>
             <Token name=".text-high" />
@@ -102,7 +102,7 @@ const hueOverride = computed(() =>
           </p>
           <span class="text-subtlest gp-meta">Announced today</span>
         </div>
-        <div class="gp-legend">
+        <div class="gp-legend border-decorative">
           <div class="gp-legend-row">
             <span class="gp-legend-grade text-high">High</span>
             <Token name=".text-high" />
@@ -172,7 +172,8 @@ const hueOverride = computed(() =>
 }
 
 .gp-legend {
-  border-top: 1px solid var(--axm-border-decorative);
+  border-top-width: 1px;
+  border-top-style: solid;
   padding-top: 0.75rem;
   display: flex;
   flex-direction: column;

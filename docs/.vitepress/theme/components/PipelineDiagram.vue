@@ -117,7 +117,7 @@ const stages = [
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.8rem;
-  color: var(--axm-text-subtlest);
+  color: var(--vp-c-text-3);
   z-index: 1;
 }
 

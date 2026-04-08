@@ -92,7 +92,7 @@ const status = props.target
   text-decoration: none;
   line-height: 1.4;
   vertical-align: baseline;
-  cursor: help;
+  cursor: pointer;
   transition: opacity 0.15s;
   white-space: nowrap;
 }
