@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import PreviewControls from "./PreviewControls.vue";
 
 const hue = ref(288);
@@ -20,12 +20,23 @@ function colorAt(l: number): string {
   return `oklch(${l.toFixed(3)} ${c.toFixed(4)} ${hue.value})`;
 }
 
-const surfaces = [
-  { name: "Spotlight", l: 0.1 },
-  { name: "Card", l: 0.902 },
-  { name: "Workspace", l: 0.957 },
-  { name: "Page", l: 0.975 },
-];
+const surfaces = ref<Array<{ name: string; l: number }>>([]);
+
+onMounted(async () => {
+  const { solve, DEFAULT_CONFIG } = await import("@design-axioms/color");
+  const output = solve(DEFAULT_CONFIG);
+
+  const result: Array<{ name: string; l: number }> = [];
+  for (const group of DEFAULT_CONFIG.groups) {
+    for (const s of group.surfaces) {
+      const solved = output.light.surfaces.find((x) => x.slug === s.slug);
+      if (!solved) continue;
+      result.push({ name: s.label, l: solved.lightness });
+    }
+  }
+  result.sort((a, b) => a.l - b.l);
+  surfaces.value = result;
+});
 
 // Build CSS gradient stops for the strip
 const stripGradient = computed(() => {
@@ -56,7 +67,7 @@ function connectorPath(l: number, index: number): string {
   const H = 30;
   const fromX = l * W;
   // Swatch centers: evenly spaced flex items across the container
-  const count = surfaces.length;
+  const count = surfaces.value.length;
   const toX = ((2 * index + 1) / (2 * count)) * W;
   const r = 6;
 
@@ -91,7 +102,7 @@ function connectorPath(l: number, index: number): string {
     />
 
     <!-- The gradient strip -->
-    <div class="taper-strip-area">
+    <div v-if="surfaces.length > 0" class="taper-strip-area">
       <div class="taper-strip-labels">
         <span class="taper-label-dark">Dark</span>
         <span class="taper-label-light">Light</span>
@@ -114,6 +125,7 @@ function connectorPath(l: number, index: number): string {
 
     <!-- Connector lines from strip ticks to swatches -->
     <svg
+      v-if="surfaces.length > 0"
       class="taper-connectors"
       viewBox="0 0 400 30"
       preserveAspectRatio="none"
@@ -127,7 +139,7 @@ function connectorPath(l: number, index: number): string {
     </svg>
 
     <!-- Surface swatches -->
-    <div class="taper-surfaces">
+    <div v-if="surfaces.length > 0" class="taper-surfaces">
       <div v-for="s in surfaces" :key="s.name" class="taper-surface">
         <div class="taper-swatch-pair">
           <div class="taper-swatch" :style="{ background: colorAt(s.l) }"></div>
