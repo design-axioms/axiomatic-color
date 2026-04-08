@@ -81,6 +81,6 @@ Apply surfaces and text grades using the generated classes:
 
 Three kinds of classes compose orthogonally:
 
-- **`.surface-*`** — sets lightness context (background, text values, borders)
-- **`.hue-*`** — overrides atmosphere (hue and chroma) without changing lightness
-- **`.text-*`** / **`.border-*`** — selects contrast grade from the current surface context
+- <Token name=".surface-*" /> — sets lightness context (background, text values, borders)
+- <Token name=".hue-*" /> — overrides atmosphere (hue and chroma) without changing lightness
+- <Token name=".text-*" /> / <Token name=".border-*" /> — selects contrast grade from the current surface context

@@ -86,7 +86,7 @@ A surface's lightness is fixed by its semantic name and the current mode and pol
 
 - `card` always resolves to the same lightness, whether it appears inside `page` or `workspace`.
 - The solver has no depth parameter, so it solves each surface once per mode and polarity.
-- CSS resets local tokens per `.surface-*` class, and descendants inherit the nearest surface context.
+- CSS resets local tokens per <Token name=".surface-*" /> class, and descendants inherit the nearest surface context.
 
 ## 8. Polarity: two independent ladders
 
@@ -103,11 +103,11 @@ The system composes along two orthogonal axes.
 - Lightness composition has a finite budget, uses a semantic ladder, and yields at most ~2 distinguishable levels per polarity per mode.
 - Atmosphere composition applies hue and chroma tinting and does not consume the lightness budget.
 
-Surfaces are achromatic by default. The atmosphere properties `--axm-atm-hue` and `--axm-atm-chroma` are registered as inheriting with an initial value of 0, so they cascade through the DOM until a `.hue-*` utility sets them. Surface classes do not emit atmosphere values — they inherit from their ancestor.
+Surfaces are achromatic by default. The atmosphere properties `--axm-atm-hue` and `--axm-atm-chroma` are registered as inheriting with an initial value of 0, so they cascade through the DOM until a <Token name=".hue-*" /> utility sets them. Surface classes do not emit atmosphere values — they inherit from their ancestor.
 
-Atmosphere flows through surface boundaries to text and border utilities. A `.hue-brand` class on a card tints that card and everything inside it, including child surfaces, unless a descendant sets its own atmosphere.
+Atmosphere flows through surface boundaries to text and border utilities. A <Token name=".hue-brand" /> class on a card tints that card and everything inside it, including child surfaces, unless a descendant sets its own atmosphere.
 
-Key colors in the config generate both primitive variables, such as `--axm-key-brand-hue` and `--axm-key-brand-chroma`, and utility classes such as `.hue-brand`. The taper in §5 ensures that atmosphere degrades gracefully at lightness extremes.
+Key colors in the config generate both primitive variables, such as `--axm-key-brand-hue` and `--axm-key-brand-chroma`, and utility classes such as <Token name=".hue-brand" />. The taper in §5 ensures that atmosphere degrades gracefully at lightness extremes.
 
 ## 10. CSS architecture
 

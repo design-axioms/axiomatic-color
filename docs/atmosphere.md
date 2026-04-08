@@ -27,7 +27,7 @@ Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 
 ## Key Colors
 
-Key colors define named atmosphere presets. A brand hex color is parsed into hue and chroma, then applied through `.hue-brand`:
+Key colors define named atmosphere presets. A brand hex color is parsed into hue and chroma, then applied through <Token name=".hue-brand" />:
 
 ```js
 // In the solver config
@@ -41,7 +41,7 @@ anchors: {
 }
 ```
 
-Each key color generates a utility class (`.hue-brand`, `.hue-success`, etc.) and CSS custom properties (`--axm-key-brand-hue`, `--axm-key-brand-chroma`).
+Each key color generates a utility class (<Token name=".hue-brand" />, <Token name=".hue-success" />, etc.) and CSS custom properties (`--axm-key-brand-hue`, `--axm-key-brand-chroma`).
 
 Use the atmosphere controls in the header to try different brand colors. The taper ensures that surfaces near lightness extremes stay nearly neutral regardless of the chroma you set.
 
