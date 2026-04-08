@@ -35,6 +35,7 @@ export default defineConfig({
         text: "System",
         items: [
           { text: "Introduction", link: "/" },
+          { text: "Getting Started", link: "/getting-started" },
           { text: "Surfaces", link: "/surfaces" },
           { text: "Text", link: "/text" },
           { text: "Borders", link: "/borders" },
@@ -46,7 +47,6 @@ export default defineConfig({
         text: "More",
         items: [
           { text: "Why Axiomatic?", link: "/why" },
-          { text: "Getting Started", link: "/getting-started" },
           { text: "Architecture", link: "/architecture" },
           { text: "CLI", link: "/reference/cli" },
         ],
