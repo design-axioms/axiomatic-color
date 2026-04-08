@@ -102,8 +102,14 @@ onMounted(async () => {
   systemSheet.value = await getSystemStyleSheet();
 });
 
+const isWildcard = computed(() => props.name.endsWith("*"));
+
 function buildMarkup(): string {
   const cat = category.value;
+  // Wildcards: just the code name, no swatch (nothing concrete to show)
+  if (isWildcard.value) {
+    return `<code class="text-subtle">${props.name}</code>`;
+  }
   if (cat === "text") {
     const cls = textClass.value ?? "";
     return `<span class="glyph ${cls}">A</span><code class="text-subtle">${props.name}</code>`;
