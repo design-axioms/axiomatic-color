@@ -37,8 +37,16 @@ const systemSheet = ref<CSSStyleSheet | null>(null);
 
 const localSheetCache = new Map<string, CSSStyleSheet>();
 
-function getLocalSheet(cat: string): CSSStyleSheet {
-  let sheet = localSheetCache.get(cat);
+const WILDCARD_COLORS: Record<string, string> = {
+  surface: "#6e56cf",
+  text: "#299764",
+  hue: "#946300",
+  border: "#6f42c1",
+};
+
+function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
+  const key = wild ? `${cat}:wild` : cat;
+  let sheet = localSheetCache.get(key);
   if (sheet) return sheet;
 
   const hostStyles = `
@@ -51,7 +59,8 @@ function getLocalSheet(cat: string): CSSStyleSheet {
       vertical-align: middle;
       line-height: 1.4;
       white-space: nowrap;
-      border: 1px solid var(--axm-border-decorative);
+      border: 1px solid var(--axm-border-decorative, var(--vp-c-divider, #e2e2e3));
+      background: var(--axm-surface, var(--vp-c-bg-alt, #f6f6f7));
       color-scheme: inherit;
     }
     code {
@@ -62,7 +71,14 @@ function getLocalSheet(cat: string): CSSStyleSheet {
   `;
 
   let extra = "";
-  if (cat === "text") {
+  if (wild) {
+    const color = WILDCARD_COLORS[cat] ?? "#929295";
+    extra = `.dot {
+      width: 0.5em; height: 0.5em; border-radius: 50%;
+      background: ${color};
+      align-self: center; flex-shrink: 0;
+    }`;
+  } else if (cat === "text") {
     extra = `.glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }`;
   } else if (cat === "surface") {
     extra = `.swatch {
@@ -86,12 +102,12 @@ function getLocalSheet(cat: string): CSSStyleSheet {
 
   sheet = new CSSStyleSheet();
   sheet.replaceSync(hostStyles + extra);
-  localSheetCache.set(cat, sheet);
+  localSheetCache.set(key, sheet);
   return sheet;
 }
 
 const sheets = computed(() =>
-  systemSheet.value ? [systemSheet.value, getLocalSheet(category.value)] : [],
+  systemSheet.value ? [systemSheet.value, getLocalSheet(category.value, isWildcard.value)] : [],
 );
 
 const shadow = useShadowRoot(shadowHost, sheets);
@@ -106,9 +122,9 @@ const isWildcard = computed(() => props.name.endsWith("*"));
 
 function buildMarkup(): string {
   const cat = category.value;
-  // Wildcards: just the code name, no swatch (nothing concrete to show)
+  // Wildcards: category-colored dot instead of a concrete swatch
   if (isWildcard.value) {
-    return `<code class="text-subtle">${props.name}</code>`;
+    return `<span class="dot"></span><code class="text-subtle">${props.name}</code>`;
   }
   if (cat === "text") {
     const cls = textClass.value ?? "";
