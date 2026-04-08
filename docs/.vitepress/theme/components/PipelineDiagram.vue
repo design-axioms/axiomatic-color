@@ -125,8 +125,14 @@ const stages = [
   .pl-flow {
     grid-template-columns: 1fr 1fr;
   }
-  .pl-stage:nth-child(2)::after {
+  .pl-stage:not(:last-child)::after {
     display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .pl-flow {
+    grid-template-columns: 1fr;
   }
 }
 </style>
