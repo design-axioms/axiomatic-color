@@ -6,7 +6,7 @@ Tint surfaces with hue and chroma. Contrast guarantees are unaffected.
 
 <TaperCurve />
 
-Chroma fades to zero near the lightness extremes.
+As a surface approaches pure black or pure white, its ability to carry color fades — neon black doesn't exist in physics, and the taper encodes that reality.
 
 ::: details Why does chroma fade at the extremes?
 This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extremes.

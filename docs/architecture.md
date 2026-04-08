@@ -32,6 +32,8 @@ The solver performs the following work:
 
 The solver does not compute intermediate mode states, because `light-dark()` removes that requirement. It also does not track DOM nesting depth or parent-relative composition.
 
+When a target cannot be met — for example, "high" grade text (Lc 100) on a mid-tone surface — the solver does not silently compromise. It solves for the best achievable contrast, reports the unmet target, and includes the actual ceiling in its diagnostics. This "noisy no" supports informed tradeoffs about surface placement, anchor ranges, and contrast targets.
+
 ## 3. Text derivation
 
 `light-dark()` accepts only `<color>` values, so each mode branch must emit a complete `oklch()` color with a pre-solved lightness value. The solver is the single source of truth for those lightness values.
@@ -101,9 +103,9 @@ The system composes along two orthogonal axes.
 - Lightness composition has a finite budget, uses a semantic ladder, and yields at most ~2 distinguishable levels per polarity per mode.
 - Atmosphere composition applies hue and chroma tinting and does not consume the lightness budget.
 
-Surfaces are achromatic by default. Each surface class writes `--axm-atm-hue: 0; --axm-atm-chroma: 0;` to establish a neutral atmosphere context. Atmosphere is applied per surface through `.hue-*` utility classes that override those values.
+Surfaces are achromatic by default. The atmosphere properties `--axm-atm-hue` and `--axm-atm-chroma` are registered as inheriting with an initial value of 0, so they cascade through the DOM until a `.hue-*` utility sets them. Surface classes do not emit atmosphere values — they inherit from their ancestor.
 
-Atmosphere resets at surface boundaries, just as lightness context does, but it flows to text and border utilities within a surface. A `.hue-brand` class on a card tints that card's text and borders, but it does not cascade to child surfaces.
+Atmosphere flows through surface boundaries to text and border utilities. A `.hue-brand` class on a card tints that card and everything inside it, including child surfaces, unless a descendant sets its own atmosphere.
 
 Key colors in the config generate both primitive variables, such as `--axm-key-brand-hue` and `--axm-key-brand-chroma`, and utility classes such as `.hue-brand`. The taper in §5 ensures that atmosphere degrades gracefully at lightness extremes.
 
@@ -111,11 +113,13 @@ Key colors in the config generate both primitive variables, such as `--axm-key-b
 
 The CSS architecture uses three orthogonal operators to produce any color:
 
-| Operator | CSS class    | Modifies                                                         | Preserves  |
-| -------- | ------------ | ---------------------------------------------------------------- | ---------- |
-| Surface  | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
-| Mood     | `.hue-*`     | Atmosphere (hue, chroma)                                         | Lightness  |
-| Voice    | `.text-*`    | Contrast intent (grade)                                          | Atmosphere |
+| Operator            | CSS class    | Modifies                                                         | Preserves  |
+| ------------------- | ------------ | ---------------------------------------------------------------- | ---------- |
+| Surface             | `.surface-*` | Lightness context (background, text values, borders, atmosphere) | — (resets) |
+| Mood (atmosphere)   | `.hue-*`     | Atmosphere (hue, chroma)                                         | Lightness  |
+| Voice (text grades) | `.text-*`    | Contrast intent (grade)                                          | Atmosphere |
+
+The operator names describe the architectural role: Surface sets context, Mood tints it, Voice reads from it. The consumer-facing names (atmosphere, text grades) appear in the class APIs and documentation. Both refer to the same mechanism.
 
 Because Mood and Voice modify disjoint components, they compose without N×M combinatorial explosion.
 
