@@ -11,7 +11,6 @@ const accent = useAccentColor();
 const { isDark } = useDarkMode();
 const { theme } = useReactiveTheme();
 const keyColors = useKeyColors();
-const expandedRow = ref<"brand" | "accent">("brand");
 
 // Async-loaded core functions
 const formatFn = ref<((l: number, c: number, h: number) => string) | null>(
@@ -180,11 +179,8 @@ const indicatorStyle = computed(() => {
     </button>
     <div id="atmosphere-popover" popover class="atmosphere-popover">
       <!-- Brand panel -->
-      <div class="panel" :class="{ expanded: expandedRow === 'brand' }">
-        <div class="panel-header" @click="expandedRow = 'brand'">
-          <span class="panel-arrow">{{
-            expandedRow === "brand" ? "▼" : "▶"
-          }}</span>
+      <details class="panel" name="colors" open>
+        <summary class="panel-header">
           <span class="panel-label">Brand</span>
           <span
             class="panel-dot"
@@ -199,10 +195,7 @@ const indicatorStyle = computed(() => {
             class="color-input"
             :class="{ invalid: brandEdit.invalid }"
             :value="brandEdit.editing ? brandEdit.text : brandHex"
-            @focus="
-              brandEdit.editing = true;
-              expandedRow = 'brand';
-            "
+            @focus="brandEdit.editing = true"
             @blur="commitRow('brand')"
             @input="
               brandEdit.text = ($event.target as HTMLInputElement).value;
@@ -212,9 +205,8 @@ const indicatorStyle = computed(() => {
             spellcheck="false"
             @click.stop
           />
-        </div>
-        <div class="panel-body-wrap">
-          <div class="panel-body">
+        </summary>
+        <div class="panel-body">
             <div class="slider-row">
               <color-slider
                 type="hue"
@@ -271,15 +263,11 @@ const indicatorStyle = computed(() => {
                 <span class="preset-name">{{ name }}</span>
               </button>
             </div>
-          </div>
         </div>
-      </div>
+      </details>
       <!-- Accent panel -->
-      <div class="panel" :class="{ expanded: expandedRow === 'accent' }">
-        <div class="panel-header" @click="expandedRow = 'accent'">
-          <span class="panel-arrow">{{
-            expandedRow === "accent" ? "▼" : "▶"
-          }}</span>
+      <details class="panel" name="colors">
+        <summary class="panel-header">
           <span class="panel-label">Accent</span>
           <span
             class="panel-dot"
@@ -294,10 +282,7 @@ const indicatorStyle = computed(() => {
             class="color-input"
             :class="{ invalid: accentEdit.invalid }"
             :value="accentEdit.editing ? accentEdit.text : accentHex"
-            @focus="
-              accentEdit.editing = true;
-              expandedRow = 'accent';
-            "
+            @focus="accentEdit.editing = true"
             @blur="commitRow('accent')"
             @input="
               accentEdit.text = ($event.target as HTMLInputElement).value;
@@ -307,9 +292,8 @@ const indicatorStyle = computed(() => {
             spellcheck="false"
             @click.stop
           />
-        </div>
-        <div class="panel-body-wrap">
-          <div class="panel-body">
+        </summary>
+        <div class="panel-body">
             <div class="slider-row">
               <color-slider
                 type="hue"
@@ -366,9 +350,8 @@ const indicatorStyle = computed(() => {
                 <span class="preset-name">{{ name }}</span>
               </button>
             </div>
-          </div>
         </div>
-      </div>
+      </details>
       <!-- Dark toggle at bottom -->
       <div class="dark-toggle-row">
         <DarkToggle :model-value="isDark" @update:model-value="isDark = $event" />
@@ -413,8 +396,12 @@ const indicatorStyle = computed(() => {
   background: var(--vp-c-bg);
 }
 
-.panel + .panel {
+.panel {
   border-top: 1px solid var(--vp-c-divider);
+}
+
+.panel:first-of-type {
+  border-top: none;
 }
 
 .panel-header {
@@ -423,12 +410,15 @@ const indicatorStyle = computed(() => {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
+  list-style: none;
 }
 
-.panel-arrow {
-  font-size: 10px;
-  color: var(--vp-c-text-3);
-  width: 1em;
+.panel-header::-webkit-details-marker {
+  display: none;
+}
+
+.panel-header::marker {
+  content: '';
 }
 
 .panel-label {
@@ -465,22 +455,7 @@ const indicatorStyle = computed(() => {
   border-color: var(--vp-c-danger-1);
 }
 
-.panel-body-wrap {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.2s ease;
-}
-
-.panel.expanded .panel-body-wrap {
-  grid-template-rows: 1fr;
-}
-
 .panel-body {
-  overflow: hidden;
-  padding: 0 1rem;
-}
-
-.panel.expanded .panel-body {
   padding: 0.25rem 1rem 0.5rem;
 }
 
