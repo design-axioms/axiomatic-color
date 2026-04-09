@@ -29,11 +29,12 @@ onMounted(async () => {
 });
 
 // Per-row display hex
-const brandHex = computed(() =>
-  formatFn.value?.(0.6, brand.chroma.value, brand.hue.value) ?? "#000000",
+const brandHex = computed(
+  () => formatFn.value?.(0.6, brand.chroma.value, brand.hue.value) ?? "#000000",
 );
-const accentHex = computed(() =>
-  formatFn.value?.(0.6, accent.chroma.value, accent.hue.value) ?? "#000000",
+const accentHex = computed(
+  () =>
+    formatFn.value?.(0.6, accent.chroma.value, accent.hue.value) ?? "#000000",
 );
 
 // Per-row editing state
@@ -101,7 +102,10 @@ const DEFAULT_BRAND = "#6e56cf";
 const DEFAULT_ACCENT = "#0891b2";
 
 function resetToDefault(row: "brand" | "accent") {
-  theme.value?.setKeyColor(row, row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT);
+  theme.value?.setKeyColor(
+    row,
+    row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT,
+  );
 }
 
 function isModified(row: "brand" | "accent") {
@@ -171,12 +175,10 @@ const indicatorStyle = computed(() => {
   const bc = brand.chroma.value;
   const ah = accent.hue.value;
   const ac = accent.chroma.value;
-  const brandBg =
-    bc > 0 ? `oklch(0.6 ${bc} ${bh})` : "var(--vp-c-text-3)";
-  const accentBg =
-    ac > 0 ? `oklch(0.6 ${ac} ${ah})` : "var(--vp-c-text-3)";
+  const brandBg = bc > 0 ? `oklch(0.6 ${bc} ${bh})` : "var(--vp-c-text-3)";
+  const accentBg = ac > 0 ? `oklch(0.6 ${ac} ${ah})` : "var(--vp-c-text-3)";
   return {
-    background: `conic-gradient(from 270deg, ${brandBg} 0deg 180deg, ${accentBg} 180deg 360deg)`,
+    background: `linear-gradient(135deg, ${brandBg} 50%, ${accentBg} 50%)`,
   };
 });
 </script>
@@ -221,55 +223,63 @@ const indicatorStyle = computed(() => {
           />
         </summary>
         <div class="panel-body">
-            <div class="slider-row">
-              <color-slider
-                type="hue"
-                aria-label="Brand hue"
-                :value="String(brand.hue.value)"
-                :hue="String(brand.hue.value)"
-                :chroma="String(brand.chroma.value)"
-                :landmarks="brandLandmarks"
-                @input="onHueInput('brand', $event)"
-                @landmark-click="onLandmarkClick('brand', $event)"
+          <div class="slider-row">
+            <color-slider
+              type="hue"
+              aria-label="Brand hue"
+              :value="String(brand.hue.value)"
+              :hue="String(brand.hue.value)"
+              :chroma="String(brand.chroma.value)"
+              :landmarks="brandLandmarks"
+              @input="onHueInput('brand', $event)"
+              @landmark-click="onLandmarkClick('brand', $event)"
+            />
+            <span class="slider-value">{{ Math.round(brand.hue.value) }}°</span>
+          </div>
+          <div class="slider-row">
+            <color-slider
+              type="chroma"
+              aria-label="Brand chroma"
+              :value="String(brand.chroma.value)"
+              :hue="String(brand.hue.value)"
+              :chroma="String(brand.chroma.value)"
+              @input="onChromaInput('brand', $event)"
+            />
+            <span class="slider-value">{{
+              brand.chroma.value.toFixed(2)
+            }}</span>
+          </div>
+          <div class="panel-presets">
+            <button
+              class="preset-btn"
+              :class="{ active: brand.chroma.value === 0 }"
+              @click="applyNone('brand')"
+            >
+              <span class="preset-dot" style="background: var(--vp-c-text-3)" />
+              <span class="preset-name">none</span>
+            </button>
+            <button
+              v-for="[name, kc] in semanticPresets"
+              :key="name"
+              class="preset-btn"
+              :class="{ active: isPresetActive('brand', kc) }"
+              @click="selectPreset('brand', kc)"
+            >
+              <span
+                class="preset-dot"
+                :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }"
               />
-              <span class="slider-value"
-                >{{ Math.round(brand.hue.value) }}°</span
-              >
-            </div>
-            <div class="slider-row">
-              <color-slider
-                type="chroma"
-                aria-label="Brand chroma"
-                :value="String(brand.chroma.value)"
-                :hue="String(brand.hue.value)"
-                :chroma="String(brand.chroma.value)"
-                @input="onChromaInput('brand', $event)"
-              />
-              <span class="slider-value">{{
-                brand.chroma.value.toFixed(2)
-              }}</span>
-            </div>
-            <div class="panel-presets">
-              <button
-                class="preset-btn"
-                :class="{ active: brand.chroma.value === 0 }"
-                @click="applyNone('brand')"
-              >
-                <span class="preset-dot" style="background: var(--vp-c-text-3)" />
-                <span class="preset-name">none</span>
-              </button>
-              <button
-                v-for="[name, kc] in semanticPresets"
-                :key="name"
-                class="preset-btn"
-                :class="{ active: isPresetActive('brand', kc) }"
-                @click="selectPreset('brand', kc)"
-              >
-                <span class="preset-dot" :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }" />
-                <span class="preset-name">{{ name }}</span>
-              </button>
-              <button v-if="isModified('brand')" class="reset-btn" @click="resetToDefault('brand')" title="Reset to default">↺</button>
-            </div>
+              <span class="preset-name">{{ name }}</span>
+            </button>
+            <button
+              v-if="isModified('brand')"
+              class="reset-btn"
+              @click="resetToDefault('brand')"
+              title="Reset to default"
+            >
+              ↺
+            </button>
+          </div>
         </div>
       </details>
       <!-- Accent panel -->
@@ -301,60 +311,73 @@ const indicatorStyle = computed(() => {
           />
         </summary>
         <div class="panel-body">
-            <div class="slider-row">
-              <color-slider
-                type="hue"
-                aria-label="Accent hue"
-                :value="String(accent.hue.value)"
-                :hue="String(accent.hue.value)"
-                :chroma="String(accent.chroma.value)"
-                :landmarks="accentLandmarks"
-                @input="onHueInput('accent', $event)"
-                @landmark-click="onLandmarkClick('accent', $event)"
+          <div class="slider-row">
+            <color-slider
+              type="hue"
+              aria-label="Accent hue"
+              :value="String(accent.hue.value)"
+              :hue="String(accent.hue.value)"
+              :chroma="String(accent.chroma.value)"
+              :landmarks="accentLandmarks"
+              @input="onHueInput('accent', $event)"
+              @landmark-click="onLandmarkClick('accent', $event)"
+            />
+            <span class="slider-value"
+              >{{ Math.round(accent.hue.value) }}°</span
+            >
+          </div>
+          <div class="slider-row">
+            <color-slider
+              type="chroma"
+              aria-label="Accent chroma"
+              :value="String(accent.chroma.value)"
+              :hue="String(accent.hue.value)"
+              :chroma="String(accent.chroma.value)"
+              @input="onChromaInput('accent', $event)"
+            />
+            <span class="slider-value">{{
+              accent.chroma.value.toFixed(2)
+            }}</span>
+          </div>
+          <div class="panel-presets">
+            <button
+              class="preset-btn"
+              :class="{ active: accent.chroma.value === 0 }"
+              @click="applyNone('accent')"
+            >
+              <span class="preset-dot" style="background: var(--vp-c-text-3)" />
+              <span class="preset-name">none</span>
+            </button>
+            <button
+              v-for="[name, kc] in semanticPresets"
+              :key="name"
+              class="preset-btn"
+              :class="{ active: isPresetActive('accent', kc) }"
+              @click="selectPreset('accent', kc)"
+            >
+              <span
+                class="preset-dot"
+                :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }"
               />
-              <span class="slider-value"
-                >{{ Math.round(accent.hue.value) }}°</span
-              >
-            </div>
-            <div class="slider-row">
-              <color-slider
-                type="chroma"
-                aria-label="Accent chroma"
-                :value="String(accent.chroma.value)"
-                :hue="String(accent.hue.value)"
-                :chroma="String(accent.chroma.value)"
-                @input="onChromaInput('accent', $event)"
-              />
-              <span class="slider-value">{{
-                accent.chroma.value.toFixed(2)
-              }}</span>
-            </div>
-            <div class="panel-presets">
-              <button
-                class="preset-btn"
-                :class="{ active: accent.chroma.value === 0 }"
-                @click="applyNone('accent')"
-              >
-                <span class="preset-dot" style="background: var(--vp-c-text-3)" />
-                <span class="preset-name">none</span>
-              </button>
-              <button
-                v-for="[name, kc] in semanticPresets"
-                :key="name"
-                class="preset-btn"
-                :class="{ active: isPresetActive('accent', kc) }"
-                @click="selectPreset('accent', kc)"
-              >
-                <span class="preset-dot" :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }" />
-                <span class="preset-name">{{ name }}</span>
-              </button>
-              <button v-if="isModified('accent')" class="reset-btn" @click="resetToDefault('accent')" title="Reset to default">↺</button>
-            </div>
+              <span class="preset-name">{{ name }}</span>
+            </button>
+            <button
+              v-if="isModified('accent')"
+              class="reset-btn"
+              @click="resetToDefault('accent')"
+              title="Reset to default"
+            >
+              ↺
+            </button>
+          </div>
         </div>
       </details>
       <!-- Dark toggle at bottom -->
       <div class="dark-toggle-row">
-        <DarkToggle :model-value="isDark" @update:model-value="isDark = $event" />
+        <DarkToggle
+          :model-value="isDark"
+          @update:model-value="isDark = $event"
+        />
       </div>
     </div>
   </div>
@@ -377,8 +400,8 @@ const indicatorStyle = computed(() => {
 
 .atmosphere-indicator {
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 1.5px solid var(--vp-c-divider);
 }
@@ -418,7 +441,7 @@ const indicatorStyle = computed(() => {
 }
 
 .panel-header::marker {
-  content: '';
+  content: "";
 }
 
 .panel-label {
