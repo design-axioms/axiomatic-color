@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useShadowRoot } from "../composables/useShadowRoot";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useDarkMode } from "../composables/useDarkMode";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 
@@ -15,7 +15,7 @@ const props = defineProps<{
 }>();
 
 const hostEl = ref<HTMLElement | null>(null);
-const { isDark } = useAtmosphereState();
+const { isDark } = useDarkMode();
 const { theme, ready } = useReactiveTheme();
 
 const baseSheet = (() => {

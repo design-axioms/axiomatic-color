@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useBrandColor } from "../composables/useBrandColor";
+import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
 import PreviewControls from "./PreviewControls.vue";
 
@@ -30,7 +31,8 @@ const surfaces = ref<SurfaceData[]>([]);
 const css = ref("");
 const ready = ref(false);
 const parsedKeyColors = useKeyColors();
-const { hue, chroma, isDark } = useAtmosphereState();
+const { hue, chroma } = useBrandColor();
+const { isDark } = useDarkMode();
 
 useThemeBuilder(rootEl);
 

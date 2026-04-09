@@ -3,7 +3,8 @@ import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
 import DarkToggle from "./DarkToggle.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useBrandColor } from "../composables/useBrandColor";
+import { useDarkMode } from "../composables/useDarkMode";
 
 interface SurfaceInfo {
   slug: string;
@@ -16,7 +17,8 @@ const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
 const ready = ref(false);
-const { hue, chroma, isDark } = useAtmosphereState();
+const { hue, chroma } = useBrandColor();
+const { isDark } = useDarkMode();
 
 const hueOverride = computed(() =>
   hue.value > 0 || chroma.value > 0

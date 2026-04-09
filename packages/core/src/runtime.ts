@@ -12,6 +12,8 @@ export interface ReactiveTheme {
   setKeyColor(name: string, hex: string): void;
   /** Get the current config (with any key color overrides) */
   getConfig(): SolverConfig;
+  /** Register a listener called after every setKeyColor update. Returns unsubscribe. */
+  subscribe(fn: () => void): () => void;
 }
 
 export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
@@ -19,6 +21,8 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
   let current: SolverConfig = JSON.parse(
     JSON.stringify(config ?? DEFAULT_CONFIG),
   );
+
+  const listeners = new Set<() => void>();
 
   function buildCSS(): string {
     const output = solve(current);
@@ -42,10 +46,16 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
         anchors: { ...current.anchors, keyColors },
       };
       sheet.replaceSync(buildCSS());
+      for (const fn of listeners) fn();
     },
 
     getConfig() {
       return current;
+    },
+
+    subscribe(fn: () => void): () => void {
+      listeners.add(fn);
+      return () => { listeners.delete(fn); };
     },
   };
 }

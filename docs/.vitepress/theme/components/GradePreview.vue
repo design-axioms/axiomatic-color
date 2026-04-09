@@ -3,14 +3,16 @@ import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
 import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useBrandColor } from "../composables/useBrandColor";
+import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
 
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
 const parsedKeyColors = useKeyColors();
-const { hue, chroma, isDark } = useAtmosphereState();
+const { hue, chroma } = useBrandColor();
+const { isDark } = useDarkMode();
 
 useThemeBuilder(rootEl);
 

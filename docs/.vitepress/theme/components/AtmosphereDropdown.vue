@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useBrandColor } from "../composables/useBrandColor";
+import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 import { useKeyColors } from "../composables/useKeyColors";
 import PreviewControls from "./PreviewControls.vue";
 
-const { hue, chroma, isDark } = useAtmosphereState();
+const { hue, chroma } = useBrandColor();
+const { isDark } = useDarkMode();
 const { theme } = useReactiveTheme();
 const keyColors = useKeyColors();
 
@@ -24,22 +26,8 @@ onMounted(async () => {
   parseFn.value = parseKeyColor;
 });
 
-/**
- * Bridge: update the reactive theme's key color AND sync the
- * atmosphere refs so TaperCurve and other vizs stay in sync.
- */
 function applyBrandColor(hex: string) {
-  if (theme.value) {
-    theme.value.setKeyColor("brand", hex);
-  }
-  // Bridge: parse the hex and update atmosphere refs
-  if (parseFn.value) {
-    const result = parseFn.value(hex);
-    if (result) {
-      hue.value = result.hue;
-      chroma.value = result.chroma;
-    }
-  }
+  theme.value?.setKeyColor("brand", hex);
 }
 
 // Focus guard: when editing, the input shows what the user typed;

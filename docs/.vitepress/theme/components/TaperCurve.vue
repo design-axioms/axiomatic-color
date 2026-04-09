@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import DarkToggle from "./DarkToggle.vue";
-import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useBrandColor } from "../composables/useBrandColor";
+import { useDarkMode } from "../composables/useDarkMode";
 
-const { hue, chroma: maxChroma, isDark } = useAtmosphereState();
+const { hue, chroma: maxChroma } = useBrandColor();
+const { isDark } = useDarkMode();
 
 const STRIP_STEPS = 80;
 
