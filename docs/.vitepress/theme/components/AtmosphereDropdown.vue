@@ -67,12 +67,12 @@ function commitRow(row: "brand" | "accent") {
   edit.text = hex;
 }
 
-// Per-row presets: all key colors except the row's own name
-const brandPresets = computed(() =>
-  Object.entries(keyColors.value).filter(([name]) => name !== "brand"),
-);
-const accentPresets = computed(() =>
-  Object.entries(keyColors.value).filter(([name]) => name !== "accent"),
+// Semantic presets only (not brand/accent — those are the editable channels)
+const SEMANTIC_KEYS = ["success", "warning", "error"] as const;
+const semanticPresets = computed(() =>
+  SEMANTIC_KEYS.map((name) => [name, keyColors.value[name]] as const).filter(
+    ([, kc]) => kc,
+  ),
 );
 
 function isPresetActive(
@@ -94,6 +94,20 @@ function selectPreset(
 
 function applyNone(row: "brand" | "accent") {
   theme.value?.setKeyColor(row, "#808080");
+}
+
+// Default colors for reset
+const DEFAULT_BRAND = "#6e56cf";
+const DEFAULT_ACCENT = "#0891b2";
+
+function resetToDefault(row: "brand" | "accent") {
+  theme.value?.setKeyColor(row, row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT);
+}
+
+function isModified(row: "brand" | "accent") {
+  const hex = row === "brand" ? brandHex.value : accentHex.value;
+  const def = row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT;
+  return hex.toLowerCase() !== def.toLowerCase();
 }
 
 // Per-row hue landmarks: other key colors (not self)
@@ -241,27 +255,20 @@ const indicatorStyle = computed(() => {
                 :class="{ active: brand.chroma.value === 0 }"
                 @click="applyNone('brand')"
               >
-                <span
-                  class="preset-dot"
-                  style="background: var(--vp-c-text-3)"
-                />
+                <span class="preset-dot" style="background: var(--vp-c-text-3)" />
                 <span class="preset-name">none</span>
               </button>
               <button
-                v-for="[name, kc] in brandPresets"
+                v-for="[name, kc] in semanticPresets"
                 :key="name"
                 class="preset-btn"
                 :class="{ active: isPresetActive('brand', kc) }"
                 @click="selectPreset('brand', kc)"
               >
-                <span
-                  class="preset-dot"
-                  :style="{
-                    background: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
-                  }"
-                />
+                <span class="preset-dot" :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }" />
                 <span class="preset-name">{{ name }}</span>
               </button>
+              <button v-if="isModified('brand')" class="reset-btn" @click="resetToDefault('brand')" title="Reset to default">↺</button>
             </div>
         </div>
       </details>
@@ -328,27 +335,20 @@ const indicatorStyle = computed(() => {
                 :class="{ active: accent.chroma.value === 0 }"
                 @click="applyNone('accent')"
               >
-                <span
-                  class="preset-dot"
-                  style="background: var(--vp-c-text-3)"
-                />
+                <span class="preset-dot" style="background: var(--vp-c-text-3)" />
                 <span class="preset-name">none</span>
               </button>
               <button
-                v-for="[name, kc] in accentPresets"
+                v-for="[name, kc] in semanticPresets"
                 :key="name"
                 class="preset-btn"
                 :class="{ active: isPresetActive('accent', kc) }"
                 @click="selectPreset('accent', kc)"
               >
-                <span
-                  class="preset-dot"
-                  :style="{
-                    background: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
-                  }"
-                />
+                <span class="preset-dot" :style="{ background: `oklch(0.6 ${kc.chroma} ${kc.hue})` }" />
                 <span class="preset-name">{{ name }}</span>
               </button>
+              <button v-if="isModified('accent')" class="reset-btn" @click="resetToDefault('accent')" title="Reset to default">↺</button>
             </div>
         </div>
       </details>
@@ -518,6 +518,23 @@ const indicatorStyle = computed(() => {
 
 .preset-name {
   text-transform: capitalize;
+}
+
+.reset-btn {
+  margin-left: auto;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--vp-c-text-3);
+  line-height: 1;
+}
+
+.reset-btn:hover {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
 }
 
 .dark-toggle-row {
