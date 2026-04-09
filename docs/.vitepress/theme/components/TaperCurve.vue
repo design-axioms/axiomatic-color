@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import DarkToggle from "./DarkToggle.vue";
-import { useBrandColor } from "../composables/useBrandColor";
+import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 
 const { hue, chroma: maxChroma } = useBrandColor();

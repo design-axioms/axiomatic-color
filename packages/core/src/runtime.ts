@@ -55,7 +55,9 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
 
     subscribe(fn: () => void): () => void {
       listeners.add(fn);
-      return () => { listeners.delete(fn); };
+      return () => {
+        listeners.delete(fn);
+      };
     },
   };
 }

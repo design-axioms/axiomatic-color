@@ -4,7 +4,7 @@ import Token from "./Token.vue";
 import ApcaBadge from "./ApcaBadge.vue";
 import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useBrandColor } from "../composables/useBrandColor";
+import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
 

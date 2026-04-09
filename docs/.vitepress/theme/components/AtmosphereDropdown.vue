@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useBrandColor } from "../composables/useBrandColor";
+import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 import { useKeyColors } from "../composables/useKeyColors";

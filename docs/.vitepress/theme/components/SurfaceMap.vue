@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
 import DarkToggle from "./DarkToggle.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useBrandColor } from "../composables/useBrandColor";
+import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 
 interface SurfaceInfo {
@@ -233,5 +233,4 @@ function surfaceBySlug(slug: string) {
   border-radius: 6px;
   transition: background 0.3s ease;
 }
-
 </style>
