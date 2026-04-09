@@ -4,6 +4,8 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 "/* Root — color-scheme drives light-dark() */
 :root {
   color-scheme: light;
+  --axm-atm-hue: 0;
+  --axm-atm-chroma: 0;
 }
 
 /* Atmosphere properties — inheriting */
@@ -176,6 +178,8 @@ exports[`solver > CSS output matches golden master 1`] = `
 "/* Root — color-scheme drives light-dark() */
 :root {
   color-scheme: light;
+  --axm-atm-hue: 0;
+  --axm-atm-chroma: 0;
 }
 
 /* Atmosphere properties — inheriting */

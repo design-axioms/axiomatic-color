@@ -70,7 +70,9 @@ function generateRoot(
     : "";
   return `/* Root — color-scheme drives light-dark() */
 ${selector} {
-  color-scheme: light;${keyColorLines}
+  color-scheme: light;
+  --${prefix}-atm-hue: 0;
+  --${prefix}-atm-chroma: 0;${keyColorLines}
 }
 
 /* Atmosphere properties — inheriting */
