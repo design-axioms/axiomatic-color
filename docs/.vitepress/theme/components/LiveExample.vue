@@ -17,6 +17,15 @@ const displayCode = computed(() => props.code ?? props.html);
 const codeOpen = ref(false);
 const codeEl = ref<HTMLElement | null>(null);
 const highlightedHtml = ref<string | null>(null);
+const copied = ref(false);
+let copyTimeout: ReturnType<typeof setTimeout> | undefined;
+
+function copyCode() {
+  navigator.clipboard.writeText(displayCode.value);
+  copied.value = true;
+  clearTimeout(copyTimeout);
+  copyTimeout = setTimeout(() => (copied.value = false), 1500);
+}
 
 // Shiki transformer: wrap system class names in string tokens with pill elements.
 // Works at the HAST level so it composes with other Shiki transformers.
@@ -116,6 +125,21 @@ watch(displayCode, () => {
     </button>
     <div ref="codeEl" class="live-example-code" :class="{ open: codeOpen }">
       <div class="live-example-code-inner">
+        <button
+          v-if="codeOpen"
+          class="live-example-copy"
+          :class="{ copied }"
+          @click="copyCode"
+          :aria-label="copied ? 'Copied' : 'Copy code'"
+        >
+          <svg v-if="!copied" width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3" />
+            <path d="M3 11V3a1.5 1.5 0 011.5-1.5H11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          </svg>
+          <svg v-else width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M4 8.5l3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
         <div
           v-if="highlightedHtml"
           class="shiki-wrapper"
@@ -183,11 +207,43 @@ watch(displayCode, () => {
 
 .live-example-code-inner {
   overflow: hidden;
+  position: relative;
 }
 
 .live-example-code.open .live-example-code-inner {
   padding: 0.75rem 1.25rem;
   border-top: 1px solid var(--vp-c-divider);
+}
+
+.live-example-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  background: var(--vp-code-block-bg);
+  color: var(--vp-c-text-3);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.live-example-copy:hover {
+  opacity: 1;
+  color: var(--vp-c-text-2);
+  border-color: var(--vp-c-text-3);
+}
+
+.live-example-copy.copied {
+  opacity: 1;
+  color: var(--vp-c-green-1);
+  border-color: var(--vp-c-green-1);
 }
 
 .live-example-code-inner pre {

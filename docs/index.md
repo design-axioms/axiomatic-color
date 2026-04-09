@@ -1,6 +1,8 @@
 # Axiomatic Color
 
-Surfaces, text, and borders with [APCA](/reference/apca) contrast targets solved per surface per mode.
+CSS color systems break when you add a surface or change a mode. Text contrast that worked on one background fails on another, and every change triggers a manual re-check across both light and dark modes.
+
+Axiomatic Color solves this. You declare surfaces, text grades, and atmosphere. The solver generates CSS custom properties where every text/surface pair meets its [APCA](/reference/apca) contrast target in both modes — no manual checking, no runtime JS.
 
 <SurfaceTile />
 
