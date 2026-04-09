@@ -108,10 +108,15 @@ function resetToDefault(row: "brand" | "accent") {
   );
 }
 
+// Parsed default hue/chroma (stable through oklch round-trip)
+const defaultBrandParsed = { hue: 288.033, chroma: 0.179 };
+const defaultAccentParsed = { hue: 194.769, chroma: 0.108 };
+
 function isModified(row: "brand" | "accent") {
-  const hex = row === "brand" ? brandHex.value : accentHex.value;
-  const def = row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT;
-  return hex.toLowerCase() !== def.toLowerCase();
+  const h = row === "brand" ? brand.hue.value : accent.hue.value;
+  const c = row === "brand" ? brand.chroma.value : accent.chroma.value;
+  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  return Math.abs(h - def.hue) > 1 || Math.abs(c - def.chroma) > 0.005;
 }
 
 // Per-row hue landmarks: other key colors (not self)
@@ -223,31 +228,33 @@ const indicatorStyle = computed(() => {
           />
         </summary>
         <div class="panel-body">
-          <div class="slider-row">
-            <color-slider
-              type="hue"
-              aria-label="Brand hue"
-              :value="String(brand.hue.value)"
-              :hue="String(brand.hue.value)"
-              :chroma="String(brand.chroma.value)"
-              :landmarks="brandLandmarks"
-              @input="onHueInput('brand', $event)"
-              @landmark-click="onLandmarkClick('brand', $event)"
-            />
-            <span class="slider-value">{{ Math.round(brand.hue.value) }}°</span>
-          </div>
-          <div class="slider-row">
-            <color-slider
-              type="chroma"
-              aria-label="Brand chroma"
-              :value="String(brand.chroma.value)"
-              :hue="String(brand.hue.value)"
-              :chroma="String(brand.chroma.value)"
-              @input="onChromaInput('brand', $event)"
-            />
-            <span class="slider-value">{{
-              brand.chroma.value.toFixed(2)
-            }}</span>
+          <div class="slider-pair">
+            <div class="slider-row">
+              <color-slider
+                type="hue"
+                aria-label="Brand hue"
+                :value="String(brand.hue.value)"
+                :hue="String(brand.hue.value)"
+                :chroma="String(brand.chroma.value)"
+                :landmarks="brandLandmarks"
+                @input="onHueInput('brand', $event)"
+                @landmark-click="onLandmarkClick('brand', $event)"
+              />
+              <span class="slider-value">{{ Math.round(brand.hue.value) }}°</span>
+            </div>
+            <div class="slider-row">
+              <color-slider
+                type="chroma"
+                aria-label="Brand chroma"
+                :value="String(brand.chroma.value)"
+                :hue="String(brand.hue.value)"
+                :chroma="String(brand.chroma.value)"
+                @input="onChromaInput('brand', $event)"
+              />
+              <span class="slider-value">{{
+                brand.chroma.value.toFixed(2)
+              }}</span>
+            </div>
           </div>
           <div class="panel-presets">
             <button
@@ -311,33 +318,35 @@ const indicatorStyle = computed(() => {
           />
         </summary>
         <div class="panel-body">
-          <div class="slider-row">
-            <color-slider
-              type="hue"
-              aria-label="Accent hue"
-              :value="String(accent.hue.value)"
-              :hue="String(accent.hue.value)"
-              :chroma="String(accent.chroma.value)"
-              :landmarks="accentLandmarks"
-              @input="onHueInput('accent', $event)"
-              @landmark-click="onLandmarkClick('accent', $event)"
-            />
-            <span class="slider-value"
-              >{{ Math.round(accent.hue.value) }}°</span
-            >
-          </div>
-          <div class="slider-row">
-            <color-slider
-              type="chroma"
-              aria-label="Accent chroma"
-              :value="String(accent.chroma.value)"
-              :hue="String(accent.hue.value)"
-              :chroma="String(accent.chroma.value)"
-              @input="onChromaInput('accent', $event)"
-            />
-            <span class="slider-value">{{
-              accent.chroma.value.toFixed(2)
-            }}</span>
+          <div class="slider-pair">
+            <div class="slider-row">
+              <color-slider
+                type="hue"
+                aria-label="Accent hue"
+                :value="String(accent.hue.value)"
+                :hue="String(accent.hue.value)"
+                :chroma="String(accent.chroma.value)"
+                :landmarks="accentLandmarks"
+                @input="onHueInput('accent', $event)"
+                @landmark-click="onLandmarkClick('accent', $event)"
+              />
+              <span class="slider-value"
+                >{{ Math.round(accent.hue.value) }}°</span
+              >
+            </div>
+            <div class="slider-row">
+              <color-slider
+                type="chroma"
+                aria-label="Accent chroma"
+                :value="String(accent.chroma.value)"
+                :hue="String(accent.hue.value)"
+                :chroma="String(accent.chroma.value)"
+                @input="onChromaInput('accent', $event)"
+              />
+              <span class="slider-value">{{
+                accent.chroma.value.toFixed(2)
+              }}</span>
+            </div>
           </div>
           <div class="panel-presets">
             <button
@@ -482,11 +491,18 @@ const indicatorStyle = computed(() => {
   padding: 0.25rem 1rem 0.5rem;
 }
 
+.slider-pair {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .slider-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  flex: 1;
+  min-width: 10rem;
 }
 
 .slider-row color-slider {
