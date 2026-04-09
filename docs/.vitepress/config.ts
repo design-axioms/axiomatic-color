@@ -20,7 +20,7 @@ export default defineConfig({
       alias: {
         "@design-axioms/color": resolve(
           __dirname,
-          "../../packages/core/src/index.ts",
+          "../../packages/core/src/browser-entry.ts",
         ),
       },
     },

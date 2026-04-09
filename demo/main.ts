@@ -11,7 +11,7 @@ import {
   generateCSS,
   createThemeBuilder,
   registerColorSlider,
-} from "@design-axioms/color";
+} from "@design-axioms/color/browser";
 
 // Register <color-slider> custom element
 registerColorSlider();
