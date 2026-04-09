@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useAtmosphereState } from "../composables/useAtmosphereState";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 import { useKeyColors } from "../composables/useKeyColors";
 import PreviewControls from "./PreviewControls.vue";
 
 const { hue, chroma, isDark } = useAtmosphereState();
+const { theme } = useReactiveTheme();
 const keyColors = useKeyColors();
 
 // Async-loaded core functions
@@ -21,6 +23,24 @@ onMounted(async () => {
   formatFn.value = formatOklchHex;
   parseFn.value = parseKeyColor;
 });
+
+/**
+ * Bridge: update the reactive theme's key color AND sync the
+ * atmosphere refs so TaperCurve and other vizs stay in sync.
+ */
+function applyBrandColor(hex: string) {
+  if (theme.value) {
+    theme.value.setKeyColor("brand", hex);
+  }
+  // Bridge: parse the hex and update atmosphere refs
+  if (parseFn.value) {
+    const result = parseFn.value(hex);
+    if (result) {
+      hue.value = result.hue;
+      chroma.value = result.chroma;
+    }
+  }
+}
 
 // Focus guard: when editing, the input shows what the user typed;
 // when not editing, it shows the computed hex from current atmosphere.
@@ -43,8 +63,7 @@ function tryParse(text: string) {
   const result = parseFn.value(text);
   if (result) {
     inputInvalid.value = false;
-    hue.value = result.hue;
-    chroma.value = result.chroma;
+    applyBrandColor(text);
   } else {
     inputInvalid.value = true;
   }
@@ -66,8 +85,9 @@ function isActivePreset(name: string): boolean {
 }
 
 function selectPreset(name: string, kc: { hue: number; chroma: number }) {
-  hue.value = kc.hue;
-  chroma.value = kc.chroma;
+  if (!formatFn.value) return;
+  const hex = formatFn.value(0.6, kc.chroma, kc.hue);
+  applyBrandColor(hex);
   isEditing.value = false;
   inputInvalid.value = false;
 }
@@ -110,7 +130,7 @@ const indicatorStyle = computed(() => {
             class="preset-btn"
             :class="{ active: chroma === 0 }"
             :style="{ '--preset-color': 'var(--vp-c-text-3)' }"
-            @click="hue = 0; chroma = 0"
+            @click="applyBrandColor('#808080')"
           >
             <span class="preset-dot" />
             <span class="preset-name">none</span>

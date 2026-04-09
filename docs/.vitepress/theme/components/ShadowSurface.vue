@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useShadowRoot } from "../composables/useShadowRoot";
 import { useAtmosphereState } from "../composables/useAtmosphereState";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 const props = defineProps<{
   /** HTML to render inside the shadow root */
@@ -14,8 +15,8 @@ const props = defineProps<{
 }>();
 
 const hostEl = ref<HTMLElement | null>(null);
-const systemSheet = ref<CSSStyleSheet | null>(null);
-const { hue, chroma, isDark } = useAtmosphereState();
+const { isDark } = useAtmosphereState();
+const { theme, ready } = useReactiveTheme();
 
 const baseSheet = (() => {
   const s = new CSSStyleSheet();
@@ -32,7 +33,7 @@ const extraSheet = computed(() => {
 
 const sheets = computed(() => {
   const result: CSSStyleSheet[] = [baseSheet];
-  if (systemSheet.value) result.push(systemSheet.value);
+  if (theme.value) result.push(theme.value.sheet);
   if (extraSheet.value) result.push(extraSheet.value);
   return result;
 });
@@ -41,39 +42,34 @@ const shadow = useShadowRoot(hostEl, sheets);
 
 useThemeBuilder(hostEl);
 
-onMounted(async () => {
-  const { getSystemStyleSheet } = await import("@design-axioms/color");
-  systemSheet.value = await getSystemStyleSheet();
+// Wait for the reactive theme to be ready before rendering
+ready.then(() => {
+  renderContent();
 });
 
 // Render HTML into shadow DOM.
 // Two-level structure: outer sets the site's color-scheme mode,
 // inner has the surface class. This lets inverted surfaces like
 // .surface-spotlight override color-scheme without fighting inline styles.
-watch([shadow, systemSheet, () => props.html], () => {
-  if (!shadow.value || !systemSheet.value) return;
+watch([shadow, theme, () => props.html], renderContent);
+
+function renderContent() {
+  if (!shadow.value || !theme.value) return;
   const surface = props.surface ?? "surface-page";
   shadow.value.innerHTML = `<div class="shadow-surface-outer"><div class="shadow-surface-root ${surface}">${props.html}</div></div>`;
-  updateAtmosphere();
-});
+  updateColorScheme();
+}
 
-function updateAtmosphere() {
+function updateColorScheme() {
   if (!shadow.value) return;
   const outer = shadow.value.querySelector(
     ".shadow-surface-outer",
   ) as HTMLElement | null;
   if (!outer) return;
   outer.style.colorScheme = isDark.value ? "dark" : "light";
-  if (hue.value > 0 || chroma.value > 0) {
-    outer.style.setProperty("--axm-atm-hue", String(hue.value));
-    outer.style.setProperty("--axm-atm-chroma", String(chroma.value));
-  } else {
-    outer.style.removeProperty("--axm-atm-hue");
-    outer.style.removeProperty("--axm-atm-chroma");
-  }
 }
 
-watch([shadow, hue, chroma, isDark], updateAtmosphere);
+watch(isDark, updateColorScheme);
 </script>
 
 <template>

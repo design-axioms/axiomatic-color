@@ -7,4 +7,6 @@
  */
 export * from "./index.js";
 export { createThemeBuilder, getSystemStyleSheet } from "./browser.js";
+export { createReactiveTheme } from "./runtime.js";
+export type { ReactiveTheme } from "./runtime.js";
 export { ColorSlider, registerColorSlider } from "./components/color-slider.js";

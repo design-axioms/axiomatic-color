@@ -19,6 +19,7 @@ export const DEFAULT_CONFIG: SolverConfig = {
     },
     keyColors: {
       brand: "#6e56cf",
+      accent: "#2e8b57",
       success: "#22c55e",
       warning: "#eab308",
       error: "#ef4444",

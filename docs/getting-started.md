@@ -116,6 +116,27 @@ Save the build output and open it in a browser:
 npx axiomatic build -o axiomatic.css
 ```
 
+<LiveExample
+  surface="surface-page"
+  :html='`<div class="surface-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+  <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Neutral Card</h1>
+  <p class="text-strong" style="font-size: 0.875rem; margin: 0;">No atmosphere. Pure lightness.</p>
+</div>
+<div class="surface-card hue-brand" style="padding: 1.5rem; border-radius: 8px;">
+  <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Brand Card</h1>
+  <p class="text-strong" style="font-size: 0.875rem; margin: 0;">Same contrast, brand tint.</p>
+</div>`'
+  :code='`<div class="surface-card">
+  <h1 class="text-high">Neutral Card</h1>
+  <p class="text-strong">No atmosphere. Pure lightness.</p>
+</div>
+<div class="surface-card hue-brand">
+  <h1 class="text-high">Brand Card</h1>
+  <p class="text-strong">Same contrast, brand tint.</p>
+</div>`'
+/>
+
+::: details Full HTML document
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -135,6 +156,7 @@ npx axiomatic build -o axiomatic.css
 </body>
 </html>
 ```
+:::
 
 ## Using the CSS
 
@@ -154,22 +176,28 @@ The generated CSS uses `color-scheme` on `:root` to drive `light-dark()`. Switch
 
 Apply surfaces and text grades using the generated classes:
 
-```html
-<body class="surface-page">
-  <!-- Neutral card -->
-  <div class="surface-card">
-    <h2 class="text-high">Card Title</h2>
-    <p class="text-strong">Body text at the strong grade.</p>
-    <p class="text-subtle">Secondary information.</p>
-  </div>
+<LiveExample
+  surface="surface-page"
+  :html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px; margin-bottom: 1rem;">
+  <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Card Title</h2>
+  <p class="text-strong" style="font-size: 0.875rem; margin: 0 0 0.25rem;">Body text at the strong grade.</p>
+  <p class="text-subtle" style="font-size: 0.8125rem; margin: 0;">Secondary information.</p>
+</div>
+<div class="surface-card hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+  <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Brand Card</h2>
+  <p class="text-strong" style="font-size: 0.875rem; margin: 0;">Same contrast, brand purple tint.</p>
+</div>`'
+  :code='`<div class="surface-card">
+  <h2 class="text-high">Card Title</h2>
+  <p class="text-strong">Body text at the strong grade.</p>
+  <p class="text-subtle">Secondary information.</p>
+</div>
 
-  <!-- Brand-tinted card — same surface, different atmosphere -->
-  <div class="surface-card hue-brand">
-    <h2 class="text-high">Brand Card</h2>
-    <p class="text-strong">Same contrast, brand purple tint.</p>
-  </div>
-</body>
-```
+<div class="surface-card hue-brand">
+  <h2 class="text-high">Brand Card</h2>
+  <p class="text-strong">Same contrast, brand purple tint.</p>
+</div>`'
+/>
 
 Three kinds of classes compose orthogonally:
 

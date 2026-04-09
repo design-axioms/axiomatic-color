@@ -11,6 +11,10 @@
     "./browser": {
       "types": "./dist/browser-entry.d.ts",
       "default": "./dist/browser-entry.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "default": "./dist/runtime.js"
     }
   },
   "files": [
