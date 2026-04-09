@@ -3,8 +3,9 @@ import { useData } from "vitepress";
 
 // Module-level refs — created once, shared across all consumers.
 // Survives VitePress SPA navigation because the module stays loaded.
-const hue = ref(0);
-const chroma = ref(0);
+// Default to brand hue so visualizations start with color, not flat gray.
+const hue = ref(288);
+const chroma = ref(0.18);
 const isDark = ref(false);
 let synced = false;
 

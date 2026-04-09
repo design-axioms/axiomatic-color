@@ -107,6 +107,15 @@ const indicatorStyle = computed(() => {
         />
         <div class="key-color-presets">
           <button
+            class="preset-btn"
+            :class="{ active: chroma === 0 }"
+            :style="{ '--preset-color': 'var(--vp-c-text-3)' }"
+            @click="hue = 0; chroma = 0"
+          >
+            <span class="preset-dot" />
+            <span class="preset-name">none</span>
+          </button>
+          <button
             v-for="(kc, name) in keyColors"
             :key="name"
             class="preset-btn"
