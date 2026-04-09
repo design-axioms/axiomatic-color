@@ -30,4 +30,20 @@ If a target can't be fully met, the solver reports the shortfall.
 </div>`'
 />
 
+<LiveExample
+  surface="surface-spotlight"
+  :html='`<div style="padding: 1.25rem;">
+  <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Deployment Status</h1>
+  <p class="text-strong" style="font-size: 0.875rem; margin: 0 0 0.25rem;">Production is healthy across all regions.</p>
+  <p class="text-subtle" style="font-size: 0.8125rem; margin: 0 0 0.25rem;">Next scheduled check in 12 minutes.</p>
+  <span class="text-subtlest" style="font-size: 0.75rem;">Build #4091</span>
+</div>`'
+  :code='`<div class="surface-spotlight">
+  <h1 class="text-high">Deployment Status</h1>
+  <p class="text-strong">Production is healthy across all regions.</p>
+  <p class="text-subtle">Next scheduled check in 12 minutes.</p>
+  <span class="text-subtlest">Build #4091</span>
+</div>`'
+/>
+
 The same classes work on every surface.

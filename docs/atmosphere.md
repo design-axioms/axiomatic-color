@@ -30,6 +30,18 @@ Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 </div>`'
 />
 
+<LiveExample
+  surface="surface-spotlight"
+  :html='`<div class="hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+  <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Featured Release</h2>
+  <p class="text-subtle" style="font-size: 0.875rem; margin: 0;">Atmosphere on inverted polarity.</p>
+</div>`'
+  :code='`<div class="surface-spotlight hue-brand">
+  <h2 class="text-high">Featured Release</h2>
+  <p class="text-subtle">Atmosphere on inverted polarity.</p>
+</div>`'
+/>
+
 ## Key Colors
 
 Key colors define named atmosphere presets. A brand hex color is parsed into hue and chroma, then applied through <Token name=".hue-brand" />:
