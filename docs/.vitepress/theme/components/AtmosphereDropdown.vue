@@ -521,32 +521,36 @@ const indicatorStyle = computed(() => {
 
 .panel-presets {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.25rem 0;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0;
 }
 
 .preset-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: none;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 100px;
+  background: var(--vp-c-bg);
   cursor: pointer;
   font-size: 11px;
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
   font-family: var(--vp-font-family-base);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
 .preset-btn:hover {
   color: var(--vp-c-text-1);
+  border-color: var(--vp-c-border);
+  background: var(--vp-c-bg-soft);
 }
 
 .preset-btn.active {
-  border-color: var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  border-color: var(--vp-c-brand-1);
   color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
 }
 
 .preset-dot {
