@@ -4,14 +4,14 @@ import { useBrandColor, useAccentColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 import { useKeyColors } from "../composables/useKeyColors";
-import PreviewControls from "./PreviewControls.vue";
+import DarkToggle from "./DarkToggle.vue";
 
 const brand = useBrandColor();
 const accent = useAccentColor();
 const { isDark } = useDarkMode();
 const { theme } = useReactiveTheme();
 const keyColors = useKeyColors();
-const activeRow = ref<"brand" | "accent">("brand");
+const expandedRow = ref<"brand" | "accent">("brand");
 
 // Async-loaded core functions
 const formatFn = ref<((l: number, c: number, h: number) => string) | null>(
@@ -22,42 +22,18 @@ const parseFn = ref<
 >(null);
 
 onMounted(async () => {
-  const { formatOklchHex, parseKeyColor } =
+  const { formatOklchHex, parseKeyColor, registerColorSlider } =
     await import("@design-axioms/color");
   formatFn.value = formatOklchHex;
   parseFn.value = parseKeyColor;
-});
-
-// Active row computed proxies for PreviewControls v-model
-const activeHue = computed({
-  get: () =>
-    activeRow.value === "brand" ? brand.hue.value : accent.hue.value,
-  set: (v) => {
-    if (activeRow.value === "brand") {
-      brand.hue.value = v;
-    } else {
-      accent.hue.value = v;
-    }
-  },
-});
-
-const activeChroma = computed({
-  get: () =>
-    activeRow.value === "brand" ? brand.chroma.value : accent.chroma.value,
-  set: (v) => {
-    if (activeRow.value === "brand") {
-      brand.chroma.value = v;
-    } else {
-      accent.chroma.value = v;
-    }
-  },
+  registerColorSlider();
 });
 
 // Per-row display hex
-const brandDisplayHex = computed(() =>
+const brandHex = computed(() =>
   formatFn.value?.(0.6, brand.chroma.value, brand.hue.value) ?? "#000000",
 );
-const accentDisplayHex = computed(() =>
+const accentHex = computed(() =>
   formatFn.value?.(0.6, accent.chroma.value, accent.hue.value) ?? "#000000",
 );
 
@@ -65,17 +41,12 @@ const accentDisplayHex = computed(() =>
 const brandEdit = reactive({ editing: false, text: "", invalid: false });
 const accentEdit = reactive({ editing: false, text: "", invalid: false });
 
-// Sync edit text when not editing
-watch(brandDisplayHex, (hex) => {
+watch(brandHex, (hex) => {
   if (!brandEdit.editing) brandEdit.text = hex;
 });
-watch(accentDisplayHex, (hex) => {
+watch(accentHex, (hex) => {
   if (!accentEdit.editing) accentEdit.text = hex;
 });
-
-function applyColor(hex: string) {
-  theme.value?.setKeyColor(activeRow.value, hex);
-}
 
 function tryParseRow(row: "brand" | "accent", text: string) {
   const edit = row === "brand" ? brandEdit : accentEdit;
@@ -91,24 +62,94 @@ function tryParseRow(row: "brand" | "accent", text: string) {
 
 function commitRow(row: "brand" | "accent") {
   const edit = row === "brand" ? brandEdit : accentEdit;
-  const hex = row === "brand" ? brandDisplayHex.value : accentDisplayHex.value;
+  const hex = row === "brand" ? brandHex.value : accentHex.value;
   edit.editing = false;
   edit.invalid = false;
   edit.text = hex;
 }
 
-function isActivePreset(name: string): boolean {
-  const kc = keyColors.value[name];
-  if (!kc) return false;
-  const h = activeHue.value;
-  const c = activeChroma.value;
+// Per-row presets: all key colors except the row's own name
+const brandPresets = computed(() =>
+  Object.entries(keyColors.value).filter(([name]) => name !== "brand"),
+);
+const accentPresets = computed(() =>
+  Object.entries(keyColors.value).filter(([name]) => name !== "accent"),
+);
+
+function isPresetActive(
+  row: "brand" | "accent",
+  kc: { hue: number; chroma: number },
+) {
+  const h = row === "brand" ? brand.hue.value : accent.hue.value;
+  const c = row === "brand" ? brand.chroma.value : accent.chroma.value;
   return Math.abs(h - kc.hue) < 0.5 && Math.abs(c - kc.chroma) < 0.005;
 }
 
-function selectPreset(name: string, kc: { hue: number; chroma: number }) {
+function selectPreset(
+  row: "brand" | "accent",
+  kc: { hue: number; chroma: number },
+) {
   if (!formatFn.value) return;
-  const hex = formatFn.value(0.6, kc.chroma, kc.hue);
-  theme.value?.setKeyColor(activeRow.value, hex);
+  theme.value?.setKeyColor(row, formatFn.value(0.6, kc.chroma, kc.hue));
+}
+
+function applyNone(row: "brand" | "accent") {
+  theme.value?.setKeyColor(row, "#808080");
+}
+
+// Per-row hue landmarks: other key colors (not self)
+const brandLandmarks = computed(() => {
+  const entries = Object.entries(keyColors.value).filter(
+    ([n]) => n !== "brand",
+  );
+  return JSON.stringify(
+    entries.map(([name, kc]) => ({
+      value: kc.hue,
+      color: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
+      name,
+    })),
+  );
+});
+const accentLandmarks = computed(() => {
+  const entries = Object.entries(keyColors.value).filter(
+    ([n]) => n !== "accent",
+  );
+  return JSON.stringify(
+    entries.map(([name, kc]) => ({
+      value: kc.hue,
+      color: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
+      name,
+    })),
+  );
+});
+
+// Slider event handlers
+function onHueInput(row: "brand" | "accent", e: Event) {
+  const detail = (e as CustomEvent).detail;
+  if (!detail) return;
+  if (row === "brand") brand.hue.value = detail.value;
+  else accent.hue.value = detail.value;
+}
+
+function onChromaInput(row: "brand" | "accent", e: Event) {
+  const detail = (e as CustomEvent).detail;
+  if (!detail) return;
+  if (row === "brand") brand.chroma.value = detail.value;
+  else accent.chroma.value = detail.value;
+}
+
+function onLandmarkClick(row: "brand" | "accent", e: Event) {
+  const detail = (e as CustomEvent).detail;
+  if (!detail) return;
+  const kc = keyColors.value[detail.name];
+  if (!kc) return;
+  if (row === "brand") {
+    brand.hue.value = kc.hue;
+    brand.chroma.value = kc.chroma;
+  } else {
+    accent.hue.value = kc.hue;
+    accent.chroma.value = kc.chroma;
+  }
 }
 
 // Split circle indicator
@@ -132,92 +173,206 @@ const indicatorStyle = computed(() => {
     <button
       class="atmosphere-btn"
       popovertarget="atmosphere-popover"
-      aria-label="Atmosphere controls"
-      title="Atmosphere"
+      aria-label="Color controls"
+      title="Colors"
     >
       <span class="atmosphere-indicator" :style="indicatorStyle" />
     </button>
     <div id="atmosphere-popover" popover class="atmosphere-popover">
-      <!-- Brand row -->
-      <div
-        class="color-row"
-        :class="{ active: activeRow === 'brand' }"
-        @click="activeRow = 'brand'"
-      >
-        <span class="row-label">Brand</span>
-        <span class="row-dot" :style="{ background: brandDisplayHex }" />
-        <input
-          class="color-input"
-          :class="{ invalid: brandEdit.invalid }"
-          :value="brandEdit.editing ? brandEdit.text : brandDisplayHex"
-          @focus="
-            brandEdit.editing = true;
-            activeRow = 'brand';
-          "
-          @blur="commitRow('brand')"
-          @input="
-            brandEdit.text = ($event.target as HTMLInputElement).value;
-            tryParseRow('brand', ($event.target as HTMLInputElement).value);
-          "
-          @keydown.enter="($event.target as HTMLInputElement).blur()"
-          spellcheck="false"
-        />
+      <!-- Brand panel -->
+      <div class="panel" :class="{ expanded: expandedRow === 'brand' }">
+        <div class="panel-header" @click="expandedRow = 'brand'">
+          <span class="panel-arrow">{{
+            expandedRow === "brand" ? "▼" : "▶"
+          }}</span>
+          <span class="panel-label">Brand</span>
+          <span
+            class="panel-dot"
+            :style="{
+              background:
+                brand.chroma.value > 0
+                  ? `oklch(0.6 ${brand.chroma.value} ${brand.hue.value})`
+                  : 'var(--vp-c-text-3)',
+            }"
+          />
+          <input
+            class="color-input"
+            :class="{ invalid: brandEdit.invalid }"
+            :value="brandEdit.editing ? brandEdit.text : brandHex"
+            @focus="
+              brandEdit.editing = true;
+              expandedRow = 'brand';
+            "
+            @blur="commitRow('brand')"
+            @input="
+              brandEdit.text = ($event.target as HTMLInputElement).value;
+              tryParseRow('brand', ($event.target as HTMLInputElement).value);
+            "
+            @keydown.enter="($event.target as HTMLInputElement).blur()"
+            spellcheck="false"
+            @click.stop
+          />
+        </div>
+        <div class="panel-body-wrap">
+          <div class="panel-body">
+            <div class="slider-row">
+              <color-slider
+                type="hue"
+                aria-label="Brand hue"
+                :value="String(brand.hue.value)"
+                :hue="String(brand.hue.value)"
+                :chroma="String(brand.chroma.value)"
+                :landmarks="brandLandmarks"
+                @input="onHueInput('brand', $event)"
+                @landmark-click="onLandmarkClick('brand', $event)"
+              />
+              <span class="slider-value"
+                >{{ Math.round(brand.hue.value) }}°</span
+              >
+            </div>
+            <div class="slider-row">
+              <color-slider
+                type="chroma"
+                aria-label="Brand chroma"
+                :value="String(brand.chroma.value)"
+                :hue="String(brand.hue.value)"
+                :chroma="String(brand.chroma.value)"
+                @input="onChromaInput('brand', $event)"
+              />
+              <span class="slider-value">{{
+                brand.chroma.value.toFixed(2)
+              }}</span>
+            </div>
+            <div class="panel-presets">
+              <button
+                class="preset-btn"
+                :class="{ active: brand.chroma.value === 0 }"
+                @click="applyNone('brand')"
+              >
+                <span
+                  class="preset-dot"
+                  style="background: var(--vp-c-text-3)"
+                />
+                <span class="preset-name">none</span>
+              </button>
+              <button
+                v-for="[name, kc] in brandPresets"
+                :key="name"
+                class="preset-btn"
+                :class="{ active: isPresetActive('brand', kc) }"
+                @click="selectPreset('brand', kc)"
+              >
+                <span
+                  class="preset-dot"
+                  :style="{
+                    background: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
+                  }"
+                />
+                <span class="preset-name">{{ name }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- Accent row -->
-      <div
-        class="color-row"
-        :class="{ active: activeRow === 'accent' }"
-        @click="activeRow = 'accent'"
-      >
-        <span class="row-label">Accent</span>
-        <span class="row-dot" :style="{ background: accentDisplayHex }" />
-        <input
-          class="color-input"
-          :class="{ invalid: accentEdit.invalid }"
-          :value="accentEdit.editing ? accentEdit.text : accentDisplayHex"
-          @focus="
-            accentEdit.editing = true;
-            activeRow = 'accent';
-          "
-          @blur="commitRow('accent')"
-          @input="
-            accentEdit.text = ($event.target as HTMLInputElement).value;
-            tryParseRow('accent', ($event.target as HTMLInputElement).value);
-          "
-          @keydown.enter="($event.target as HTMLInputElement).blur()"
-          spellcheck="false"
-        />
+      <!-- Accent panel -->
+      <div class="panel" :class="{ expanded: expandedRow === 'accent' }">
+        <div class="panel-header" @click="expandedRow = 'accent'">
+          <span class="panel-arrow">{{
+            expandedRow === "accent" ? "▼" : "▶"
+          }}</span>
+          <span class="panel-label">Accent</span>
+          <span
+            class="panel-dot"
+            :style="{
+              background:
+                accent.chroma.value > 0
+                  ? `oklch(0.6 ${accent.chroma.value} ${accent.hue.value})`
+                  : 'var(--vp-c-text-3)',
+            }"
+          />
+          <input
+            class="color-input"
+            :class="{ invalid: accentEdit.invalid }"
+            :value="accentEdit.editing ? accentEdit.text : accentHex"
+            @focus="
+              accentEdit.editing = true;
+              expandedRow = 'accent';
+            "
+            @blur="commitRow('accent')"
+            @input="
+              accentEdit.text = ($event.target as HTMLInputElement).value;
+              tryParseRow('accent', ($event.target as HTMLInputElement).value);
+            "
+            @keydown.enter="($event.target as HTMLInputElement).blur()"
+            spellcheck="false"
+            @click.stop
+          />
+        </div>
+        <div class="panel-body-wrap">
+          <div class="panel-body">
+            <div class="slider-row">
+              <color-slider
+                type="hue"
+                aria-label="Accent hue"
+                :value="String(accent.hue.value)"
+                :hue="String(accent.hue.value)"
+                :chroma="String(accent.chroma.value)"
+                :landmarks="accentLandmarks"
+                @input="onHueInput('accent', $event)"
+                @landmark-click="onLandmarkClick('accent', $event)"
+              />
+              <span class="slider-value"
+                >{{ Math.round(accent.hue.value) }}°</span
+              >
+            </div>
+            <div class="slider-row">
+              <color-slider
+                type="chroma"
+                aria-label="Accent chroma"
+                :value="String(accent.chroma.value)"
+                :hue="String(accent.hue.value)"
+                :chroma="String(accent.chroma.value)"
+                @input="onChromaInput('accent', $event)"
+              />
+              <span class="slider-value">{{
+                accent.chroma.value.toFixed(2)
+              }}</span>
+            </div>
+            <div class="panel-presets">
+              <button
+                class="preset-btn"
+                :class="{ active: accent.chroma.value === 0 }"
+                @click="applyNone('accent')"
+              >
+                <span
+                  class="preset-dot"
+                  style="background: var(--vp-c-text-3)"
+                />
+                <span class="preset-name">none</span>
+              </button>
+              <button
+                v-for="[name, kc] in accentPresets"
+                :key="name"
+                class="preset-btn"
+                :class="{ active: isPresetActive('accent', kc) }"
+                @click="selectPreset('accent', kc)"
+              >
+                <span
+                  class="preset-dot"
+                  :style="{
+                    background: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
+                  }"
+                />
+                <span class="preset-name">{{ name }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- Shared presets -->
-      <div class="preset-row">
-        <button
-          class="preset-btn"
-          :class="{ active: activeChroma === 0 }"
-          :style="{ '--preset-color': 'var(--vp-c-text-3)' }"
-          @click="applyColor('#808080')"
-        >
-          <span class="preset-dot" />
-          <span class="preset-name">none</span>
-        </button>
-        <button
-          v-for="(kc, name) in keyColors"
-          :key="name"
-          class="preset-btn"
-          :class="{ active: isActivePreset(String(name)) }"
-          :style="{ '--preset-color': `oklch(0.6 ${kc.chroma} ${kc.hue})` }"
-          @click="selectPreset(String(name), kc)"
-        >
-          <span class="preset-dot" />
-          <span class="preset-name">{{ name }}</span>
-        </button>
+      <!-- Dark toggle at bottom -->
+      <div class="dark-toggle-row">
+        <DarkToggle :model-value="isDark" @update:model-value="isDark = $event" />
       </div>
-      <!-- Sliders for active row -->
-      <PreviewControls
-        v-model:hue="activeHue"
-        v-model:chroma="activeChroma"
-        v-model:is-dark="isDark"
-        :key-colors="keyColors"
-      />
     </div>
   </div>
 </template>
@@ -258,34 +413,31 @@ const indicatorStyle = computed(() => {
   background: var(--vp-c-bg);
 }
 
-.atmosphere-popover :deep(.preview-controls) {
-  border-bottom: none;
+.panel + .panel {
+  border-top: 1px solid var(--vp-c-divider);
 }
 
-.color-row {
+.panel-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  border-left: 2px solid transparent;
 }
 
-.color-row.active {
-  border-left-color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg-soft);
+.panel-arrow {
+  font-size: 10px;
+  color: var(--vp-c-text-3);
+  width: 1em;
 }
 
-.row-label {
-  font-size: 11px;
+.panel-label {
+  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--vp-c-text-2);
-  width: 3.5em;
+  color: var(--vp-c-text-1);
 }
 
-.row-dot {
+.panel-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -294,6 +446,7 @@ const indicatorStyle = computed(() => {
 
 .color-input {
   width: 7em;
+  margin-left: auto;
   font-family: var(--vp-font-family-mono);
   font-size: 12px;
   padding: 0.25rem 0.5rem;
@@ -312,13 +465,50 @@ const indicatorStyle = computed(() => {
   border-color: var(--vp-c-danger-1);
 }
 
-.preset-row {
+.panel-body-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+
+.panel.expanded .panel-body-wrap {
+  grid-template-rows: 1fr;
+}
+
+.panel-body {
+  overflow: hidden;
+  padding: 0 1rem;
+}
+
+.panel.expanded .panel-body {
+  padding: 0.25rem 1rem 0.5rem;
+}
+
+.slider-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 1rem;
-  border-top: 1px solid var(--vp-c-divider);
-  border-bottom: 1px solid var(--vp-c-divider);
+  margin-bottom: 0.25rem;
+}
+
+.slider-row color-slider {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.slider-value {
+  font-size: 11px;
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-3);
+  min-width: 3em;
+  text-align: right;
+}
+
+.panel-presets {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
 .preset-btn {
@@ -349,10 +539,16 @@ const indicatorStyle = computed(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--preset-color);
 }
 
 .preset-name {
   text-transform: capitalize;
+}
+
+.dark-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.375rem 1rem;
+  border-top: 1px solid var(--vp-c-divider);
 }
 </style>
