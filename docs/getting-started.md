@@ -118,7 +118,7 @@ npx axiomatic build -o axiomatic.css
 
 <LiveExample
   surface="surface-page"
-  :html='`<div class="surface-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+  :html='`<div class="surface-card border-decorative" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border-width: 1px; border-style: solid;">
   <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Neutral Card</h1>
   <p class="text-strong" style="font-size: 0.875rem; margin: 0;">No atmosphere. Pure lightness.</p>
 </div>
@@ -126,7 +126,7 @@ npx axiomatic build -o axiomatic.css
   <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Brand Card</h1>
   <p class="text-strong" style="font-size: 0.875rem; margin: 0;">Same contrast, brand tint.</p>
 </div>`'
-  :code='`<div class="surface-card">
+  :code='`<div class="surface-card border-decorative">
   <h1 class="text-high">Neutral Card</h1>
   <p class="text-strong">No atmosphere. Pure lightness.</p>
 </div>
