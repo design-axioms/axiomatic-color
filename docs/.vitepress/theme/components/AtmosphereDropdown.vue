@@ -82,15 +82,14 @@ function isPresetActive(
 ) {
   const h = row === "brand" ? brand.hue.value : accent.hue.value;
   const c = row === "brand" ? brand.chroma.value : accent.chroma.value;
-  return Math.abs(h - kc.hue) < 0.5 && Math.abs(c - kc.chroma) < 0.005;
+  return Math.abs(h - kc.hue) < 2 && Math.abs(c - kc.chroma) < 0.01;
 }
 
 function selectPreset(
   row: "brand" | "accent",
-  kc: { hue: number; chroma: number },
+  kc: { hue: number; chroma: number; hex: string },
 ) {
-  if (!formatFn.value) return;
-  theme.value?.setKeyColor(row, formatFn.value(0.6, kc.chroma, kc.hue));
+  theme.value?.setKeyColor(row, kc.hex);
 }
 
 function applyNone(row: "brand" | "accent") {
@@ -279,8 +278,8 @@ const indicatorStyle = computed(() => {
               <span class="preset-name">{{ name }}</span>
             </button>
             <button
-              v-if="isModified('brand')"
               class="reset-btn"
+              :class="{ visible: isModified('brand') }"
               @click="resetToDefault('brand')"
               title="Reset to default"
             >
@@ -371,8 +370,8 @@ const indicatorStyle = computed(() => {
               <span class="preset-name">{{ name }}</span>
             </button>
             <button
-              v-if="isModified('accent')"
               class="reset-btn"
+              :class="{ visible: isModified('accent') }"
               @click="resetToDefault('accent')"
               title="Reset to default"
             >
@@ -577,6 +576,11 @@ const indicatorStyle = computed(() => {
   font-size: 13px;
   color: var(--vp-c-text-3);
   line-height: 1;
+  visibility: hidden;
+}
+
+.reset-btn.visible {
+  visibility: visible;
 }
 
 .reset-btn:hover {

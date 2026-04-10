@@ -1,6 +1,7 @@
 import { ref, type Ref } from "vue";
 
-type ParsedKeyColors = Record<string, { hue: number; chroma: number }>;
+type ParsedKeyColor = { hue: number; chroma: number; hex: string };
+type ParsedKeyColors = Record<string, ParsedKeyColor>;
 
 let parsed: Ref<ParsedKeyColors> | null = null;
 
@@ -15,7 +16,7 @@ export function useKeyColors(): Ref<ParsedKeyColors> {
       DEFAULT_CONFIG.anchors.keyColors,
     )) {
       const kc = parseKeyColor(value);
-      if (kc) result[name] = kc;
+      if (kc) result[name] = { ...kc, hex: value };
     }
     parsed!.value = result;
   });
