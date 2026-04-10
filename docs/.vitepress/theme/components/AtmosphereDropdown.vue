@@ -19,14 +19,34 @@ const formatFn = ref<((l: number, c: number, h: number) => string) | null>(
 const parseFn = ref<
   ((color: string) => { hue: number; chroma: number } | null) | null
 >(null);
+const displayableFn = ref<((color: { mode: string; l: number; c: number; h: number }) => boolean) | null>(null);
 
 onMounted(async () => {
-  const { formatOklchHex, parseKeyColor, registerColorSlider } =
-    await import("@design-axioms/color");
-  formatFn.value = formatOklchHex;
-  parseFn.value = parseKeyColor;
-  registerColorSlider();
+  const [coreMod, culoriMod] = await Promise.all([
+    import("@design-axioms/color"),
+    import("culori"),
+  ]);
+  formatFn.value = coreMod.formatOklchHex;
+  parseFn.value = coreMod.parseKeyColor;
+  displayableFn.value = culoriMod.displayable;
+  coreMod.registerColorSlider();
 });
+
+// Max in-gamut chroma for a given hue at L=0.6 (binary search)
+function maxChroma(hue: number): number {
+  if (!displayableFn.value) return 0.4;
+  const check = displayableFn.value;
+  let lo = 0, hi = 0.4;
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    if (check({ mode: "oklch", l: 0.6, c: mid, h: hue })) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+const brandMaxChroma = computed(() => maxChroma(brand.hue.value));
+const accentMaxChroma = computed(() => maxChroma(accent.hue.value));
 
 // Per-row display hex
 const brandHex = computed(
@@ -120,9 +140,9 @@ function isModified(row: "brand" | "accent") {
 
 // Hue landmarks: semantic colors only (not brand/accent)
 const semanticLandmarks = computed(() => {
-  const entries = SEMANTIC_KEYS
-    .map((name) => [name, keyColors.value[name]] as const)
-    .filter(([, kc]) => kc);
+  const entries = SEMANTIC_KEYS.map(
+    (name) => [name, keyColors.value[name]] as const,
+  ).filter(([, kc]) => kc);
   return JSON.stringify(
     entries.map(([name, kc]) => ({
       value: kc.hue,
@@ -134,18 +154,22 @@ const semanticLandmarks = computed(() => {
 
 // Chroma landmarks: default chroma for reset snap-back
 const brandChromaLandmarks = computed(() =>
-  JSON.stringify([{
-    value: defaultBrandParsed.chroma,
-    color: `oklch(0.6 ${defaultBrandParsed.chroma} ${brand.hue.value})`,
-    name: "default",
-  }]),
+  JSON.stringify([
+    {
+      value: defaultBrandParsed.chroma,
+      color: `oklch(0.6 ${defaultBrandParsed.chroma} ${brand.hue.value})`,
+      name: "default",
+    },
+  ]),
 );
 const accentChromaLandmarks = computed(() =>
-  JSON.stringify([{
-    value: defaultAccentParsed.chroma,
-    color: `oklch(0.6 ${defaultAccentParsed.chroma} ${accent.hue.value})`,
-    name: "default",
-  }]),
+  JSON.stringify([
+    {
+      value: defaultAccentParsed.chroma,
+      color: `oklch(0.6 ${defaultAccentParsed.chroma} ${accent.hue.value})`,
+      name: "default",
+    },
+  ]),
 );
 
 // Slider event handlers — call setHue/setChroma directly (no watches)
@@ -253,6 +277,7 @@ const indicatorStyle = computed(() => {
                 type="chroma"
                 aria-label="Brand chroma"
                 :value="String(brand.chroma.value)"
+                :max="String(brandMaxChroma)"
                 :hue="String(brand.hue.value)"
                 :chroma="String(brand.chroma.value)"
                 :landmarks="brandChromaLandmarks"
@@ -347,6 +372,7 @@ const indicatorStyle = computed(() => {
                 type="chroma"
                 aria-label="Accent chroma"
                 :value="String(accent.chroma.value)"
+                :max="String(accentMaxChroma)"
                 :hue="String(accent.hue.value)"
                 :chroma="String(accent.chroma.value)"
                 :landmarks="accentChromaLandmarks"
