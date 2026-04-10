@@ -58,10 +58,13 @@ pnpm docs:dev     # Local dev server
 pnpm docs:build   # Build static site
 ```
 
-- [Why Axiomatic?](docs/guide/index.md) — The problem and the solution
-- [Getting Started](docs/guide/getting-started.md) — Installation and usage
-- [Concepts](docs/guide/concepts.md) — Surfaces, polarity, text grades, borders, atmosphere
-- [Pedagogy](docs/pedagogy.md) — Metaphor mapping for the internal algebra
+- [Why Axiomatic?](docs/why.md) — The problem and the solution
+- [Getting Started](docs/getting-started.md) — Installation and usage
+- [Surfaces](docs/surfaces.md) — Named regions with fixed lightness
+- [Text](docs/text.md) — Four contrast grades, solved per surface
+- [Borders](docs/borders.md) — Three tiers: decorative, interactive, critical
+- [Atmosphere](docs/atmosphere.md) — Opt-in color via key colors
+- [Composition](docs/composition.md) — Independent axes, polarity inversion
 - [CLI Reference](docs/reference/cli.md) — All commands and options
 
 ## Architecture
