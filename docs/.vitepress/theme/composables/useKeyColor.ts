@@ -1,10 +1,12 @@
-import { ref, watch, type Ref } from "vue";
+import { ref, type Ref } from "vue";
 import { useReactiveTheme } from "./useReactiveTheme";
 import type { ReactiveTheme } from "@design-axioms/color";
 
 interface KeyColorState {
   hue: Ref<number>;
   chroma: Ref<number>;
+  setHue(h: number): void;
+  setChroma(c: number): void;
 }
 
 let parseKeyColorFn:
@@ -15,7 +17,6 @@ let formatOklchHexFn: ((l: number, c: number, h: number) => string) | null =
 
 const instances = new Map<string, KeyColorState>();
 let coreLoaded = false;
-let syncingFromConfig = false;
 
 function syncFromConfig(name: string, theme: ReactiveTheme) {
   const state = instances.get(name);
@@ -34,11 +35,9 @@ function syncFromConfig(name: string, theme: ReactiveTheme) {
 }
 
 function syncAllFromConfig(theme: ReactiveTheme) {
-  syncingFromConfig = true;
   for (const name of instances.keys()) {
     syncFromConfig(name, theme);
   }
-  syncingFromConfig = false;
 }
 
 export function useKeyColor(name: string): KeyColorState {
@@ -46,10 +45,27 @@ export function useKeyColor(name: string): KeyColorState {
 
   const hue = ref(0);
   const chroma = ref(0);
-  const state: KeyColorState = { hue, chroma };
-  instances.set(name, state);
 
   const { ready } = useReactiveTheme();
+
+  function setHue(h: number) {
+    hue.value = h;
+    if (!formatOklchHexFn) return;
+    ready.then((t) =>
+      t.setKeyColor(name, formatOklchHexFn!(0.6, chroma.value, h)),
+    );
+  }
+
+  function setChroma(c: number) {
+    chroma.value = c;
+    if (!formatOklchHexFn) return;
+    ready.then((t) =>
+      t.setKeyColor(name, formatOklchHexFn!(0.6, c, hue.value)),
+    );
+  }
+
+  const state: KeyColorState = { hue, chroma, setHue, setChroma };
+  instances.set(name, state);
 
   // Load core functions once, subscribe once
   if (!coreLoaded) {
@@ -62,25 +78,8 @@ export function useKeyColor(name: string): KeyColorState {
       t.subscribe(() => syncAllFromConfig(t));
     });
   } else {
-    // Core already loading/loaded — sync this instance when ready
     ready.then((t) => syncFromConfig(name, t));
   }
-
-  watch(hue, (h) => {
-    if (syncingFromConfig) return;
-    if (!formatOklchHexFn) return;
-    ready.then((t) =>
-      t.setKeyColor(name, formatOklchHexFn!(0.6, chroma.value, h)),
-    );
-  });
-
-  watch(chroma, (c) => {
-    if (syncingFromConfig) return;
-    if (!formatOklchHexFn) return;
-    ready.then((t) =>
-      t.setKeyColor(name, formatOklchHexFn!(0.6, c, hue.value)),
-    );
-  });
 
   return state;
 }

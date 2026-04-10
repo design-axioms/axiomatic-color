@@ -144,19 +144,19 @@ const accentLandmarks = computed(() => {
   );
 });
 
-// Slider event handlers
+// Slider event handlers — call setHue/setChroma directly (no watches)
 function onHueInput(row: "brand" | "accent", e: Event) {
   const detail = (e as CustomEvent).detail;
   if (!detail) return;
-  if (row === "brand") brand.hue.value = detail.value;
-  else accent.hue.value = detail.value;
+  const channel = row === "brand" ? brand : accent;
+  channel.setHue(detail.value);
 }
 
 function onChromaInput(row: "brand" | "accent", e: Event) {
   const detail = (e as CustomEvent).detail;
   if (!detail) return;
-  if (row === "brand") brand.chroma.value = detail.value;
-  else accent.chroma.value = detail.value;
+  const channel = row === "brand" ? brand : accent;
+  channel.setChroma(detail.value);
 }
 
 function onLandmarkClick(row: "brand" | "accent", e: Event) {
@@ -164,13 +164,8 @@ function onLandmarkClick(row: "brand" | "accent", e: Event) {
   if (!detail) return;
   const kc = keyColors.value[detail.name];
   if (!kc) return;
-  if (row === "brand") {
-    brand.hue.value = kc.hue;
-    brand.chroma.value = kc.chroma;
-  } else {
-    accent.hue.value = kc.hue;
-    accent.chroma.value = kc.chroma;
-  }
+  // Use original hex to avoid lossy round-trip
+  theme.value?.setKeyColor(row, kc.hex);
 }
 
 // Split circle indicator
@@ -239,7 +234,9 @@ const indicatorStyle = computed(() => {
                 @input="onHueInput('brand', $event)"
                 @landmark-click="onLandmarkClick('brand', $event)"
               />
-              <span class="slider-value">{{ Math.round(brand.hue.value) }}°</span>
+              <span class="slider-value"
+                >{{ Math.round(brand.hue.value) }}°</span
+              >
             </div>
             <div class="slider-row">
               <color-slider
@@ -537,7 +534,10 @@ const indicatorStyle = computed(() => {
   font-size: 11px;
   color: var(--vp-c-text-2);
   font-family: var(--vp-font-family-base);
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
 
 .preset-btn:hover {

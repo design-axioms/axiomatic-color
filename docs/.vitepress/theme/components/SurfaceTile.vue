@@ -31,7 +31,7 @@ const surfaces = ref<SurfaceData[]>([]);
 const css = ref("");
 const ready = ref(false);
 const parsedKeyColors = useKeyColors();
-const { hue, chroma } = useBrandColor();
+const { hue, chroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
 
 useThemeBuilder(rootEl);
@@ -140,8 +140,10 @@ const hueOverride = computed(() =>
     <component :is="'style'" v-text="css" />
 
     <PreviewControls
-      v-model:hue="hue"
-      v-model:chroma="chroma"
+      :hue="hue"
+      :chroma="chroma"
+      @update:hue="setHue"
+      @update:chroma="setChroma"
       v-model:is-dark="isDark"
       :key-colors="parsedKeyColors"
     />
