@@ -164,21 +164,27 @@ const semanticLandmarks = computed(() => {
   );
 });
 
-// Chroma landmarks: anchor chroma from last explicit selection
-const brandChromaLandmarks = computed(() =>
-  JSON.stringify([{
-    value: brandAnchorChroma.value,
-    color: `oklch(0.6 ${brandAnchorChroma.value} ${brand.hue.value})`,
+// Chroma landmarks: anchor chroma (clamped to gamut, hidden if out of range)
+const brandChromaLandmarks = computed(() => {
+  const anchor = brandAnchorChroma.value;
+  const max = brandMaxChroma.value;
+  if (anchor >= max) return "[]";
+  return JSON.stringify([{
+    value: anchor,
+    color: `oklch(0.6 ${anchor} ${brand.hue.value})`,
     name: "anchor",
-  }]),
-);
-const accentChromaLandmarks = computed(() =>
-  JSON.stringify([{
-    value: accentAnchorChroma.value,
-    color: `oklch(0.6 ${accentAnchorChroma.value} ${accent.hue.value})`,
+  }]);
+});
+const accentChromaLandmarks = computed(() => {
+  const anchor = accentAnchorChroma.value;
+  const max = accentMaxChroma.value;
+  if (anchor >= max) return "[]";
+  return JSON.stringify([{
+    value: anchor,
+    color: `oklch(0.6 ${anchor} ${accent.hue.value})`,
     name: "anchor",
-  }]),
-);
+  }]);
+});
 
 // Slider event handlers — call setHue/setChroma directly (no watches)
 function onHueInput(row: "brand" | "accent", e: Event) {
