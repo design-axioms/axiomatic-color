@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useShadowRoot } from "../composables/useShadowRoot";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 const props = defineProps<{
   name: string;
@@ -33,7 +34,7 @@ const bareClass = computed(() => {
 
 // Shared stylesheets
 const shadowHost = ref<HTMLElement | null>(null);
-const systemSheet = ref<CSSStyleSheet | null>(null);
+const { theme } = useReactiveTheme();
 
 const localSheetCache = new Map<string, CSSStyleSheet>();
 
@@ -107,16 +108,10 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
 }
 
 const sheets = computed(() =>
-  systemSheet.value ? [systemSheet.value, getLocalSheet(category.value, isWildcard.value)] : [],
+  theme.value ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)] : [],
 );
 
 const shadow = useShadowRoot(shadowHost, sheets);
-
-onMounted(async () => {
-  if (!usesShadow.value) return;
-  const { getSystemStyleSheet } = await import("@design-axioms/color");
-  systemSheet.value = await getSystemStyleSheet();
-});
 
 const isWildcard = computed(() => props.name.endsWith("*"));
 
@@ -142,8 +137,8 @@ function buildMarkup(): string {
   return "";
 }
 
-watch([shadow, systemSheet, () => props.name], () => {
-  if (shadow.value && systemSheet.value) shadow.value.innerHTML = buildMarkup();
+watch([shadow, () => theme.value, () => props.name], () => {
+  if (shadow.value && theme.value) shadow.value.innerHTML = buildMarkup();
 });
 </script>
 
