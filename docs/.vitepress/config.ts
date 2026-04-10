@@ -32,11 +32,16 @@ export default defineConfig({
     ],
     sidebar: [
       {
-        text: "System",
+        text: "Guide",
         items: [
           { text: "Introduction", link: "/" },
           { text: "Getting Started", link: "/getting-started" },
           { text: "Why Axiomatic?", link: "/why" },
+        ],
+      },
+      {
+        text: "Concepts",
+        items: [
           { text: "Surfaces", link: "/surfaces" },
           { text: "Text", link: "/text" },
           { text: "Borders", link: "/borders" },
@@ -45,7 +50,7 @@ export default defineConfig({
         ],
       },
       {
-        text: "More",
+        text: "Reference",
         items: [
           { text: "Architecture", link: "/architecture" },
           { text: "CLI", link: "/reference/cli" },

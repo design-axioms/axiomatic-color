@@ -1,6 +1,6 @@
 # Composition
 
-Surface, atmosphere, and grade are independent axes: lightness, hue, and contrast. Each choice modifies one axis without disturbing the others.
+Surface, atmosphere, and text grade are three independent axes. Surface controls lightness, atmosphere controls hue and chroma, and text grade controls contrast. Each choice modifies one axis without disturbing the others.
 
 ## The Tile
 
