@@ -12,7 +12,7 @@ Three contrast tiers.
   <div class="surface-card border-decorative" style="padding: 1rem; border-radius: 6px; border-width: 1px; border-style: solid;">
     <p class="text-strong" style="margin: 0; font-size: 0.875rem;">Decorative border</p>
   </div>
-  <button class="surface-action border-interactive text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border-width: 1px; border-style: solid; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Submit</button>
+  <button class="surface-action hue-accent border-interactive text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border-width: 1px; border-style: solid; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Submit</button>
   <div class="surface-card border-critical" style="padding: 1rem; border-radius: 6px; border-width: 1px; border-style: solid;">
     <p class="text-high" style="margin: 0; font-size: 0.875rem;">Required field</p>
   </div>
@@ -21,7 +21,7 @@ Three contrast tiers.
   <p class="text-strong">Decorative border</p>
 </div>
 
-<button class="surface-action border-interactive text-high">
+<button class="surface-action hue-accent border-interactive text-high">
   Submit
 </button>
 

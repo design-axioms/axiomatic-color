@@ -119,7 +119,7 @@ function surfaceBySlug(slug: string) {
               >L={{ fmt(surfaceBySlug("card")?.lightness[mode] ?? 0) }}</span
             >
           </div>
-          <div class="map-card surface-action">
+          <div class="map-card surface-action hue-accent">
             <div class="map-title">
               <span class="map-name text-high">Action</span>
               <span class="map-role text-subtlest">Interactive element</span>
