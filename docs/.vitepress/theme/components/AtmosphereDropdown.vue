@@ -118,23 +118,11 @@ function isModified(row: "brand" | "accent") {
   return Math.abs(h - def.hue) > 1 || Math.abs(c - def.chroma) > 0.005;
 }
 
-// Per-row hue landmarks: other key colors (not self)
-const brandLandmarks = computed(() => {
-  const entries = Object.entries(keyColors.value).filter(
-    ([n]) => n !== "brand",
-  );
-  return JSON.stringify(
-    entries.map(([name, kc]) => ({
-      value: kc.hue,
-      color: `oklch(0.6 ${kc.chroma} ${kc.hue})`,
-      name,
-    })),
-  );
-});
-const accentLandmarks = computed(() => {
-  const entries = Object.entries(keyColors.value).filter(
-    ([n]) => n !== "accent",
-  );
+// Hue landmarks: semantic colors only (not brand/accent)
+const semanticLandmarks = computed(() => {
+  const entries = SEMANTIC_KEYS
+    .map((name) => [name, keyColors.value[name]] as const)
+    .filter(([, kc]) => kc);
   return JSON.stringify(
     entries.map(([name, kc]) => ({
       value: kc.hue,
@@ -230,7 +218,7 @@ const indicatorStyle = computed(() => {
                 :value="String(brand.hue.value)"
                 :hue="String(brand.hue.value)"
                 :chroma="String(brand.chroma.value)"
-                :landmarks="brandLandmarks"
+                :landmarks="semanticLandmarks"
                 @input="onHueInput('brand', $event)"
                 @landmark-click="onLandmarkClick('brand', $event)"
               />
@@ -322,7 +310,7 @@ const indicatorStyle = computed(() => {
                 :value="String(accent.hue.value)"
                 :hue="String(accent.hue.value)"
                 :chroma="String(accent.chroma.value)"
-                :landmarks="accentLandmarks"
+                :landmarks="semanticLandmarks"
                 @input="onHueInput('accent', $event)"
                 @landmark-click="onLandmarkClick('accent', $event)"
               />
