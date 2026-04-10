@@ -132,6 +132,22 @@ const semanticLandmarks = computed(() => {
   );
 });
 
+// Chroma landmarks: default chroma for reset snap-back
+const brandChromaLandmarks = computed(() =>
+  JSON.stringify([{
+    value: defaultBrandParsed.chroma,
+    color: `oklch(0.6 ${defaultBrandParsed.chroma} ${brand.hue.value})`,
+    name: "default",
+  }]),
+);
+const accentChromaLandmarks = computed(() =>
+  JSON.stringify([{
+    value: defaultAccentParsed.chroma,
+    color: `oklch(0.6 ${defaultAccentParsed.chroma} ${accent.hue.value})`,
+    name: "default",
+  }]),
+);
+
 // Slider event handlers — call setHue/setChroma directly (no watches)
 function onHueInput(row: "brand" | "accent", e: Event) {
   const detail = (e as CustomEvent).detail;
@@ -154,6 +170,12 @@ function onLandmarkClick(row: "brand" | "accent", e: Event) {
   if (!kc) return;
   // Use original hex to avoid lossy round-trip
   theme.value?.setKeyColor(row, kc.hex);
+}
+
+function onChromaLandmarkClick(row: "brand" | "accent", _e: Event) {
+  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  const channel = row === "brand" ? brand : accent;
+  channel.setChroma(def.chroma);
 }
 
 // Split circle indicator
@@ -233,7 +255,9 @@ const indicatorStyle = computed(() => {
                 :value="String(brand.chroma.value)"
                 :hue="String(brand.hue.value)"
                 :chroma="String(brand.chroma.value)"
+                :landmarks="brandChromaLandmarks"
                 @input="onChromaInput('brand', $event)"
+                @landmark-click="onChromaLandmarkClick('brand', $event)"
               />
               <span class="slider-value">{{
                 brand.chroma.value.toFixed(2)
@@ -325,7 +349,9 @@ const indicatorStyle = computed(() => {
                 :value="String(accent.chroma.value)"
                 :hue="String(accent.hue.value)"
                 :chroma="String(accent.chroma.value)"
+                :landmarks="accentChromaLandmarks"
                 @input="onChromaInput('accent', $event)"
+                @landmark-click="onChromaLandmarkClick('accent', $event)"
               />
               <span class="slider-value">{{
                 accent.chroma.value.toFixed(2)
