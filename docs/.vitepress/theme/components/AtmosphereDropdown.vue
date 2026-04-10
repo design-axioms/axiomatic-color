@@ -548,9 +548,13 @@ const indicatorStyle = computed(() => {
 }
 
 .preset-btn.active {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-text-1);
-  background: var(--vp-c-bg-soft);
+  border-color: var(--vp-c-neutral);
+  color: var(--vp-c-neutral-inverse);
+  background: var(--vp-c-neutral);
+}
+
+.preset-btn.active .preset-dot {
+  border-color: var(--vp-c-neutral-inverse);
 }
 
 .preset-dot {
