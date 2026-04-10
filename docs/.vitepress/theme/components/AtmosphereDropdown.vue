@@ -74,6 +74,8 @@ function tryParseRow(row: "brand" | "accent", text: string) {
   const result = parseFn.value(text);
   if (result) {
     edit.invalid = false;
+    if (row === "brand") brandAnchorChroma.value = result.chroma;
+    else accentAnchorChroma.value = result.chroma;
     theme.value?.setKeyColor(row, text);
   } else {
     edit.invalid = true;
@@ -105,14 +107,23 @@ function isPresetActive(
   return Math.abs(h - kc.hue) < 2 && Math.abs(c - kc.chroma) < 0.01;
 }
 
+// Anchor chroma: the chroma of the last explicit selection (preset, hex, reset).
+// Slider drags don't update this — it's the "snap back" target.
+const brandAnchorChroma = ref(defaultBrandParsed.chroma);
+const accentAnchorChroma = ref(defaultAccentParsed.chroma);
+
 function selectPreset(
   row: "brand" | "accent",
   kc: { hue: number; chroma: number; hex: string },
 ) {
+  if (row === "brand") brandAnchorChroma.value = kc.chroma;
+  else accentAnchorChroma.value = kc.chroma;
   theme.value?.setKeyColor(row, kc.hex);
 }
 
 function applyNone(row: "brand" | "accent") {
+  if (row === "brand") brandAnchorChroma.value = 0;
+  else accentAnchorChroma.value = 0;
   theme.value?.setKeyColor(row, "#808080");
 }
 
@@ -121,6 +132,9 @@ const DEFAULT_BRAND = "#6e56cf";
 const DEFAULT_ACCENT = "#0891b2";
 
 function resetToDefault(row: "brand" | "accent") {
+  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  if (row === "brand") brandAnchorChroma.value = def.chroma;
+  else accentAnchorChroma.value = def.chroma;
   theme.value?.setKeyColor(
     row,
     row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT,
@@ -152,24 +166,20 @@ const semanticLandmarks = computed(() => {
   );
 });
 
-// Chroma landmarks: default chroma for reset snap-back
+// Chroma landmarks: anchor chroma from last explicit selection
 const brandChromaLandmarks = computed(() =>
-  JSON.stringify([
-    {
-      value: defaultBrandParsed.chroma,
-      color: `oklch(0.6 ${defaultBrandParsed.chroma} ${brand.hue.value})`,
-      name: "default",
-    },
-  ]),
+  JSON.stringify([{
+    value: brandAnchorChroma.value,
+    color: `oklch(0.6 ${brandAnchorChroma.value} ${brand.hue.value})`,
+    name: "anchor",
+  }]),
 );
 const accentChromaLandmarks = computed(() =>
-  JSON.stringify([
-    {
-      value: defaultAccentParsed.chroma,
-      color: `oklch(0.6 ${defaultAccentParsed.chroma} ${accent.hue.value})`,
-      name: "default",
-    },
-  ]),
+  JSON.stringify([{
+    value: accentAnchorChroma.value,
+    color: `oklch(0.6 ${accentAnchorChroma.value} ${accent.hue.value})`,
+    name: "anchor",
+  }]),
 );
 
 // Slider event handlers — call setHue/setChroma directly (no watches)
@@ -197,9 +207,9 @@ function onLandmarkClick(row: "brand" | "accent", e: Event) {
 }
 
 function onChromaLandmarkClick(row: "brand" | "accent", _e: Event) {
-  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  const anchor = row === "brand" ? brandAnchorChroma : accentAnchorChroma;
   const channel = row === "brand" ? brand : accent;
-  channel.setChroma(def.chroma);
+  channel.setChroma(anchor.value);
 }
 
 // Split circle indicator
