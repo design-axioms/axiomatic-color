@@ -9,7 +9,7 @@ const emit = defineEmits<{ "update:modelValue": [value: boolean] }>();
     :aria-label="modelValue ? 'Switch to light theme' : 'Switch to dark theme'"
     @click="emit('update:modelValue', !modelValue)"
   >
-    {{ modelValue ? '☀ Light' : '● Dark' }}
+    {{ modelValue ? '● Dark' : '☀ Light' }}
   </button>
 </template>
 
