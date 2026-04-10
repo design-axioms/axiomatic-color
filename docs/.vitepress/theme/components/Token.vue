@@ -107,13 +107,13 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
   return sheet;
 }
 
+const isWildcard = computed(() => props.name.endsWith("*"));
+
 const sheets = computed(() =>
   theme.value ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)] : [],
 );
 
 const shadow = useShadowRoot(shadowHost, sheets);
-
-const isWildcard = computed(() => props.name.endsWith("*"));
 
 function buildMarkup(): string {
   const cat = category.value;
