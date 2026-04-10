@@ -203,7 +203,7 @@ function fmt(n: number): string {
                   <span class="comp-border border-critical"></span>
                 </div>
               </div>
-              <div class="comp-card surface-action">
+              <div class="comp-card surface-action hue-accent">
                 <div class="comp-label">
                   <span class="comp-name text-high">Action</span>
                   <span class="comp-meta text-subtlest"
