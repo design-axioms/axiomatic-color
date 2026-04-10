@@ -107,6 +107,12 @@ function isPresetActive(
   return Math.abs(h - kc.hue) < 2 && Math.abs(c - kc.chroma) < 0.01;
 }
 
+// Default colors and parsed values (must be before anchor refs)
+const DEFAULT_BRAND = "#6e56cf";
+const DEFAULT_ACCENT = "#0891b2";
+const defaultBrandParsed = { hue: 288.033, chroma: 0.179 };
+const defaultAccentParsed = { hue: 194.769, chroma: 0.108 };
+
 // Anchor chroma: the chroma of the last explicit selection (preset, hex, reset).
 // Slider drags don't update this — it's the "snap back" target.
 const brandAnchorChroma = ref(defaultBrandParsed.chroma);
@@ -127,10 +133,6 @@ function applyNone(row: "brand" | "accent") {
   theme.value?.setKeyColor(row, "#808080");
 }
 
-// Default colors for reset
-const DEFAULT_BRAND = "#6e56cf";
-const DEFAULT_ACCENT = "#0891b2";
-
 function resetToDefault(row: "brand" | "accent") {
   const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
   if (row === "brand") brandAnchorChroma.value = def.chroma;
@@ -140,10 +142,6 @@ function resetToDefault(row: "brand" | "accent") {
     row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT,
   );
 }
-
-// Parsed default hue/chroma (stable through oklch round-trip)
-const defaultBrandParsed = { hue: 288.033, chroma: 0.179 };
-const defaultAccentParsed = { hue: 194.769, chroma: 0.108 };
 
 function isModified(row: "brand" | "accent") {
   const h = row === "brand" ? brand.hue.value : accent.hue.value;
