@@ -28,16 +28,28 @@ Apply a surface with a single class. The specimen below uses the system CSS and 
 
 Page-polarity surfaces share the same lightness range: light in light mode, dark in dark mode. Spotlight uses the opposite range. This creates a guaranteed contrast gap between any page-polarity surface and spotlight.
 
-Primary actions use the opposite polarity to pop against their container:
+A button using the opposite polarity pops against its container. The contrast gap is the point — it's visible because both surfaces are in the same example:
 
 <LiveExample
-  surface="surface-card"
-  :html='`<button class=\"surface-spotlight text-high\" style=\"padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;\">Primary</button>`'
-  :code='`<!-- On a page-polarity surface -->\n<button class=\"surface-spotlight text-high\">Primary</button>`'
+  surface="surface-page"
+  :html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px; display: flex; align-items: center; gap: 1rem;">
+  <p class="text-strong" style="margin: 0; font-size: 0.875rem; flex: 1;">Ready to deploy?</p>
+  <button class="surface-spotlight text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Deploy</button>
+</div>`'
+  :code='`<div class="surface-card">
+  <p class="text-strong">Ready to deploy?</p>
+  <button class="surface-spotlight text-high">Deploy</button>
+</div>`'
 />
 
 <LiveExample
   surface="surface-spotlight"
-  :html='`<button class=\"surface-page text-high\" style=\"padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;\">Primary</button>`'
-  :code='`<!-- On spotlight -->\n<button class=\"surface-page text-high\">Primary</button>`'
+  :html='`<div style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+  <p class="text-strong" style="margin: 0; font-size: 0.875rem; flex: 1;">Confirm your selection.</p>
+  <button class="surface-page text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Confirm</button>
+</div>`'
+  :code='`<div class="surface-spotlight">
+  <p class="text-strong">Confirm your selection.</p>
+  <button class="surface-page text-high">Confirm</button>
+</div>`'
 />
