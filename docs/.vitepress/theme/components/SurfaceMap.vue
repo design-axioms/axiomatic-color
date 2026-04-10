@@ -4,6 +4,7 @@ import Token from "./Token.vue";
 import DarkToggle from "./DarkToggle.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useDarkMode } from "../composables/useDarkMode";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 interface SurfaceInfo {
   slug: string;
@@ -17,22 +18,23 @@ const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
 const ready = ref(false);
 const { isDark } = useDarkMode();
+const { theme, ready: themeReady } = useReactiveTheme();
 
-useThemeBuilder(rootEl);
+let solveFn: typeof import("@design-axioms/color").solve | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
 
-onMounted(async () => {
-  const { solve, DEFAULT_CONFIG, generateCSS } =
-    await import("@design-axioms/color");
-
-  const output = solve(DEFAULT_CONFIG);
-  css.value = generateCSS(output, {
-    ...DEFAULT_CONFIG.options,
+function rebuildCSS() {
+  if (!theme.value || !solveFn || !generateCSSFn) return;
+  const config = theme.value.getConfig();
+  const output = solveFn(config);
+  css.value = generateCSSFn(output, {
+    ...config.options,
     selector: ".surface-map-root",
-    keyColors: DEFAULT_CONFIG.anchors.keyColors,
+    keyColors: config.anchors.keyColors,
   });
 
   const result: SurfaceInfo[] = [];
-  for (const group of DEFAULT_CONFIG.groups) {
+  for (const group of config.groups) {
     for (const s of group.surfaces) {
       const light = output.light.surfaces.find((x) => x.slug === s.slug);
       const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
@@ -47,6 +49,18 @@ onMounted(async () => {
   }
   surfaces.value = result;
   ready.value = true;
+}
+
+useThemeBuilder(rootEl);
+
+onMounted(async () => {
+  const mod = await import("@design-axioms/color");
+  solveFn = mod.solve;
+  generateCSSFn = mod.generateCSS;
+
+  const t = await themeReady;
+  rebuildCSS();
+  t.subscribe(() => rebuildCSS());
 });
 
 const mode = computed<"light" | "dark">(() =>
