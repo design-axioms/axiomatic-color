@@ -1,12 +1,14 @@
 # Atmosphere
 
-Tint surfaces with hue and chroma. Contrast guarantees are unaffected.
-
-## The Taper
+Surfaces are achromatic by default. Add color per element with <Token name=".hue-*" /> classes.
 
 <TaperCurve />
 
-As a surface approaches pure black or pure white, its ability to carry color fades — neon black doesn't exist in physics, and the taper encodes that reality.
+## How It Works
+
+Surfaces start with no color. A <Token name=".hue-brand" /> or <Token name=".hue-accent" /> class opts a surface into color by setting its hue and chroma from the corresponding key color.
+
+The taper shapes how much chroma each surface actually carries. Surfaces near mid-lightness get vivid color; surfaces near the extremes stay nearly neutral. This keeps contrast guarantees intact regardless of the hue you choose.
 
 ::: details Why does chroma fade at the extremes?
 This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extremes.
@@ -16,7 +18,7 @@ This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extr
 
 ## Usage
 
-Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
+Apply color per surface with a <Token name=".hue-*" /> utility:
 
 <LiveExample
   surface="surface-page"
@@ -44,13 +46,14 @@ Apply atmosphere per surface with a <Token name=".hue-*" /> utility:
 
 ## Key Colors
 
-Key colors define named atmosphere presets. A brand hex color is parsed into hue and chroma, then applied through <Token name=".hue-brand" />:
+Key colors are named hex values that the solver parses into hue and chroma. <Token name=".hue-brand" /> and <Token name=".hue-accent" /> are the two editable key colors. Semantic colors (<Token name=".hue-success" />, <Token name=".hue-warning" />, <Token name=".hue-error" />) are fixed in config.
 
 ```js
 // In the solver config
 anchors: {
   keyColors: {
     brand: "#6e56cf",
+    accent: "#0891b2",
     success: "#22c55e",
     warning: "#eab308",
     error: "#ef4444",
@@ -58,9 +61,9 @@ anchors: {
 }
 ```
 
-Each key color generates a utility class (<Token name=".hue-brand" />, <Token name=".hue-success" />, etc.) and CSS custom properties (`--axm-key-brand-hue`, `--axm-key-brand-chroma`).
+Each key color generates a utility class and CSS custom properties (`--axm-key-brand-hue`, `--axm-key-brand-chroma`).
 
-Use the atmosphere controls in the header to try different brand colors. The taper ensures that surfaces near lightness extremes stay nearly neutral regardless of the chroma you set.
+Try the color controls in the nav bar. Every <Token name=".hue-brand" /> surface on this page updates in real time.
 
 ## The Formula
 

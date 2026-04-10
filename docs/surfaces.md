@@ -10,7 +10,7 @@ The map shows five surfaces across two polarities. Four share **page polarity**:
 
 ## Usage
 
-Apply a surface with a single class. The specimen below uses the system CSS and responds to the site's atmosphere controls:
+Apply a surface with a single class. The specimen below uses the system CSS and responds to the color controls in the nav bar:
 
 <LiveExample
   surface="surface-page"
