@@ -71,18 +71,18 @@ function generateRoot(
   return `/* Root — color-scheme drives light-dark() */
 ${selector} {
   color-scheme: light;
-  --${prefix}-atm-hue: 0;
-  --${prefix}-atm-chroma: 0;${keyColorLines}
+  --${prefix}-hue: 0;
+  --${prefix}-chroma: 0;${keyColorLines}
 }
 
-/* Atmosphere properties — inheriting */
-@property --${prefix}-atm-hue {
+/* Hue/chroma properties — inheriting */
+@property --${prefix}-hue {
   syntax: "<number>";
   inherits: true;
   initial-value: 0;
 }
 
-@property --${prefix}-atm-chroma {
+@property --${prefix}-chroma {
   syntax: "<number>";
   inherits: true;
   initial-value: 0;
@@ -146,9 +146,9 @@ function generateSurfaces(output: SolverOutput, prefix: string): string {
  */
 function oklchColor(lightness: number, prefix: string): string {
   const L = lightness.toFixed(4);
-  const C = `var(--${prefix}-atm-chroma)`;
+  const C = `var(--${prefix}-chroma)`;
   const taper = `calc(${C} * (1 - abs(2 * ${L} - 1)))`;
-  return `oklch(${L} ${taper} var(--${prefix}-atm-hue))`;
+  return `oklch(${L} ${taper} var(--${prefix}-hue))`;
 }
 
 /**
@@ -280,8 +280,8 @@ function generateHueUtilities(
   const lines: string[] = ["/* Hue utilities — atmosphere modifiers */"];
   for (const name of Object.keys(keyColors)) {
     lines.push(`.hue-${name} {
-  --${prefix}-atm-hue: var(--${prefix}-key-${name}-hue);
-  --${prefix}-atm-chroma: var(--${prefix}-key-${name}-chroma);
+  --${prefix}-hue: var(--${prefix}-key-${name}-hue);
+  --${prefix}-chroma: var(--${prefix}-key-${name}-chroma);
 }`);
   }
   return lines.join("\n\n");

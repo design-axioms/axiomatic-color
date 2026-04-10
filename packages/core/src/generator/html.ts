@@ -323,7 +323,7 @@ body {
 }
 .demo-slider {
   width: 120px;
-  accent-color: oklch(0.6 0.15 var(--axm-atm-hue, 0));
+  accent-color: oklch(0.6 0.15 var(--axm-hue, 0));
 }
 #hue-slider {
   -webkit-appearance: none;
@@ -344,7 +344,7 @@ body {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background: oklch(0.6 0.15 var(--axm-atm-hue, 0));
+  background: oklch(0.6 0.15 var(--axm-hue, 0));
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   cursor: pointer;
@@ -355,18 +355,18 @@ body {
   height: 0.5rem;
   border-radius: 0.25rem;
   background: linear-gradient(to right,
-    oklch(0.6 0 var(--axm-atm-hue, 0)),
-    oklch(0.6 0.1 var(--axm-atm-hue, 0)),
-    oklch(0.6 0.2 var(--axm-atm-hue, 0)),
-    oklch(0.6 0.3 var(--axm-atm-hue, 0)),
-    oklch(0.6 0.4 var(--axm-atm-hue, 0)));
+    oklch(0.6 0 var(--axm-hue, 0)),
+    oklch(0.6 0.1 var(--axm-hue, 0)),
+    oklch(0.6 0.2 var(--axm-hue, 0)),
+    oklch(0.6 0.3 var(--axm-hue, 0)),
+    oklch(0.6 0.4 var(--axm-hue, 0)));
 }
 #chroma-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background: oklch(0.6 var(--axm-atm-chroma, 0) var(--axm-atm-hue, 0));
+  background: oklch(0.6 var(--axm-chroma, 0) var(--axm-hue, 0));
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   cursor: pointer;
@@ -516,8 +516,8 @@ function toggleScript(): string {
     currentChroma = c;
     var surfaces = document.querySelectorAll('[class*="surface-"]');
     surfaces.forEach(function(el) {
-      el.style.setProperty('--axm-atm-hue', h);
-      el.style.setProperty('--axm-atm-chroma', c);
+      el.style.setProperty('--axm-hue', h);
+      el.style.setProperty('--axm-chroma', c);
     });
     hueVal.textContent = Math.round(h);
     chromaVal.textContent = parseFloat(c).toFixed(2);

@@ -47,8 +47,8 @@ function applyAtmosphere(h: number, c: number): void {
     '[class*="surface-"]',
   );
   for (const el of surfaces) {
-    el.style.setProperty("--axm-atm-hue", String(h));
-    el.style.setProperty("--axm-atm-chroma", String(c));
+    el.style.setProperty("--axm-hue", String(h));
+    el.style.setProperty("--axm-chroma", String(c));
   }
   hueVal.textContent = String(Math.round(h));
   chromaVal.textContent = c.toFixed(2);

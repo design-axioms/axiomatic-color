@@ -7,6 +7,7 @@ import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 const css = ref("");
 const ready = ref(false);
@@ -14,38 +15,42 @@ const rootEl = ref<HTMLElement | null>(null);
 const parsedKeyColors = useKeyColors();
 const { hue, chroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
+const { theme, ready: themeReady } = useReactiveTheme();
+
+let solveFn: typeof import("@design-axioms/color").solve | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
+
+function rebuildCSS() {
+  if (!theme.value || !solveFn || !generateCSSFn) return;
+  const config = theme.value.getConfig();
+  const output = solveFn(config);
+  css.value = generateCSSFn(output, {
+    ...config.options,
+    selector: ".border-preview-root",
+    keyColors: config.anchors.keyColors,
+  });
+  ready.value = true;
+}
 
 useThemeBuilder(rootEl);
 
 onMounted(async () => {
-  const { solve, DEFAULT_CONFIG, generateCSS } =
-    await import("@design-axioms/color");
+  const mod = await import("@design-axioms/color");
+  solveFn = mod.solve;
+  generateCSSFn = mod.generateCSS;
 
-  const output = solve(DEFAULT_CONFIG);
-  css.value = generateCSS(output, {
-    ...DEFAULT_CONFIG.options,
-    selector: ".border-preview-root",
-  });
-
-  ready.value = true;
+  const t = await themeReady;
+  rebuildCSS();
+  t.subscribe(() => rebuildCSS());
 });
-
-const hueOverride = computed(() =>
-  hue.value > 0 || chroma.value > 0
-    ? {
-        "--axm-atm-hue": String(hue.value),
-        "--axm-atm-chroma": String(chroma.value),
-      }
-    : {},
-);
 </script>
 
 <template>
   <div
     v-if="ready"
     ref="rootEl"
-    class="border-preview-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
+    class="border-preview-root hue-brand"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
   >
     <component :is="'style'" v-text="css" />
 

@@ -4,6 +4,7 @@ import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 import PreviewControls from "./PreviewControls.vue";
 
 interface SurfaceData {
@@ -33,23 +34,23 @@ const ready = ref(false);
 const parsedKeyColors = useKeyColors();
 const { hue, chroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
+const { theme, ready: themeReady } = useReactiveTheme();
 
-useThemeBuilder(rootEl);
+let solveFn: typeof import("@design-axioms/color").solve | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
 
-onMounted(async () => {
-  const { solve, DEFAULT_CONFIG, generateCSS } =
-    await import("@design-axioms/color");
-
-  const output = solve(DEFAULT_CONFIG);
-  css.value = generateCSS(output, {
-    ...DEFAULT_CONFIG.options,
+function rebuildCSS() {
+  if (!theme.value || !solveFn || !generateCSSFn) return;
+  const config = theme.value.getConfig();
+  const output = solveFn(config);
+  css.value = generateCSSFn(output, {
+    ...config.options,
     selector: ".surface-tile-root",
-    keyColors: DEFAULT_CONFIG.anchors.keyColors,
+    keyColors: config.anchors.keyColors,
   });
 
-  // Build surface data for the template
   const slugs = new Map<string, { label: string; polarity: string }>();
-  for (const group of DEFAULT_CONFIG.groups) {
+  for (const group of config.groups) {
     for (const s of group.surfaces) {
       slugs.set(s.slug, { label: s.label, polarity: s.polarity });
     }
@@ -104,8 +105,19 @@ onMounted(async () => {
   }
 
   surfaces.value = result;
-
   ready.value = true;
+}
+
+useThemeBuilder(rootEl);
+
+onMounted(async () => {
+  const mod = await import("@design-axioms/color");
+  solveFn = mod.solve;
+  generateCSSFn = mod.generateCSS;
+
+  const t = await themeReady;
+  rebuildCSS();
+  t.subscribe(() => rebuildCSS());
 });
 
 const mode = computed<"light" | "dark">(() =>
@@ -119,23 +131,14 @@ function surfaceBySlug(slug: string) {
 function fmt(n: number): string {
   return n.toFixed(3);
 }
-
-const hueOverride = computed(() =>
-  hue.value > 0 || chroma.value > 0
-    ? {
-        "--axm-atm-hue": String(hue.value),
-        "--axm-atm-chroma": String(chroma.value),
-      }
-    : {},
-);
 </script>
 
 <template>
   <div
     v-if="ready"
     ref="rootEl"
-    class="surface-tile-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
+    class="surface-tile-root hue-brand"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
   >
     <component :is="'style'" v-text="css" />
 

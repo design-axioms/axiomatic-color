@@ -103,7 +103,7 @@ The system composes along two orthogonal axes.
 - Lightness composition has a finite budget, uses a semantic ladder, and yields at most ~2 distinguishable levels per polarity per mode.
 - Atmosphere composition applies hue and chroma tinting and does not consume the lightness budget.
 
-Surfaces are achromatic by default. The atmosphere properties `--axm-atm-hue` and `--axm-atm-chroma` are registered as inheriting with an initial value of 0, so they cascade through the DOM until a <Token name=".hue-*" /> utility sets them. Surface classes do not emit atmosphere values — they inherit from their ancestor.
+Surfaces are achromatic by default. The atmosphere properties `--axm-hue` and `--axm-chroma` are registered as inheriting with an initial value of 0, so they cascade through the DOM until a <Token name=".hue-*" /> utility sets them. Surface classes do not emit atmosphere values — they inherit from their ancestor.
 
 Atmosphere flows through surface boundaries to text and border utilities. A <Token name=".hue-brand" /> class on a card tints that card and everything inside it, including child surfaces, unless a descendant sets its own atmosphere.
 
@@ -138,7 +138,7 @@ The inheritance model works as follows:
 
 The system registers the following properties:
 
-- `--axm-atm-hue` and `--axm-atm-chroma` are inheriting properties with an initial value of 0.
+- `--axm-hue` and `--axm-chroma` are inheriting properties with an initial value of 0.
 - Key color primitives use `--axm-key-{name}-hue` and `--axm-key-{name}-chroma`.
 - Surface-local variables remain class-scoped and are not registered.
 
