@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from "vue";
 import Token from "./Token.vue";
 import DarkToggle from "./DarkToggle.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
 
 interface SurfaceInfo {
@@ -17,17 +16,7 @@ const rootEl = ref<HTMLElement | null>(null);
 const surfaces = ref<SurfaceInfo[]>([]);
 const css = ref("");
 const ready = ref(false);
-const { hue, chroma } = useBrandColor();
 const { isDark } = useDarkMode();
-
-const hueOverride = computed(() =>
-  hue.value > 0 || chroma.value > 0
-    ? {
-        "--axm-atm-hue": String(hue.value),
-        "--axm-atm-chroma": String(chroma.value),
-      }
-    : {},
-);
 
 useThemeBuilder(rootEl);
 
@@ -39,6 +28,7 @@ onMounted(async () => {
   css.value = generateCSS(output, {
     ...DEFAULT_CONFIG.options,
     selector: ".surface-map-root",
+    keyColors: DEFAULT_CONFIG.anchors.keyColors,
   });
 
   const result: SurfaceInfo[] = [];
@@ -76,8 +66,8 @@ function surfaceBySlug(slug: string) {
   <div
     v-if="ready"
     ref="rootEl"
-    class="surface-map-root"
-    :style="{ colorScheme: isDark ? 'dark' : 'light', ...hueOverride }"
+    class="surface-map-root hue-brand"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
   >
     <component :is="'style'" v-text="css" />
 
