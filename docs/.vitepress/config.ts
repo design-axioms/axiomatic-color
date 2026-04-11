@@ -53,6 +53,7 @@ export default defineConfig({
         text: "Reference",
         items: [
           { text: "Architecture", link: "/architecture" },
+          { text: "Validity Grid", link: "/reference/grid" },
           { text: "CLI", link: "/reference/cli" },
         ],
       },

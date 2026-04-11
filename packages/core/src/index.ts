@@ -35,3 +35,4 @@ export type {
 } from "./types.js";
 
 export { SAFETY_MARGINS, TEXT_GRADES } from "./types.js";
+export { contrastForPair } from "./math.js";
