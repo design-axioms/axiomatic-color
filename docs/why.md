@@ -6,6 +6,12 @@ Maintaining contrast across surfaces and across light and dark modes is manual w
 
 When you add a surface, you re-check every text grade on that surface in both modes. When you change a key color, you re-check every surface it tints. When a surface moves to a different lightness, all of its text and border values need re-solving. This is the maintenance loop.
 
+## A palette can't answer "does this work?"
+
+A traditional color system gives you swatches. They look complete. But try to compose two of them — pick a background, then pick text — and the palette can't tell you whether the result is accessible.
+
+<PaletteGrid />
+
 ## The approach
 
 Axiomatic Color starts from semantic intent instead of a fixed palette. You declare surfaces, text grades, and atmosphere. The solver generates CSS custom properties that handle contrast and mode switching together.

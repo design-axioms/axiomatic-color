@@ -19,6 +19,7 @@ import PipelineDiagram from "./components/PipelineDiagram.vue";
 import ShadowSurface from "./components/ShadowSurface.vue";
 import LiveExample from "./components/LiveExample.vue";
 import ValidityGrid from "./components/ValidityGrid.vue";
+import PaletteGrid from "./components/PaletteGrid.vue";
 
 export default {
   extends: DefaultTheme,
@@ -35,6 +36,7 @@ export default {
     app.component("ShadowSurface", ShadowSurface);
     app.component("LiveExample", LiveExample);
     app.component("ValidityGrid", ValidityGrid);
+    app.component("PaletteGrid", PaletteGrid);
 
     if (typeof window !== "undefined") {
       import("@design-axioms/color").then(({ registerColorSlider }) => {
