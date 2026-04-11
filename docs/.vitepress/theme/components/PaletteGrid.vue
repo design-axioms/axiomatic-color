@@ -88,14 +88,45 @@ const fgColor = computed(() => {
   return scales.value[selectedFg.value.scale].steps[selectedFg.value.step];
 });
 
-// We'll compute APCA once the user picks both — showing them the answer
-// they had to manually figure out
 const ready = ref(false);
 let contrastFn: ((a: number, b: number) => number) | null = null;
+
+// Solved surface lightness values for approximate token mapping
+interface SolvedRef {
+  slug: string;
+  label: string;
+  lightness: { light: number; dark: number };
+}
+const solvedSurfaces = ref<SolvedRef[]>([]);
+
+const TEXT_GRADE_TARGETS = [
+  { key: "high", label: ".text-high", target: 100 },
+  { key: "strong", label: ".text-strong", target: 95 },
+  { key: "subtle", label: ".text-subtle", target: 90 },
+  { key: "subtlest", label: ".text-subtlest", target: 75 },
+] as const;
 
 onMounted(async () => {
   const mod = await import("@design-axioms/color");
   contrastFn = mod.contrastForPair;
+
+  // Solve to get surface lightness values for token mapping
+  const output = mod.solve(mod.DEFAULT_CONFIG);
+  const refs: SolvedRef[] = [];
+  for (const group of mod.DEFAULT_CONFIG.groups) {
+    for (const s of group.surfaces) {
+      const light = output.light.surfaces.find((x) => x.slug === s.slug);
+      const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
+      if (light && dark) {
+        refs.push({
+          slug: s.slug,
+          label: s.label,
+          lightness: { light: light.lightness, dark: dark.lightness },
+        });
+      }
+    }
+  }
+  solvedSurfaces.value = refs;
   ready.value = true;
 });
 
@@ -103,6 +134,31 @@ const achievedApca = computed(() => {
   if (!bgColor.value || !fgColor.value || !contrastFn) return null;
   return Math.round(contrastFn(fgColor.value.l, bgColor.value.l));
 });
+
+// Compute APCA for any swatch against the selected background
+function swatchApca(scaleIdx: number, stepIdx: number): number | null {
+  if (!bgColor.value || !contrastFn) return null;
+  const step = scales.value[scaleIdx].steps[stepIdx];
+  return Math.round(contrastFn(step.l, bgColor.value.l));
+}
+
+// Is this swatch a valid foreground (body text) against the selected bg?
+function swatchValid(scaleIdx: number, stepIdx: number): boolean {
+  const apca = swatchApca(scaleIdx, stepIdx);
+  return apca !== null && apca >= 75;
+}
+
+// Should this swatch be dimmed in pick-fg phase?
+function isSwatchDimmed(scaleIdx: number, stepIdx: number): boolean {
+  if (phase.value !== "pick-fg") return false;
+  // Don't dim the selected background
+  if (
+    selectedBg.value?.scale === scaleIdx &&
+    selectedBg.value?.step === stepIdx
+  )
+    return false;
+  return !swatchValid(scaleIdx, stepIdx);
+}
 
 function isSelected(scaleIdx: number, stepIdx: number): boolean {
   if (
@@ -117,6 +173,37 @@ function isSelected(scaleIdx: number, stepIdx: number): boolean {
     return true;
   return false;
 }
+
+// Approximate token mapping: snap selected bg to nearest surface
+const nearestSurface = computed(() => {
+  if (!bgColor.value || solvedSurfaces.value.length === 0) return null;
+  const m = mode.value;
+  let best: SolvedRef | null = null;
+  let bestDist = Infinity;
+  for (const s of solvedSurfaces.value) {
+    const dist = Math.abs(s.lightness[m] - bgColor.value.l);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = s;
+    }
+  }
+  return best;
+});
+
+// Approximate text grade mapping: snap achieved APCA to nearest grade
+const nearestGrade = computed(() => {
+  if (achievedApca.value === null) return null;
+  let best: (typeof TEXT_GRADE_TARGETS)[number] | null = null;
+  let bestDist = Infinity;
+  for (const g of TEXT_GRADE_TARGETS) {
+    const dist = Math.abs(achievedApca.value - g.target);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = g;
+    }
+  }
+  return best;
+});
 </script>
 
 <template>
@@ -158,6 +245,7 @@ function isSelected(scaleIdx: number, stepIdx: number): boolean {
             :class="{
               clickable: phase === 'pick-bg' || phase === 'pick-fg',
               selected: isSelected(si, ti),
+              dimmed: isSwatchDimmed(si, ti),
             }"
             :style="{ background: step.css }"
             @click="pickSwatch(si, ti)"
@@ -193,6 +281,9 @@ function isSelected(scaleIdx: number, stepIdx: number): boolean {
         <p class="pg-moral">
           You just did manual contrast checking. For every combination. In both modes.
         </p>
+        <div v-if="nearestSurface && nearestGrade && (achievedApca ?? 0) >= 75" class="pg-token-map">
+          In Axiomatic Color, this is <code>.surface-{{ nearestSurface.slug }}</code> + <code>{{ nearestGrade.label }}</code>
+        </div>
       </div>
     </div>
   </div>
@@ -315,6 +406,11 @@ function isSelected(scaleIdx: number, stepIdx: number): boolean {
   z-index: 2;
 }
 
+.pg-swatch.dimmed {
+  opacity: 0.15;
+  transform: scale(0.9);
+}
+
 .pg-result {
   border-top: 1px solid var(--vp-c-divider);
   padding: 1rem 0.75rem;
@@ -376,5 +472,22 @@ function isSelected(scaleIdx: number, stepIdx: number): boolean {
   color: var(--vp-c-text-3);
   margin: 0.5rem 0 0;
   font-style: italic;
+}
+
+.pg-token-map {
+  font-size: 0.8rem;
+  color: var(--vp-c-text-1);
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+}
+
+.pg-token-map code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--vp-c-brand-1);
 }
 </style>
