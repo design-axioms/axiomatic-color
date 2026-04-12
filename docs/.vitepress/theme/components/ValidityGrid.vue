@@ -33,7 +33,11 @@ const TEXT_TOKENS = [
 
 const BORDER_TOKENS = [
   { key: "decorative", label: ".border-decorative", cls: "border-decorative" },
-  { key: "interactive", label: ".border-interactive", cls: "border-interactive" },
+  {
+    key: "interactive",
+    label: ".border-interactive",
+    cls: "border-interactive",
+  },
   { key: "critical", label: ".border-critical", cls: "border-critical" },
 ] as const;
 
@@ -55,12 +59,17 @@ const selectedCell = ref<string | null>(null); // "slug:key"
 const atmosphere = ref<"none" | "brand" | "accent">("none");
 
 let solveFn: typeof import("@design-axioms/color").solve | null = null;
-let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
-let contrastFn: typeof import("@design-axioms/color").contrastForPair | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null =
+  null;
+let contrastFn: typeof import("@design-axioms/color").contrastForPair | null =
+  null;
 let textGrades: typeof import("@design-axioms/color").TEXT_GRADES | null = null;
-let defaultConfig: typeof import("@design-axioms/color").DEFAULT_CONFIG | null = null;
+let defaultConfig: typeof import("@design-axioms/color").DEFAULT_CONFIG | null =
+  null;
 
-const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
+const mode = computed<"light" | "dark">(() =>
+  isDark.value ? "dark" : "light",
+);
 
 const hueClass = computed(() => {
   if (atmosphere.value === "brand") return "hue-brand";
@@ -68,14 +77,25 @@ const hueClass = computed(() => {
   return "";
 });
 
-function cellStatus(achieved: number, target: number): "met" | "close" | "unmet" {
+function cellStatus(
+  achieved: number,
+  target: number,
+): "met" | "close" | "unmet" {
   if (achieved >= target) return "met";
   if (achieved >= target - 5) return "close";
   return "unmet";
 }
 
 function rebuildCSS() {
-  if (!theme.value || !solveFn || !generateCSSFn || !contrastFn || !textGrades || !defaultConfig) return;
+  if (
+    !theme.value ||
+    !solveFn ||
+    !generateCSSFn ||
+    !contrastFn ||
+    !textGrades ||
+    !defaultConfig
+  )
+    return;
   const config = theme.value.getConfig();
   const output = solveFn(config);
   css.value = generateCSSFn(output, {
@@ -88,10 +108,15 @@ function rebuildCSS() {
   const m = mode.value;
 
   const modeOutput = m === "light" ? output.light : output.dark;
-  const surfaceConfigs: { slug: string; label: string; polarity: string }[] = [];
+  const surfaceConfigs: { slug: string; label: string; polarity: string }[] =
+    [];
   for (const group of config.groups) {
     for (const s of group.surfaces) {
-      surfaceConfigs.push({ slug: s.slug, label: s.label, polarity: s.polarity });
+      surfaceConfigs.push({
+        slug: s.slug,
+        label: s.label,
+        polarity: s.polarity,
+      });
     }
   }
 
@@ -198,26 +223,35 @@ function isCellSelected(slug: string, key: string): boolean {
 function isCellDimmed(slug: string, key: string): boolean {
   if (selectedSurface.value && selectedSurface.value !== slug) return true;
   if (selectedToken.value && selectedToken.value !== key) return true;
-  if (selectedCell.value && selectedCell.value !== `${slug}:${key}`) return true;
+  if (selectedCell.value && selectedCell.value !== `${slug}:${key}`)
+    return true;
   return false;
 }
 </script>
 
 <template>
-  <div v-if="ready" ref="rootEl" class="validity-grid-root" :class="hueClass" :style="{ colorScheme: isDark ? 'dark' : 'light' }">
+  <div
+    v-if="ready"
+    ref="rootEl"
+    class="validity-grid-root"
+    :class="hueClass"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+  >
     <component :is="'style'" v-text="css" />
 
     <!-- Toolbar -->
     <div class="grid-toolbar">
       <div class="atm-buttons">
         <button
-          v-for="opt in (['none', 'brand', 'accent'] as const)"
+          v-for="opt in ['none', 'brand', 'accent'] as const"
           :key="opt"
           class="atm-btn"
           :class="{ active: atmosphere === opt }"
           @click="atmosphere = opt"
         >
-          {{ opt === 'none' ? 'None' : opt.charAt(0).toUpperCase() + opt.slice(1) }}
+          {{
+            opt === "none" ? "None" : opt.charAt(0).toUpperCase() + opt.slice(1)
+          }}
         </button>
       </div>
       <DarkToggle v-model="isDark" />
@@ -230,7 +264,9 @@ function isCellDimmed(slug: string, key: string): boolean {
           <tr>
             <th class="corner-cell"></th>
             <th class="section-header" :colspan="TEXT_TOKENS.length">Text</th>
-            <th class="section-header" :colspan="BORDER_TOKENS.length">Borders</th>
+            <th class="section-header" :colspan="BORDER_TOKENS.length">
+              Borders
+            </th>
           </tr>
           <tr>
             <th class="corner-cell">Surface</th>
@@ -266,20 +302,36 @@ function isCellDimmed(slug: string, key: string): boolean {
               }"
               @click="toggleCell(row.slug, cell.token)"
             >
-              <div class="cell-swatch" :class="[cell.surfaceClass, atmosphere === 'accent' && row.slug === 'action' ? 'hue-accent' : '']">
+              <div
+                class="cell-swatch"
+                :class="[
+                  cell.surfaceClass,
+                  atmosphere === 'accent' && row.slug === 'action'
+                    ? 'hue-accent'
+                    : '',
+                ]"
+              >
                 <template v-if="cell.type === 'text'">
                   <span :class="cell.className" class="cell-text">Aa</span>
                 </template>
                 <template v-else>
-                  <span class="cell-border-sample" :class="cell.className"></span>
+                  <span
+                    class="cell-border-sample"
+                    :class="cell.className"
+                  ></span>
                 </template>
               </div>
               <span class="cell-apca" :class="cell.status">
                 {{ cell.achieved }}
               </span>
               <!-- Expanded info when cell selected -->
-              <div v-if="isCellSelected(row.slug, cell.token)" class="cell-detail">
-                <code>class="{{ cell.surfaceClass }} {{ cell.className }}"</code>
+              <div
+                v-if="isCellSelected(row.slug, cell.token)"
+                class="cell-detail"
+              >
+                <code
+                  >class="{{ cell.surfaceClass }} {{ cell.className }}"</code
+                >
                 <span class="cell-target">target: {{ cell.target }}</span>
               </div>
             </td>
@@ -489,7 +541,7 @@ function isCellDimmed(slug: string, key: string): boolean {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .cell-detail code {

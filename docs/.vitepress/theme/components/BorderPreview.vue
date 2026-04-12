@@ -18,7 +18,8 @@ const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
 let solveFn: typeof import("@design-axioms/color").solve | null = null;
-let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null =
+  null;
 
 function rebuildCSS() {
   if (!theme.value || !solveFn || !generateCSSFn) return;

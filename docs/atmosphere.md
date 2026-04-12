@@ -21,8 +21,9 @@ This shape is the **safe bicone taper**: wide at mid-lightness, zero at the extr
 Apply color per surface with a <Token name=".hue-*" /> utility:
 
 <LiveExample
-  surface="surface-page"
-  :html='`<div class="surface-card hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+surface="surface-page"
+:html='`<div class="surface-card hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+
   <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Brand Card</h2>
   <p class="text-subtle" style="font-size: 0.875rem; margin: 0;">Tinted, same contrast.</p>
 </div>`'
@@ -33,8 +34,9 @@ Apply color per surface with a <Token name=".hue-*" /> utility:
 />
 
 <LiveExample
-  surface="surface-spotlight"
-  :html='`<div class="hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+surface="surface-spotlight"
+:html='`<div class="hue-brand" style="padding: 1.25rem; border-radius: 6px;">
+
   <h2 class="text-high" style="font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem;">Featured Release</h2>
   <p class="text-subtle" style="font-size: 0.875rem; margin: 0;">Atmosphere on inverted polarity.</p>
 </div>`'

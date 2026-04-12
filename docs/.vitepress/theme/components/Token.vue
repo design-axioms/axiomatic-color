@@ -110,7 +110,9 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
 const isWildcard = computed(() => props.name.endsWith("*"));
 
 const sheets = computed(() =>
-  theme.value ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)] : [],
+  theme.value
+    ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)]
+    : [],
 );
 
 const shadow = useShadowRoot(shadowHost, sheets);

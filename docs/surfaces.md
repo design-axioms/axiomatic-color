@@ -31,8 +31,9 @@ Page-polarity surfaces share the same lightness range: light in light mode, dark
 A button using the opposite polarity pops against its container. The contrast gap is the point — it's visible because both surfaces are in the same example:
 
 <LiveExample
-  surface="surface-page"
-  :html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px; display: flex; align-items: center; gap: 1rem;">
+surface="surface-page"
+:html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px; display: flex; align-items: center; gap: 1rem;">
+
   <p class="text-strong" style="margin: 0; font-size: 0.875rem; flex: 1;">Ready to deploy?</p>
   <button class="surface-spotlight text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Deploy</button>
 </div>`'
@@ -43,8 +44,9 @@ A button using the opposite polarity pops against its container. The contrast ga
 />
 
 <LiveExample
-  surface="surface-spotlight"
-  :html='`<div style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+surface="surface-spotlight"
+:html='`<div style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+
   <p class="text-strong" style="margin: 0; font-size: 0.875rem; flex: 1;">Confirm your selection.</p>
   <button class="surface-page text-high" style="padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 500;">Confirm</button>
 </div>`'
