@@ -127,10 +127,21 @@ function isFg(si: number, ti: number) {
   return selectedFg.value?.scale === si && selectedFg.value?.step === ti;
 }
 
-function isDimmed(si: number, ti: number): boolean {
-  if (!selectedBg.value) return false;
-  if (isBg(si, ti) || isFg(si, ti)) return false;
-  return !swatchValid(si, ti);
+function isSameHueRow(si: number): boolean {
+  return selectedBg.value !== null && selectedBg.value.scale === si;
+}
+
+// Three swatch states when bg is selected:
+// 'same-hue-valid' — expressible, full brightness + Aa
+// 'cross-hue-valid' — contrast works but not expressible — softer
+// 'invalid' — fails contrast — dimmed
+function swatchState(si: number, ti: number): 'none' | 'same-hue-valid' | 'cross-hue-valid' | 'invalid' {
+  if (!selectedBg.value) return 'none';
+  if (isBg(si, ti)) return 'none';
+  if (isFg(si, ti)) return 'none';
+  if (!swatchValid(si, ti)) return 'invalid';
+  if (isSameHueRow(si)) return 'same-hue-valid';
+  return 'cross-hue-valid';
 }
 
 function clickSwatch(si: number, ti: number) {
@@ -148,12 +159,14 @@ function clickSwatch(si: number, ti: number) {
     selectedFg.value = null;
     return;
   }
+  // Any swatch with valid contrast can be selected as fg (even cross-hue)
   if (swatchValid(si, ti)) {
     selectedFg.value = { scale: si, step: ti };
     if (!hasEverCompleted.value) hasEverCompleted.value = true;
   } else {
-    selectedBg.value = { scale: si, step: ti };
-    selectedFg.value = null;
+    // Invalid: select it as fg anyway to show the failure reason
+    selectedFg.value = { scale: si, step: ti };
+    if (!hasEverCompleted.value) hasEverCompleted.value = true;
   }
 }
 
@@ -168,11 +181,15 @@ const isCrossHue = computed(() => {
   return selectedBg.value.scale !== selectedFg.value.scale;
 });
 
-// Should this swatch show an 'Aa' label? (valid foreground, bg is selected, not the bg itself)
+// Should this swatch show an 'Aa' label?
 function showAa(si: number, ti: number): boolean {
-  if (!selectedBg.value) return false;
-  if (isBg(si, ti)) return false;
-  return swatchValid(si, ti);
+  const state = swatchState(si, ti);
+  return state === 'same-hue-valid';
+}
+
+// Should this swatch show a dimmed 'Aa' (cross-hue valid)?
+function showCrossAa(si: number, ti: number): boolean {
+  return swatchState(si, ti) === 'cross-hue-valid';
 }
 
 // Get contrasting text color for rendering 'Aa' on a swatch
@@ -223,12 +240,13 @@ const nearestGrade = computed(() => {
             :class="{
               'is-bg': isBg(si, ti),
               'is-fg': isFg(si, ti),
-              dimmed: isDimmed(si, ti),
+              dimmed: swatchState(si, ti) === 'invalid',
+              'cross-hue': swatchState(si, ti) === 'cross-hue-valid',
               valid: showAa(si, ti),
             }"
             :style="{ background: step.css }"
             @click="clickSwatch(si, ti)"
-          ><span v-if="showAa(si, ti)" class="pg-swatch-aa" :style="{ color: aaColor(si, ti) }">Aa</span></button>
+          ><span v-if="showAa(si, ti)" class="pg-swatch-aa" :style="{ color: aaColor(si, ti) }">Aa</span><span v-else-if="showCrossAa(si, ti)" class="pg-swatch-aa cross" :style="{ color: aaColor(si, ti) }">Aa</span></button>
         </div>
       </div>
     </div>
@@ -261,24 +279,37 @@ const nearestGrade = computed(() => {
         </div>
         <div class="pg-strip-info">
           <ApcaBadge :value="achievedApca ?? 0" :target="75" />
-          <span v-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass"
-            >Passes for body text</span
-          >
-          <span v-else-if="(achievedApca ?? 0) >= 75" class="pg-verdict close"
-            >Large text only</span
-          >
-          <span v-else class="pg-verdict fail">Below APCA minimum</span>
-          <div v-if="isCrossHue" class="pg-cross-hue">
-            Text inherits the surface hue. This combination isn't expressible.
-          </div>
-          <div
-            v-else-if="nearestSurface && nearestGrade && (achievedApca ?? 0) >= 75"
-            class="pg-tokens"
-          >
-            <Token :name="`.surface-${nearestSurface.slug}`" />
-            <span class="pg-plus">+</span>
-            <Token :name="nearestGrade.label" />
-          </div>
+
+          <!-- Fails contrast entirely -->
+          <template v-if="(achievedApca ?? 0) < 75">
+            <span class="pg-verdict fail">Fails APCA minimum</span>
+            <span class="pg-fail-detail">
+              Needs Lc 75+, got {{ achievedApca }}. Not enough contrast for any text grade.
+            </span>
+          </template>
+
+          <!-- Valid contrast but cross-hue -->
+          <template v-else-if="isCrossHue">
+            <span v-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Contrast: pass</span>
+            <span v-else class="pg-verdict close">Contrast: large text only</span>
+            <div class="pg-cross-hue">
+              Text inherits the surface hue — this pair isn't expressible.
+            </div>
+          </template>
+
+          <!-- Valid and same-hue: show tokens -->
+          <template v-else>
+            <span v-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Passes for body text</span>
+            <span v-else class="pg-verdict close">Large text only</span>
+            <div
+              v-if="nearestSurface && nearestGrade"
+              class="pg-tokens"
+            >
+              <Token :name="`.surface-${nearestSurface.slug}`" />
+              <span class="pg-plus">+</span>
+              <Token :name="nearestGrade.label" />
+            </div>
+          </template>
         </div>
       </template>
 
@@ -368,6 +399,16 @@ const nearestGrade = computed(() => {
   line-height: 1;
   pointer-events: none;
 }
+.pg-swatch.cross-hue {
+  opacity: 0.45;
+}
+.pg-swatch.cross-hue:hover {
+  opacity: 0.7;
+  transform: scale(1.08);
+}
+.pg-swatch-aa.cross {
+  opacity: 0.5;
+}
 .pg-swatch.dimmed:hover {
   opacity: 0.4;
   transform: scale(1);
@@ -453,6 +494,10 @@ const nearestGrade = computed(() => {
   font-size: 0.75rem;
   color: var(--vp-c-yellow-2);
   font-style: italic;
+}
+.pg-fail-detail {
+  font-size: 0.7rem;
+  color: var(--vp-c-text-3);
 }
 .pg-annotation {
   width: 100%;
