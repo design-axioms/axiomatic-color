@@ -212,6 +212,11 @@ const nearestSurface = computed(() => {
   return best;
 });
 
+const surfaceDistance = computed(() => {
+  if (!bgColor.value || !nearestSurface.value) return null;
+  return Math.round(Math.abs(bgColor.value.l - nearestSurface.value.lightness[mode.value]) * 1000) / 1000;
+});
+
 const nearestGrade = computed(() => {
   if (achievedApca.value === null) return null;
   let best: (typeof TEXT_GRADE_TARGETS)[number] | null = null;
@@ -267,7 +272,15 @@ const nearestGrade = computed(() => {
             >Aa</span
           >
         </div>
-        <div class="pg-strip-prompt">Pick a bright swatch for text.</div>
+        <div class="pg-strip-prompt">
+          <div v-if="nearestSurface" class="pg-snap">
+            Nearest surface: <Token :name="`.surface-${nearestSurface.slug}`" />
+            <span v-if="surfaceDistance !== null && surfaceDistance > 0.02" class="pg-snap-note">
+              (L={{ bgColor!.l.toFixed(2) }} → {{ nearestSurface.lightness[mode].toFixed(2) }})
+            </span>
+          </div>
+          Pick a bright swatch for text.
+        </div>
       </template>
 
       <template v-else>
@@ -498,6 +511,20 @@ const nearestGrade = computed(() => {
 .pg-fail-detail {
   font-size: 0.7rem;
   color: var(--vp-c-text-3);
+}
+.pg-snap {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-2);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+.pg-snap-note {
+  font-size: 0.65rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
 }
 .pg-annotation {
   width: 100%;
