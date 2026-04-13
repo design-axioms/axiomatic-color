@@ -11,21 +11,22 @@ function generateScale(
   chroma: number,
   mode: "light" | "dark",
 ): { l: number; c: number; h: number; css: string }[] {
-  const steps = 10;
-  const result = [];
-  for (let i = 0; i < steps; i++) {
-    const t = i / (steps - 1);
-    const l = mode === "light" ? 0.97 - t * 0.87 : 0.13 + t * 0.82;
+  // Positions chosen to align with solved surface lightness values.
+  // Page surfaces cluster near L=0.90-0.98 (light), inverted near L=0.10-0.20.
+  const lightSteps = [0.98, 0.96, 0.92, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.18, 0.10];
+  const darkSteps = [0.10, 0.18, 0.25, 0.35, 0.40, 0.50, 0.60, 0.70, 0.80, 0.88, 0.93, 0.97];
+  const positions = mode === "light" ? lightSteps : darkSteps;
+
+  return positions.map((l) => {
     const taper = 1 - Math.abs(2 * l - 1);
     const c = chroma * taper;
-    result.push({
+    return {
       l,
       c,
       h: hue,
       css: `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${hue})`,
-    });
-  }
-  return result;
+    };
+  });
 }
 
 interface ScaleRow {
@@ -91,6 +92,29 @@ onMounted(async () => {
   ready.value = true;
 });
 
+// Which solved surface (if any) does this swatch map to? (within L threshold)
+const SURFACE_THRESHOLD = 0.06;
+
+function swatchSurface(si: number, ti: number): SolvedRef | null {
+  if (solvedSurfaces.value.length === 0) return null;
+  const step = scales.value[si].steps[ti];
+  const m = mode.value;
+  let best: SolvedRef | null = null;
+  let bestDist = Infinity;
+  for (const s of solvedSurfaces.value) {
+    const dist = Math.abs(s.lightness[m] - step.l);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = s;
+    }
+  }
+  return bestDist <= SURFACE_THRESHOLD ? best : null;
+}
+
+function isValidSurface(si: number, ti: number): boolean {
+  return swatchSurface(si, ti) !== null;
+}
+
 const bgColor = computed(() => {
   if (!selectedBg.value) return null;
   return scales.value[selectedBg.value.scale].steps[selectedBg.value.step];
@@ -144,7 +168,12 @@ function swatchState(si: number, ti: number): 'none' | 'same-hue-valid' | 'cross
   return 'cross-hue-valid';
 }
 
+// Message shown when clicking a non-surface swatch with no bg selected
+const notSurfaceMsg = ref<string | null>(null);
+
 function clickSwatch(si: number, ti: number) {
+  notSurfaceMsg.value = null;
+
   if (isBg(si, ti)) {
     selectedBg.value = null;
     selectedFg.value = null;
@@ -154,20 +183,32 @@ function clickSwatch(si: number, ti: number) {
     selectedFg.value = null;
     return;
   }
+
+  // No bg selected — trying to pick a surface
   if (!selectedBg.value) {
-    selectedBg.value = { scale: si, step: ti };
-    selectedFg.value = null;
+    const surface = swatchSurface(si, ti);
+    if (surface) {
+      selectedBg.value = { scale: si, step: ti };
+      selectedFg.value = null;
+    } else {
+      // Not near any surface — show why
+      const step = scales.value[si].steps[ti];
+      let nearest: SolvedRef | null = null;
+      let nearestDist = Infinity;
+      for (const s of solvedSurfaces.value) {
+        const dist = Math.abs(s.lightness[mode.value] - step.l);
+        if (dist < nearestDist) { nearestDist = dist; nearest = s; }
+      }
+      notSurfaceMsg.value = nearest
+        ? `L=${step.l.toFixed(2)} isn't a surface. Nearest: .surface-${nearest.slug} (L=${nearest.lightness[mode.value].toFixed(2)})`
+        : "No surfaces defined.";
+    }
     return;
   }
-  // Any swatch with valid contrast can be selected as fg (even cross-hue)
-  if (swatchValid(si, ti)) {
-    selectedFg.value = { scale: si, step: ti };
-    if (!hasEverCompleted.value) hasEverCompleted.value = true;
-  } else {
-    // Invalid: select it as fg anyway to show the failure reason
-    selectedFg.value = { scale: si, step: ti };
-    if (!hasEverCompleted.value) hasEverCompleted.value = true;
-  }
+
+  // Bg is selected — picking foreground. Any swatch can be selected to show the result.
+  selectedFg.value = { scale: si, step: ti };
+  if (!hasEverCompleted.value) hasEverCompleted.value = true;
 }
 
 watch(mode, () => {
@@ -248,6 +289,7 @@ const nearestGrade = computed(() => {
               dimmed: swatchState(si, ti) === 'invalid',
               'cross-hue': swatchState(si, ti) === 'cross-hue-valid',
               valid: showAa(si, ti),
+              'not-surface': !selectedBg && !isValidSurface(si, ti),
             }"
             :style="{ background: step.css }"
             @click="clickSwatch(si, ti)"
@@ -258,7 +300,8 @@ const nearestGrade = computed(() => {
 
     <div class="pg-strip" :class="{ active: !!selectedBg }">
       <div v-if="!selectedBg" class="pg-strip-empty">
-        Click any color to use it as a surface.
+        <span v-if="notSurfaceMsg" class="pg-not-surface">{{ notSurfaceMsg }}</span>
+        <span v-else>Click a highlighted swatch to use it as a surface.</span>
       </div>
 
       <template v-else-if="!selectedFg">
@@ -372,7 +415,7 @@ const nearestGrade = computed(() => {
   border: 1px solid rgba(0, 0, 0, 0.06);
   cursor: pointer;
   padding: 0;
-  min-height: 32px;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -398,6 +441,12 @@ const nearestGrade = computed(() => {
   outline-offset: 1px;
   transform: scale(1.08);
   z-index: 2;
+}
+.pg-swatch.not-surface {
+  opacity: 0.35;
+}
+.pg-swatch.not-surface:hover {
+  opacity: 0.6;
 }
 .pg-swatch.dimmed {
   opacity: 0.12;
@@ -507,6 +556,10 @@ const nearestGrade = computed(() => {
   font-size: 0.75rem;
   color: var(--vp-c-yellow-2);
   font-style: italic;
+}
+.pg-not-surface {
+  color: var(--vp-c-yellow-2);
+  font-size: 0.75rem;
 }
 .pg-fail-detail {
   font-size: 0.7rem;

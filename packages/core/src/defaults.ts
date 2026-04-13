@@ -14,8 +14,8 @@ export const DEFAULT_CONFIG: SolverConfig = {
       dark: { start: 0.1, end: 0.4 },
     },
     inverted: {
-      light: { start: 0.1, end: 0.0 },
-      dark: { start: 0.9, end: 1.0 },
+      light: { start: 0.1, end: 0.2 },
+      dark: { start: 0.9, end: 0.8 },
     },
     keyColors: {
       brand: "#6e56cf",
