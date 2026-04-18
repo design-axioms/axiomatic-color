@@ -233,10 +233,16 @@ function showCrossAa(si: number, ti: number): boolean {
   return swatchState(si, ti) === 'cross-hue-valid';
 }
 
-// Get contrasting text color for rendering 'Aa' on a swatch
-function aaColor(si: number, ti: number): string {
+// High-contrast marker color for a swatch
+function markerColor(si: number, ti: number): string {
   const step = scales.value[si].steps[ti];
-  return step.l > 0.5 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)';
+  return step.l > 0.5 ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)';
+}
+
+// Softer marker for invalid/cross-hue
+function softMarkerColor(si: number, ti: number): string {
+  const step = scales.value[si].steps[ti];
+  return step.l > 0.5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
 }
 
 const nearestSurface = computed(() => {
@@ -291,12 +297,12 @@ const nearestGrade = computed(() => {
             @click="clickSwatch(si, ti)"
           >
             <!-- Browse mode: dot on surface-capable swatches -->
-            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: step.l > 0.5 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }" />
+            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: step.l > 0.5 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }" />
             <!-- Surface selected: markers on other swatches -->
             <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
-              <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: aaColor(si, ti) }">Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'cross-hue-valid'" class="pg-marker pg-marker-cross" :style="{ color: aaColor(si, ti) }">Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: step.l > 0.5 ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)' }">×</span>
+              <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: markerColor(si, ti) }">Aa</span>
+              <span v-else-if="swatchState(si, ti) === 'cross-hue-valid'" class="pg-marker pg-marker-cross" :style="{ color: softMarkerColor(si, ti) }">Aa</span>
+              <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
             </template>
           </button>
         </div>
@@ -464,7 +470,6 @@ const nearestGrade = computed(() => {
 }
 
 .pg-marker-cross {
-  opacity: 0.45;
   border-bottom: 1px dashed currentColor;
   padding-bottom: 1px;
 }
