@@ -286,14 +286,19 @@ const nearestGrade = computed(() => {
             :class="{
               'is-bg': isBg(si, ti),
               'is-fg': isFg(si, ti),
-              dimmed: swatchState(si, ti) === 'invalid',
-              'cross-hue': swatchState(si, ti) === 'cross-hue-valid',
-              valid: showAa(si, ti),
-              'not-surface': !selectedBg && !isValidSurface(si, ti),
             }"
             :style="{ background: step.css }"
             @click="clickSwatch(si, ti)"
-          ><span v-if="showAa(si, ti)" class="pg-swatch-aa" :style="{ color: aaColor(si, ti) }">Aa</span><span v-else-if="showCrossAa(si, ti)" class="pg-swatch-aa cross" :style="{ color: aaColor(si, ti) }">Aa</span></button>
+          >
+            <!-- Browse mode: dot on surface-capable swatches -->
+            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: step.l > 0.5 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' }" />
+            <!-- Surface selected: markers on other swatches -->
+            <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
+              <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: aaColor(si, ti) }">Aa</span>
+              <span v-else-if="swatchState(si, ti) === 'cross-hue-valid'" class="pg-marker pg-marker-cross" :style="{ color: aaColor(si, ti) }">Aa</span>
+              <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: step.l > 0.5 ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)' }">×</span>
+            </template>
+          </button>
         </div>
       </div>
     </div>
@@ -442,38 +447,32 @@ const nearestGrade = computed(() => {
   transform: scale(1.08);
   z-index: 2;
 }
-.pg-swatch.not-surface {
-  opacity: 0.35;
+/* Surface-capable dot marker */
+.pg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
 }
-.pg-swatch.not-surface:hover {
-  opacity: 0.6;
-}
-.pg-swatch.dimmed {
-  opacity: 0.12;
-  transform: scale(0.88);
-}
-.pg-swatch.valid {
-  position: relative;
-}
-.pg-swatch-aa {
+
+/* Foreground markers */
+.pg-marker {
   font-size: 0.55rem;
   font-weight: 700;
   line-height: 1;
   pointer-events: none;
 }
-.pg-swatch.cross-hue {
+
+.pg-marker-cross {
   opacity: 0.45;
+  border-bottom: 1px dashed currentColor;
+  padding-bottom: 1px;
 }
-.pg-swatch.cross-hue:hover {
-  opacity: 0.7;
-  transform: scale(1.08);
-}
-.pg-swatch-aa.cross {
-  opacity: 0.5;
-}
-.pg-swatch.dimmed:hover {
-  opacity: 0.4;
-  transform: scale(1);
+
+.pg-marker-x {
+  font-size: 0.7rem;
+  font-weight: 400;
+  pointer-events: none;
 }
 
 .pg-strip {
