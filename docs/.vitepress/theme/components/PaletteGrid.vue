@@ -331,7 +331,6 @@ const nearestGrade = computed(() => {
         <button class="pg-close" @click="reset" title="Clear selection">×</button>
 
         <div class="pg-equation">
-          <!-- Row 1: slabs + operators + result -->
           <div class="pg-eq-slab" :style="{ background: bgColor!.css }">
             <span class="pg-eq-label" :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }">Surface</span>
           </div>
@@ -353,30 +352,24 @@ const nearestGrade = computed(() => {
             </template>
             <span v-else class="pg-eq-waiting">—</span>
           </div>
-
-          <!-- Row 2: token labels aligned under slabs -->
-          <div class="pg-eq-token">
-            <Token v-if="nearestSurface" :name="`.surface-${nearestSurface.slug}`" />
-          </div>
-          <div class="pg-eq-spacer" />
-          <div class="pg-eq-token">
-            <Token v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75" :name="nearestGrade.label" />
-            <span v-else-if="!selectedFg" class="pg-eq-pick">pick text ↑</span>
-          </div>
-          <div class="pg-eq-spacer" />
-          <div class="pg-eq-token" />
         </div>
 
-        <!-- Detail messages -->
-        <div v-if="selectedFg" class="pg-detail">
+        <!-- Tokens row: shows what the selection maps to in the system -->
+        <div v-if="nearestSurface" class="pg-eq-tokens">
+          <Token :name="`.surface-${nearestSurface.slug}`" />
+          <span class="pg-eq-tokens-op">+</span>
+          <Token v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75" :name="nearestGrade.label" />
+          <span v-else-if="!selectedFg" class="pg-eq-pick">pick text above</span>
+          <span v-else class="pg-eq-pick">—</span>
+        </div>
+
+        <!-- Detail messages — only for failure/cross-hue cases; success shown by token row above -->
+        <div v-if="selectedFg && ((achievedApca ?? 0) < 75 || isCrossHue)" class="pg-detail">
           <template v-if="(achievedApca ?? 0) < 75">
             <span class="pg-fail-detail">Needs Lc 75+, got {{ achievedApca }}.</span>
           </template>
           <template v-else-if="isCrossHue">
             <span class="pg-cross-hue">Text inherits the surface hue — this pair isn't expressible.</span>
-          </template>
-          <template v-else-if="nearestSurface && nearestGrade">
-            <span class="pg-expressible">In Axiomatic Color: <Token :name="`.surface-${nearestSurface.slug}`" /> + <Token :name="nearestGrade.label" /></span>
           </template>
         </div>
 
@@ -528,15 +521,25 @@ const nearestGrade = computed(() => {
   border-color: var(--vp-c-border);
 }
 
-/* 2-row grid: slabs+ops on top, tokens on bottom */
 .pg-equation {
-  display: grid;
-  grid-template-columns: auto auto auto auto auto 1fr;
-  grid-template-rows: auto auto;
+  display: flex;
   align-items: center;
-  gap: 0 0.5rem;
-  row-gap: 0.25rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   padding-right: 2rem; /* room for close button */
+}
+
+.pg-eq-tokens {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pg-eq-tokens-op {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
 }
 
 .pg-eq-slab {
@@ -588,17 +591,6 @@ const nearestGrade = computed(() => {
 .pg-eq-waiting {
   font-size: 0.9rem;
   color: var(--vp-c-text-3);
-}
-
-/* Row 2: token labels */
-.pg-eq-token {
-  display: flex;
-  justify-content: center;
-  min-height: 1.2rem;
-}
-
-.pg-eq-spacer {
-  /* empty cell under the + and = operators */
 }
 
 .pg-eq-pick {
