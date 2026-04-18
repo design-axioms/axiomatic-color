@@ -233,16 +233,22 @@ function showCrossAa(si: number, ti: number): boolean {
   return swatchState(si, ti) === 'cross-hue-valid';
 }
 
-// High-contrast marker color for a swatch
+// Pick black or white for maximum contrast against this swatch
 function markerColor(si: number, ti: number): string {
+  if (!contrastFn) return '#000';
   const step = scales.value[si].steps[ti];
-  return step.l > 0.5 ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)';
+  const blackContrast = Math.abs(contrastFn(0, step.l));
+  const whiteContrast = Math.abs(contrastFn(1, step.l));
+  return blackContrast > whiteContrast ? '#000' : '#fff';
 }
 
-// Softer marker for invalid/cross-hue
+// Same logic but at reduced opacity for secondary markers
 function softMarkerColor(si: number, ti: number): string {
+  if (!contrastFn) return 'rgba(0,0,0,0.5)';
   const step = scales.value[si].steps[ti];
-  return step.l > 0.5 ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
+  const blackContrast = Math.abs(contrastFn(0, step.l));
+  const whiteContrast = Math.abs(contrastFn(1, step.l));
+  return blackContrast > whiteContrast ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
 }
 
 const nearestSurface = computed(() => {
@@ -297,7 +303,7 @@ const nearestGrade = computed(() => {
             @click="clickSwatch(si, ti)"
           >
             <!-- Browse mode: dot on surface-capable swatches -->
-            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: step.l > 0.5 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }" />
+            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: markerColor(si, ti) }" />
             <!-- Surface selected: markers on other swatches -->
             <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
               <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: markerColor(si, ti) }">Aa</span>
