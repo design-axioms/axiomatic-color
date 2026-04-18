@@ -211,10 +211,13 @@ function clickSwatch(si: number, ti: number) {
   if (!hasEverCompleted.value) hasEverCompleted.value = true;
 }
 
-watch(mode, () => {
+function reset() {
   selectedBg.value = null;
   selectedFg.value = null;
-});
+  notSurfaceMsg.value = null;
+}
+
+watch(mode, reset);
 
 // Is the foreground from a different hue row than the background?
 const isCrossHue = computed(() => {
@@ -242,13 +245,13 @@ function markerColor(si: number, ti: number): string {
   return blackContrast > whiteContrast ? '#000' : '#fff';
 }
 
-// Same logic but at reduced opacity for secondary markers
+// Same logic but slightly softer for secondary markers
 function softMarkerColor(si: number, ti: number): string {
-  if (!contrastFn) return 'rgba(0,0,0,0.5)';
+  if (!contrastFn) return 'rgba(0,0,0,0.65)';
   const step = scales.value[si].steps[ti];
   const blackContrast = Math.abs(contrastFn(0, step.l));
   const whiteContrast = Math.abs(contrastFn(1, step.l));
-  return blackContrast > whiteContrast ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+  return blackContrast > whiteContrast ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.65)';
 }
 
 const nearestSurface = computed(() => {
@@ -315,81 +318,73 @@ const nearestGrade = computed(() => {
       </div>
     </div>
 
-    <div class="pg-strip" :class="{ active: !!selectedBg }">
-      <div v-if="!selectedBg" class="pg-strip-empty">
+    <!-- Composition workspace — always visible -->
+    <div class="pg-workspace">
+      <!-- Empty state -->
+      <div v-if="!selectedBg" class="pg-ws-empty">
         <span v-if="notSurfaceMsg" class="pg-not-surface">{{ notSurfaceMsg }}</span>
-        <span v-else>Click a highlighted swatch to use it as a surface.</span>
+        <span v-else class="pg-ws-hint">Click a <strong>dotted</strong> swatch to pick a surface.</span>
       </div>
 
-      <template v-else-if="!selectedFg">
-        <div class="pg-surface-slab" :style="{ background: bgColor!.css }">
-          <span
-            class="pg-ghost"
-            :style="{
-              color:
-                bgColor!.l > 0.5 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)',
-            }"
-            >Aa</span
-          >
-        </div>
-        <div class="pg-strip-prompt">
-          <div v-if="nearestSurface" class="pg-snap">
-            Nearest surface: <Token :name="`.surface-${nearestSurface.slug}`" />
-            <span v-if="surfaceDistance !== null && surfaceDistance > 0.02" class="pg-snap-note">
-              (L={{ bgColor!.l.toFixed(2) }} → {{ nearestSurface.lightness[mode].toFixed(2) }})
-            </span>
-          </div>
-          Pick a bright swatch for text.
-        </div>
-      </template>
-
+      <!-- Composition equation: surface + text = result -->
       <template v-else>
-        <div class="pg-surface-slab" :style="{ background: bgColor!.css }">
-          <span class="pg-live-text" :style="{ color: fgColor!.css }">Aa</span>
-          <span class="pg-live-body" :style="{ color: fgColor!.css }"
-            >Body text</span
-          >
-        </div>
-        <div class="pg-strip-info">
-          <ApcaBadge :value="achievedApca ?? 0" :target="75" />
+        <button class="pg-close" @click="reset" title="Clear selection">×</button>
 
-          <!-- Fails contrast entirely -->
+        <div class="pg-equation">
+          <!-- Row 1: slabs + operators + result -->
+          <div class="pg-eq-slab" :style="{ background: bgColor!.css }">
+            <span class="pg-eq-label" :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }">Surface</span>
+          </div>
+          <span class="pg-eq-op">+</span>
+          <div v-if="fgColor" class="pg-eq-slab" :style="{ background: bgColor!.css }">
+            <span class="pg-eq-aa" :style="{ color: fgColor!.css }">Aa</span>
+          </div>
+          <div v-else class="pg-eq-slab pg-eq-placeholder" :style="{ background: bgColor!.css }">
+            <span class="pg-eq-ghost" :style="{ color: bgColor!.l > 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }">Aa</span>
+          </div>
+          <span class="pg-eq-op">=</span>
+          <div class="pg-eq-result">
+            <template v-if="selectedFg">
+              <ApcaBadge :value="achievedApca ?? 0" :target="75" />
+              <span v-if="(achievedApca ?? 0) < 75" class="pg-verdict fail">Fails</span>
+              <span v-else-if="isCrossHue" class="pg-verdict close">Wrong hue</span>
+              <span v-else-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Pass</span>
+              <span v-else class="pg-verdict close">Large only</span>
+            </template>
+            <span v-else class="pg-eq-waiting">—</span>
+          </div>
+
+          <!-- Row 2: token labels aligned under slabs -->
+          <div class="pg-eq-token">
+            <Token v-if="nearestSurface" :name="`.surface-${nearestSurface.slug}`" />
+          </div>
+          <div class="pg-eq-spacer" />
+          <div class="pg-eq-token">
+            <Token v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75" :name="nearestGrade.label" />
+            <span v-else-if="!selectedFg" class="pg-eq-pick">pick text ↑</span>
+          </div>
+          <div class="pg-eq-spacer" />
+          <div class="pg-eq-token" />
+        </div>
+
+        <!-- Detail messages -->
+        <div v-if="selectedFg" class="pg-detail">
           <template v-if="(achievedApca ?? 0) < 75">
-            <span class="pg-verdict fail">Fails APCA minimum</span>
-            <span class="pg-fail-detail">
-              Needs Lc 75+, got {{ achievedApca }}. Not enough contrast for any text grade.
-            </span>
+            <span class="pg-fail-detail">Needs Lc 75+, got {{ achievedApca }}.</span>
           </template>
-
-          <!-- Valid contrast but cross-hue -->
           <template v-else-if="isCrossHue">
-            <span v-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Contrast: pass</span>
-            <span v-else class="pg-verdict close">Contrast: large text only</span>
-            <div class="pg-cross-hue">
-              Text inherits the surface hue — this pair isn't expressible.
-            </div>
+            <span class="pg-cross-hue">Text inherits the surface hue — this pair isn't expressible.</span>
           </template>
-
-          <!-- Valid and same-hue: show tokens -->
-          <template v-else>
-            <span v-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Passes for body text</span>
-            <span v-else class="pg-verdict close">Large text only</span>
-            <div
-              v-if="nearestSurface && nearestGrade"
-              class="pg-tokens"
-            >
-              <Token :name="`.surface-${nearestSurface.slug}`" />
-              <span class="pg-plus">+</span>
-              <Token :name="nearestGrade.label" />
-            </div>
+          <template v-else-if="nearestSurface && nearestGrade">
+            <span class="pg-expressible">In Axiomatic Color: <Token :name="`.surface-${nearestSurface.slug}`" /> + <Token :name="nearestGrade.label" /></span>
           </template>
         </div>
-      </template>
 
-      <p v-if="hasEverCompleted && hasPair" class="pg-annotation">
-        You just did manual contrast checking. The system does this for every
-        combination, in both modes, automatically.
-      </p>
+        <p v-if="hasEverCompleted && hasPair" class="pg-annotation">
+          You just did manual contrast checking. The system does this for every
+          combination, in both modes, automatically.
+        </p>
+      </template>
     </div>
   </div>
 </template>
@@ -486,58 +481,141 @@ const nearestGrade = computed(() => {
   pointer-events: none;
 }
 
-.pg-strip {
+/* --- Composition workspace --- */
+.pg-workspace {
   border-top: 1px solid var(--vp-c-divider);
   padding: 0.75rem;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
   background: var(--vp-c-bg-soft);
+  min-height: 56px;
+  position: relative;
 }
 
-.pg-strip-empty {
+.pg-ws-empty {
   font-size: 0.8rem;
   color: var(--vp-c-text-3);
-  width: 100%;
   text-align: center;
   padding: 0.25rem 0;
 }
 
-.pg-surface-slab {
-  width: 80px;
-  height: 56px;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.1rem;
-  flex-shrink: 0;
-}
-.pg-ghost {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-.pg-strip-prompt {
-  font-size: 0.8rem;
+.pg-ws-hint strong {
+  font-weight: 600;
   color: var(--vp-c-text-2);
 }
-.pg-live-text {
-  font-size: 1.4rem;
+
+.pg-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-3);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 1;
+}
+
+.pg-close:hover {
+  background: var(--vp-c-bg-alt);
+  color: var(--vp-c-text-1);
+  border-color: var(--vp-c-border);
+}
+
+/* 2-row grid: slabs+ops on top, tokens on bottom */
+.pg-equation {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 0.5rem;
+  row-gap: 0.25rem;
+  padding-right: 2rem; /* room for close button */
+}
+
+.pg-eq-slab {
+  width: 56px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.pg-eq-label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pg-eq-aa {
+  font-size: 1.1rem;
   font-weight: 700;
   line-height: 1;
 }
-.pg-live-body {
-  font-size: 0.6rem;
+
+.pg-eq-ghost {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.pg-strip-info {
+.pg-eq-placeholder {
+  border: 1px dashed rgba(128, 128, 128, 0.3);
+}
+
+.pg-eq-op {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--vp-c-text-3);
+  text-align: center;
+}
+
+.pg-eq-result {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+}
+
+.pg-eq-waiting {
+  font-size: 0.9rem;
+  color: var(--vp-c-text-3);
+}
+
+/* Row 2: token labels */
+.pg-eq-token {
+  display: flex;
+  justify-content: center;
+  min-height: 1.2rem;
+}
+
+.pg-eq-spacer {
+  /* empty cell under the + and = operators */
+}
+
+.pg-eq-pick {
+  font-size: 0.6rem;
+  color: var(--vp-c-text-3);
+}
+
+.pg-detail {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.pg-expressible {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--vp-c-text-2);
   flex-wrap: wrap;
 }
 .pg-verdict {
