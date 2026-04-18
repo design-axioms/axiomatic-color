@@ -14,11 +14,11 @@ let systemSheetPromise: Promise<CSSStyleSheet> | undefined;
 export function getSystemStyleSheet(): Promise<CSSStyleSheet> {
   return (systemSheetPromise ??= Promise.resolve().then(() => {
     const output = solve(DEFAULT_CONFIG);
-    const cssText = generateCSS(output, {
-      ...DEFAULT_CONFIG.options,
-      selector: ":host",
-      keyColors: DEFAULT_CONFIG.anchors.keyColors,
-    });
+    const opts = { ...DEFAULT_CONFIG.options, selector: ":host" as const };
+    const keyColors = DEFAULT_CONFIG.anchors.keyColors;
+    const cssText = keyColors
+      ? generateCSS(output, { ...opts, keyColors })
+      : generateCSS(output, opts);
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(cssText);
     return sheet;

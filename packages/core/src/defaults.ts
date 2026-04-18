@@ -14,8 +14,8 @@ export const DEFAULT_CONFIG: SolverConfig = {
       dark: { start: 0.1, end: 0.4 },
     },
     inverted: {
-      light: { start: 0.1, end: 0.2 },
-      dark: { start: 0.9, end: 0.8 },
+      light: { start: 0.1, end: 0.0 },
+      dark: { start: 0.9, end: 1.0 },
     },
     keyColors: {
       brand: "#6e56cf",
@@ -80,22 +80,6 @@ export const DEFAULT_CONFIG: SolverConfig = {
           label: "Spotlight",
           description: "Inverted emphasis surface.",
           polarity: "inverted",
-        },
-        {
-          slug: "spotlight-card",
-          label: "Spotlight Card",
-          description: "Elevated container within inverted context.",
-          polarity: "inverted",
-          contrastOffset: { light: 15, dark: 15 },
-        },
-        {
-          slug: "spotlight-action",
-          label: "Spotlight Action",
-          description: "Interactive element within inverted context.",
-          polarity: "inverted",
-          hue: "accent",
-          targetChroma: 0.12,
-          contrastOffset: { light: 25, dark: 25 },
         },
       ],
     },
