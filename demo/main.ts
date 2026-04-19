@@ -25,7 +25,7 @@ style.textContent = css;
 document.head.appendChild(style);
 
 // ThemeBuilder handles polarity flips for spotlight
-const builder = createThemeBuilder();
+createThemeBuilder();
 
 // Mode toggle
 let dark = false;
