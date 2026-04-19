@@ -5,14 +5,14 @@
  * elements on semantic surfaces, using APCA as the contrast metric.
  */
 
-export { DEFAULT_CONFIG } from "./defaults.js";
+export { DEFAULT_CONFIG } from "./defaults.ts";
 export {
   formatOklchHex,
   generateCSS,
   generateHTML,
   parseKeyColor,
-} from "./generator/index.js";
-export { solve } from "./solver/index.js";
+} from "./generator/index.ts";
+export { solve } from "./solver/index.ts";
 
 export type {
   Anchors,
@@ -32,7 +32,7 @@ export type {
   SurfaceGroup,
   SurfaceState,
   TextGrades,
-} from "./types.js";
+} from "./types.ts";
 
-export { SAFETY_MARGINS, TEXT_GRADES } from "./types.js";
-export { contrastForPair } from "./math.js";
+export { SAFETY_MARGINS, TEXT_GRADES } from "./types.ts";
+export { contrastForPair } from "./math.ts";

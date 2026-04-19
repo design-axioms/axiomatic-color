@@ -6,9 +6,9 @@
  * handles the rest.
  */
 
-import type { SolvedSurface, SolverConfig, SolverOutput } from "../types.js";
-import { contrastForPair } from "../math.js";
-import { generateCSS } from "./css.js";
+import type { SolvedSurface, SolverConfig, SolverOutput } from "../types.ts";
+import { contrastForPair } from "../math.ts";
+import { generateCSS } from "./css.ts";
 
 // --- Public API ---
 

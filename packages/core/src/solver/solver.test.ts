@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG } from "../defaults.js";
-import { generateCSS } from "../generator/css.js";
-import { contrastForPair, contrastWithChroma } from "../math.js";
-import type { SolverConfig } from "../types.js";
-import { solve } from "./index.js";
+import { DEFAULT_CONFIG } from "../defaults.ts";
+import { generateCSS } from "../generator/css.ts";
+import { contrastForPair, contrastWithChroma } from "../math.ts";
+import type { SolverConfig } from "../types.ts";
+import { solve } from "./index.ts";
 
 /**
  * Rich config fixture — exercises multiple key colors, status surfaces

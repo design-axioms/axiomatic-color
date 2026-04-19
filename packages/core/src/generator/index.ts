@@ -1,2 +1,2 @@
-export { formatOklchHex, generateCSS, parseKeyColor } from "./css.js";
-export { generateHTML } from "./html.js";
+export { formatOklchHex, generateCSS, parseKeyColor } from "./css.ts";
+export { generateHTML } from "./html.ts";

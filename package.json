@@ -12,6 +12,7 @@
     "check": "tsc --build",
     "lint": "eslint .",
     "clean": "pnpm --filter './packages/*' clean",
+    "cli": "node --conditions=design-axioms:source packages/cli/src/index.ts",
     "demo:dev": "vite --config demo/vite.config.ts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

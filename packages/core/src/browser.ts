@@ -1,8 +1,8 @@
 /// <reference lib="dom" />
 
-import { DEFAULT_CONFIG } from "./defaults.js";
-import { generateCSS } from "./generator/index.js";
-import { solve } from "./solver/index.js";
+import { DEFAULT_CONFIG } from "./defaults.ts";
+import { generateCSS } from "./generator/index.ts";
+import { solve } from "./solver/index.ts";
 
 let systemSheetPromise: Promise<CSSStyleSheet> | undefined;
 

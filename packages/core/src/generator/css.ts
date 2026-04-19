@@ -12,7 +12,7 @@
  * - Taper as single calc() expression (§5)
  */
 
-import type { SolvedSurface, SolverOutput } from "../types.js";
+import type { SolvedSurface, SolverOutput } from "../types.ts";
 import { converter, formatHex, parse } from "culori";
 
 const toOklch = converter("oklch");
