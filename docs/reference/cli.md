@@ -27,10 +27,12 @@ Example output:
 ```
 === LIGHT MODE ===
   page: L=0.9750, polarity=page
-  workspace: L=0.9566, polarity=page
+  workspace: L=0.9550, polarity=page
     ⚠ unmet text grades: high
-  card: L=0.9016, polarity=page
+  card: L=0.9000, polarity=page
     ⚠ unmet text grades: high, strong, subtle
+  spotlight: L=0.1000, polarity=inverted
+  spotlight-card: L=0.1800, polarity=inverted
 
   Composition:
     page ↔ spotlight: 102.6 APCA [guarantee]

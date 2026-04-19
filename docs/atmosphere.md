@@ -52,14 +52,12 @@ Key colors are named hex values that the solver parses into hue and chroma. <Tok
 
 ```js
 // In the solver config
-anchors: {
-  keyColors: {
-    brand: "#6e56cf",
-    accent: "#0891b2",
-    success: "#22c55e",
-    warning: "#eab308",
-    error: "#ef4444",
-  }
+keyColors: {
+  brand: "#6e56cf",
+  accent: "#0891b2",
+  success: "#22c55e",
+  warning: "#eab308",
+  error: "#ef4444",
 }
 ```
 
