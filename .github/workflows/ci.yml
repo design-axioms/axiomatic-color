@@ -26,5 +26,8 @@ jobs:
       - name: Run tests
         run: pnpm exec vitest run
 
-      - name: Build core
-        run: pnpm --filter @design-axioms/color build
+      - name: Type-check workspace
+        run: pnpm exec tsc --build
+
+      - name: Build all packages
+        run: pnpm -r build

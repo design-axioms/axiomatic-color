@@ -1,9 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true
+    "composite": true,
+    "verbatimModuleSyntax": false,
+    "rewriteRelativeImportExtensions": false,
+    "allowImportingTsExtensions": false,
+    "types": ["vscode", "node"]
   },
   "references": [{ "path": "../core" }],
   "include": ["src"],

@@ -22,6 +22,7 @@
     "@design-axioms/color": "workspace:^",
     "@fontsource/geist-mono": "^5.2.7",
     "@fontsource/geist-sans": "^5.2.5",
+    "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.2",
     "culori": "^4.0.1",
     "markdown-it-mathjax3": "^4.3.2",
