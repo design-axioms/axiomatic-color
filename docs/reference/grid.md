@@ -1,6 +1,6 @@
-# Validity Grid
+# Surface × Token Matrix
 
-Every surface × token combination, with achieved contrast.
+A diagnostic view: every surface × every token, with achieved APCA contrast. Useful for validating your config and surfacing "noisy no" cases where a target is unmet.
 
 <ValidityGrid />
 
