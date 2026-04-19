@@ -5,7 +5,7 @@
  * Anchor values from the original system, validated by experiments.
  */
 
-import type { SolverConfig } from "./types.js";
+import type { SolverConfig } from "./types.ts";
 
 export const DEFAULT_CONFIG: SolverConfig = {
   anchors: {

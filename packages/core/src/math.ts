@@ -9,8 +9,8 @@
 import { APCAcontrast, sRGBtoY } from "apca-w3";
 import { clampChroma, converter } from "culori";
 
-import type { Context, SafetyMargin } from "./types.js";
-import { SAFETY_MARGINS } from "./types.js";
+import type { Context, SafetyMargin } from "./types.ts";
+import { SAFETY_MARGINS } from "./types.ts";
 
 const toRgb = converter("rgb");
 

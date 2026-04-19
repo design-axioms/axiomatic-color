@@ -17,14 +17,14 @@ import {
   roundLightness,
   safetyMarginForChroma,
   textCeiling,
-} from "../math.js";
+} from "../math.ts";
 import type {
   CompositionReport,
   CompositionTier,
   Context,
   SolvedSurface,
-} from "../types.js";
-import { TEXT_GRADES } from "../types.js";
+} from "../types.ts";
+import { TEXT_GRADES } from "../types.ts";
 
 /**
  * Pre-solve text lightness values for a surface.

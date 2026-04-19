@@ -9,8 +9,8 @@
  * all contrast targets.
  */
 
-import { binarySearchLightness, clampTo, contrastForPair } from "../math.js";
-import type { Context, ModeAnchors, SurfaceGroup } from "../types.js";
+import { binarySearchLightness, clampTo, contrastForPair } from "../math.ts";
+import type { Context, ModeAnchors, SurfaceGroup } from "../types.ts";
 
 /**
  * Solve background lightness for a target APCA contrast against the

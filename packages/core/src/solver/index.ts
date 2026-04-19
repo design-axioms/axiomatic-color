@@ -13,16 +13,16 @@ import type {
   SolvedSurface,
   SolverConfig,
   SolverOutput,
-} from "../types.js";
-import { TEXT_GRADES } from "../types.js";
+} from "../types.ts";
+import { TEXT_GRADES } from "../types.ts";
 import { converter, parse } from "culori";
-import { planSurfacePlacements } from "./planner.js";
+import { planSurfacePlacements } from "./planner.ts";
 import {
   classifyComposition,
   solveBorderValues,
   solveTextValues,
   validateTargets,
-} from "./validator.js";
+} from "./validator.ts";
 
 const toOklch = converter("oklch");
 

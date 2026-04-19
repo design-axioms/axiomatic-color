@@ -1,9 +1,9 @@
 /// <reference lib="dom" />
 
-import type { SolverConfig } from "./types.js";
-import { DEFAULT_CONFIG } from "./defaults.js";
-import { solve } from "./solver/index.js";
-import { generateCSS } from "./generator/css.js";
+import type { SolverConfig } from "./types.ts";
+import { DEFAULT_CONFIG } from "./defaults.ts";
+import { solve } from "./solver/index.ts";
+import { generateCSS } from "./generator/css.ts";
 
 export interface ReactiveTheme {
   /** The constructible stylesheet — adopt into shadow roots or document */
