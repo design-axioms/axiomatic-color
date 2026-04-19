@@ -28,7 +28,7 @@ function rebuildCSS() {
   css.value = generateCSSFn(output, {
     ...config.options,
     selector: ".border-preview-root",
-    keyColors: config.anchors.keyColors,
+    keyColors: config.keyColors,
   });
   ready.value = true;
 }

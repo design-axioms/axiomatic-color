@@ -16,8 +16,11 @@ export const DEFAULT_CONFIG: SolverConfig = {
       dark: [0.1, 0.18, 0.25, 0.32, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
     },
     inverted: {
-      light: [0.1, 0.08, 0.06, 0.04, 0.02],
-      dark: [0.9, 0.92, 0.94, 0.96, 0.98],
+      // Position 0 is most "inverted-committed" (darkest in light mode,
+      // lightest in dark mode). Higher positions step back toward the
+      // opposite polarity's territory without crossing.
+      light: [0.1, 0.14, 0.18, 0.22, 0.26],
+      dark: [0.9, 0.86, 0.82, 0.78, 0.74],
     },
   },
   surfaces: {

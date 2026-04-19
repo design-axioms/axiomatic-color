@@ -38,11 +38,14 @@ onMounted(async () => {
     ["dark", darkSurfaces] as const,
   ]) {
     const result: Array<{ name: string; l: number }> = [];
-    for (const group of DEFAULT_CONFIG.groups) {
-      for (const s of group.surfaces) {
-        const solved = output[mode].surfaces.find((x) => x.slug === s.slug);
+    for (const polarity of ["page", "inverted"] as const) {
+      const bucket = DEFAULT_CONFIG.surfaces[polarity];
+      if (!bucket) continue;
+      for (const [slug, spec] of Object.entries(bucket)) {
+        const label = typeof spec === "number" ? slug : spec.label ?? slug;
+        const solved = output[mode].surfaces.find((x) => x.slug === slug);
         if (!solved) continue;
-        result.push({ name: s.label, l: solved.lightness });
+        result.push({ name: label, l: solved.lightness });
       }
     }
     result.sort((a, b) => a.l - b.l);

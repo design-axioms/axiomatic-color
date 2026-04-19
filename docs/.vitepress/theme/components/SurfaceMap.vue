@@ -30,19 +30,22 @@ function rebuildCSS() {
   css.value = generateCSSFn(output, {
     ...config.options,
     selector: ".surface-map-root",
-    keyColors: config.anchors.keyColors,
+    keyColors: config.keyColors,
   });
 
   const result: SurfaceInfo[] = [];
-  for (const group of config.groups) {
-    for (const s of group.surfaces) {
-      const light = output.light.surfaces.find((x) => x.slug === s.slug);
-      const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      const light = output.light.surfaces.find((x) => x.slug === slug);
+      const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (!light || !dark) continue;
       result.push({
-        slug: s.slug,
-        label: s.label,
-        polarity: s.polarity,
+        slug,
+        label,
+        polarity,
         lightness: { light: light.lightness, dark: dark.lightness },
       });
     }

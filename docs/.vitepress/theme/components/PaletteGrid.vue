@@ -6,17 +6,25 @@ import ApcaBadge from "./ApcaBadge.vue";
 
 const { isDark } = useDarkMode();
 
+type PaletteStep = { l: number; c: number; h: number; css: string };
+
+// Palette lightness, lazily loaded from the solver package so the grid
+// tracks the real scale rather than a hand-tuned parallel copy.
+//
+// Layout: page scale first (position 0 → N), then inverted scale in its
+// natural order (position 0 = most-extreme-inverted). At the polarity
+// boundary the scale turns around (light mode: bright → dark → back-up
+// slightly) but at those low lightness values the turn-around is
+// imperceptible; what matters is that un-dotted swatches end up at the
+// row edge rather than mid-run.
+const paletteLightness = ref<{ light: number[]; dark: number[] } | null>(null);
+
 function generateScale(
   hue: number,
   chroma: number,
   mode: "light" | "dark",
-): { l: number; c: number; h: number; css: string }[] {
-  // Positions chosen to align with solved surface lightness values.
-  // Page surfaces cluster near L=0.90-0.98 (light), inverted near L=0.10-0.20.
-  const lightSteps = [0.98, 0.96, 0.92, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.18, 0.10];
-  const darkSteps = [0.10, 0.18, 0.25, 0.35, 0.40, 0.50, 0.60, 0.70, 0.80, 0.88, 0.93, 0.97];
-  const positions = mode === "light" ? lightSteps : darkSteps;
-
+): PaletteStep[] {
+  const positions = paletteLightness.value?.[mode] ?? [];
   return positions.map((l) => {
     const taper = 1 - Math.abs(2 * l - 1);
     const c = chroma * taper;
@@ -74,16 +82,27 @@ const TEXT_GRADE_TARGETS = [
 onMounted(async () => {
   const mod = await import("@design-axioms/color");
   contrastFn = mod.contrastForPair;
-  const output = mod.solve(mod.DEFAULT_CONFIG);
+  const config = mod.DEFAULT_CONFIG;
+  const output = mod.solve(config);
+
+  paletteLightness.value = {
+    light: [...config.scale.page.light, ...config.scale.inverted.light],
+    dark: [...config.scale.page.dark, ...config.scale.inverted.dark],
+  };
+
   const refs: SolvedRef[] = [];
-  for (const group of mod.DEFAULT_CONFIG.groups) {
-    for (const s of group.surfaces) {
-      const light = output.light.surfaces.find((x) => x.slug === s.slug);
-      const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label =
+        typeof spec === "number" ? slug : spec.label ?? slug;
+      const light = output.light.surfaces.find((x) => x.slug === slug);
+      const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (light && dark)
         refs.push({
-          slug: s.slug,
-          label: s.label,
+          slug,
+          label,
           lightness: { light: light.lightness, dark: dark.lightness },
         });
     }
