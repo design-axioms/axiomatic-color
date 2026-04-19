@@ -5,17 +5,17 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
+      "design-axioms:source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./browser": {
-      "development": "./src/browser-entry.ts",
+      "design-axioms:source": "./src/browser-entry.ts",
       "types": "./dist/browser-entry.d.ts",
       "default": "./dist/browser-entry.js"
     },
     "./runtime": {
-      "development": "./src/runtime.ts",
+      "design-axioms:source": "./src/runtime.ts",
       "types": "./dist/runtime.d.ts",
       "default": "./dist/runtime.js"
     }
