@@ -51,7 +51,7 @@ if (command === "build") {
   const output = solve(config);
   const css = generateCSS(output, {
     ...config.options,
-    ...(config.anchors.keyColors && { keyColors: config.anchors.keyColors }),
+    ...(config.keyColors && { keyColors: config.keyColors }),
   });
 
   if (outputPath) {

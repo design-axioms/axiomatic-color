@@ -1,133 +1,99 @@
 /**
  * Surface placement planner.
  *
- * Distributes surfaces across the lightness range for a given context,
- * respecting group ordering, contrast offsets, and anchor bounds.
+ * Scale-based: each surface gets its lightness directly from the scale
+ * at its declared position. No spreading, no contrast math, no clamping.
  *
- * Architecture note (§2): the planner places surfaces on the ladder.
+ * Architecture note (§2): the planner places surfaces on the scale.
  * The validator (separate step) checks that the placement achieves
  * all contrast targets.
  */
 
-import { binarySearchLightness, clampTo, contrastForPair } from "../math.ts";
-import type { Context, ModeAnchors, SurfaceGroup } from "../types.ts";
+import type {
+  Context,
+  ModeScale,
+  SurfaceConfig,
+  SurfaceSpec,
+} from "../types.ts";
+
+export interface PlannedSurface {
+  readonly slug: string;
+  readonly lightness: number;
+  readonly position: number;
+  /** True if the surface's position was out-of-bounds and clamped. */
+  readonly clamped: boolean;
+}
 
 /**
- * Solve background lightness for a target APCA contrast against the
- * start anchor, within the allowed lightness bounds.
+ * Normalize a SurfaceSpec (bare number or config object) to a full config.
  */
-function solveBackgroundForContrast(
-  ctx: Context,
-  targetContrast: number,
-  minBg: number,
-  maxBg: number,
-): number {
-  // Reference point is the start anchor (brightest for light page, darkest for dark page)
-  const refL =
-    ctx.mode === "light"
-      ? ctx.polarity === "page"
-        ? 1.0
-        : 0.0
-      : ctx.polarity === "page"
-        ? 0.0
-        : 1.0;
-
-  return binarySearchLightness(
-    minBg,
-    maxBg,
-    (candidate) => contrastForPair(refL, candidate),
-    targetContrast,
-  );
-}
-
-interface PlannedSurface {
-  slug: string;
-  lightness: number;
-  targetContrast: number;
-  clamped: boolean;
+export function normalizeSurface(spec: SurfaceSpec): SurfaceConfig {
+  return typeof spec === "number" ? { position: spec } : spec;
 }
 
 /**
- * Place all surfaces on the lightness ladder for a given context.
+ * Look up the lightness at a scale position.
  *
- * Returns a map of slug → planned lightness. Does NOT validate
- * text contrast or composition — that's the validator's job.
+ * If position is out of bounds, clamps to the nearest valid index and
+ * reports it. Out-of-bounds positions are a config bug — the solver
+ * still produces a value so downstream code doesn't crash.
+ */
+function lightnessAt(
+  scale: ModeScale,
+  position: number,
+): { lightness: number; position: number; clamped: boolean } {
+  if (scale.length === 0) {
+    return { lightness: 0.5, position, clamped: true };
+  }
+  const maxIndex = scale.length - 1;
+  const clampedIndex = Math.max(0, Math.min(maxIndex, position));
+  const clamped = clampedIndex !== position;
+  return {
+    lightness: scale[clampedIndex]!,
+    position: clampedIndex,
+    clamped,
+  };
+}
+
+/**
+ * Place all surfaces in a polarity bucket on the scale for a given context.
+ *
+ * Returns a map of slug → planned lightness. Does NOT validate text
+ * contrast or composition — that's the validator's job.
  */
 export function planSurfacePlacements(
-  ctx: Context,
-  anchors: ModeAnchors,
-  groups: readonly SurfaceGroup[],
+  _ctx: Context,
+  scale: ModeScale,
+  surfaces: { readonly [slug: string]: SurfaceSpec },
 ): Map<string, PlannedSurface> {
   const result = new Map<string, PlannedSurface>();
-  if (groups.length === 0) return result;
 
-  const [minBg, maxBg] = [
-    Math.min(anchors.start, anchors.end),
-    Math.max(anchors.start, anchors.end),
-  ];
+  for (const [slug, spec] of Object.entries(surfaces)) {
+    const surface = normalizeSurface(spec);
+    const placed = lightnessAt(scale, surface.position);
 
-  const startContrast = contrastForPair(
-    ctx.mode === "light" ? 1 : 0,
-    anchors.start,
-  );
-  const endContrast = contrastForPair(
-    ctx.mode === "light" ? 1 : 0,
-    anchors.end,
-  );
-
-  const totalGroups = groups.length;
-  const delta =
-    totalGroups > 1 ? (endContrast - startContrast) / (totalGroups - 1) : 0;
-
-  const minContrast = Math.min(startContrast, endContrast);
-  const maxContrast = Math.max(startContrast, endContrast);
-
-  groups.forEach((group, groupIndex) => {
-    const gap = group.gapBefore ?? 0;
-    const adjustedIndex = groupIndex + gap;
-    const groupBase = startContrast + delta * adjustedIndex;
-
-    group.surfaces.forEach((surface, surfaceIndex) => {
-      const intraStep = delta * 0.2;
-      const stagger = surfaceIndex * intraStep;
-      const offset = surface.contrastOffset?.[ctx.mode] ?? 0;
-      const target = groupBase + stagger + offset;
-      const clamped = clampTo(target, minContrast, maxContrast);
-      const wasClamped = Math.abs(target - clamped) > 0.01;
-
-      const lightness = solveBackgroundForContrast(ctx, clamped, minBg, maxBg);
-
-      result.set(surface.slug, {
-        slug: surface.slug,
-        lightness,
-        targetContrast: clamped,
-        clamped: wasClamped,
-      });
-
-      // Solve states
-      if (surface.states) {
-        for (const state of surface.states) {
-          const stateTarget = clampTo(
-            clamped + state.offset,
-            minContrast,
-            maxContrast,
-          );
-          const stateL = solveBackgroundForContrast(
-            ctx,
-            stateTarget,
-            minBg,
-            maxBg,
-          );
-          result.set(`${surface.slug}-${state.name}`, {
-            slug: `${surface.slug}-${state.name}`,
-            lightness: stateL,
-            targetContrast: stateTarget,
-            clamped: Math.abs(clamped + state.offset - stateTarget) > 0.01,
-          });
-        }
-      }
+    result.set(slug, {
+      slug,
+      lightness: placed.lightness,
+      position: placed.position,
+      clamped: placed.clamped,
     });
-  });
+
+    // Solve states — each state is a position offset from the base
+    if (surface.states) {
+      for (const [stateName, state] of Object.entries(surface.states)) {
+        const stateSlug = `${slug}-${stateName}`;
+        const statePos = surface.position + state.positionOffset;
+        const statePlaced = lightnessAt(scale, statePos);
+        result.set(stateSlug, {
+          slug: stateSlug,
+          lightness: statePlaced.lightness,
+          position: statePlaced.position,
+          clamped: statePlaced.clamped,
+        });
+      }
+    }
+  }
 
   return result;
 }

@@ -27,7 +27,7 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
   function buildCSS(): string {
     const output = solve(current);
     const opts = { ...current.options, selector: ":host" as const };
-    const keyColors = current.anchors.keyColors;
+    const keyColors = current.keyColors;
     return keyColors
       ? generateCSS(output, { ...opts, keyColors })
       : generateCSS(output, opts);
@@ -40,10 +40,10 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
     sheet,
 
     setKeyColor(name: string, hex: string) {
-      const keyColors = { ...current.anchors.keyColors, [name]: hex };
+      const keyColors = { ...current.keyColors, [name]: hex };
       current = {
         ...current,
-        anchors: { ...current.anchors, keyColors },
+        keyColors,
       };
       sheet.replaceSync(buildCSS());
       for (const fn of listeners) fn();

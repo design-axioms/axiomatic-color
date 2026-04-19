@@ -15,22 +15,23 @@ export {
 export { solve } from "./solver/index.ts";
 
 export type {
-  Anchors,
   CompositionReport,
   CompositionTier,
   Context,
   Mode,
-  ModeAnchors,
+  ModeScale,
   Oklch,
   Polarity,
-  PolarityAnchors,
+  PolarityScale,
+  Scale,
   SolvedMode,
   SolvedSurface,
   SolverConfig,
   SolverOutput,
   SurfaceConfig,
-  SurfaceGroup,
+  SurfaceSpec,
   SurfaceState,
+  Surfaces,
   TextGrades,
 } from "./types.ts";
 
