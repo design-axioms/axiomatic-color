@@ -51,6 +51,26 @@ export const DEFAULT_CONFIG: SolverConfig = {
         label: "Spotlight",
         description: "Inverted emphasis surface.",
       },
+      "spotlight-card": {
+        position: 2,
+        label: "Spotlight Card",
+        description: "Card-like container inside a spotlight region.",
+        states: {
+          hover: { positionOffset: 1 },
+          active: { positionOffset: 2 },
+        },
+      },
+      "spotlight-action": {
+        position: 2,
+        label: "Spotlight Action",
+        description: "Clickable action surface inside a spotlight region.",
+        hue: "accent",
+        targetChroma: 0.12,
+        states: {
+          hover: { positionOffset: 1 },
+          active: { positionOffset: 2 },
+        },
+      },
     },
   },
   keyColors: {
