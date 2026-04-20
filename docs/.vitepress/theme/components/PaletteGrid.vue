@@ -257,6 +257,20 @@ const isCrossHue = computed(() => {
   return selectedBg.value.scale !== selectedFg.value.scale;
 });
 
+// Badge status for the composition equation. Mirrors the verdict text:
+//   Fails      -> unmet  (Lc < 75)
+//   Wrong hue  -> close  (cross-hue, any Lc)
+//   Large only -> close  (same-hue, Lc 75-89)
+//   Pass       -> met    (same-hue, Lc 90+)
+// Keeps the badge color honest: green only when the verdict is 'Pass'.
+const verdictStatus = computed<"met" | "close" | "unmet">(() => {
+  const apca = achievedApca.value ?? 0;
+  if (apca < 75) return "unmet";
+  if (isCrossHue.value) return "close";
+  if (apca >= 90) return "met";
+  return "close";
+});
+
 // Should this swatch show an 'Aa' label?
 function showAa(si: number, ti: number): boolean {
   const state = swatchState(si, ti);
@@ -387,7 +401,7 @@ const nearestGrade = computed(() => {
           <span class="pg-eq-op">=</span>
           <div class="pg-eq-result">
             <template v-if="selectedFg">
-              <ApcaBadge :value="achievedApca ?? 0" :target="75" />
+              <ApcaBadge :value="achievedApca ?? 0" :status="verdictStatus" />
               <span v-if="(achievedApca ?? 0) < 75" class="pg-verdict fail">Fails</span>
               <span v-else-if="isCrossHue" class="pg-verdict close">Wrong hue</span>
               <span v-else-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Pass</span>

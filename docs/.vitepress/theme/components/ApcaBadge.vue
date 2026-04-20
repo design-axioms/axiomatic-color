@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+type BadgeStatus = "met" | "close" | "unmet" | "info";
+
 const props = defineProps<{
   value: number;
   target?: number;
   label?: string;
+  /** Override the computed status. Useful when the caller knows better
+   * (e.g. distinguishing 'large only' from 'comfortable pass'). */
+  status?: BadgeStatus;
 }>();
 
-const status = computed(() =>
-  props.target
-    ? props.value >= props.target
-      ? "met"
-      : props.value >= props.target * 0.9
-        ? "close"
-        : "unmet"
-    : "info",
-);
+const status = computed<BadgeStatus>(() => {
+  if (props.status) return props.status;
+  if (!props.target) return "info";
+  if (props.value >= props.target) return "met";
+  if (props.value >= props.target * 0.9) return "close";
+  return "unmet";
+});
 </script>
 
 <template>
