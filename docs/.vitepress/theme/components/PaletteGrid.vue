@@ -163,6 +163,19 @@ function swatchValid(si: number, ti: number): boolean {
   return apca !== null && apca >= 75;
 }
 
+// Which text grade (if any) the fg-on-selected-bg pair achieves.
+// Mirrors TEXT_GRADES from the core package: high=100, strong=95,
+// subtle=90, subtlest=75. subtlest is the 'large only' floor.
+type SwatchGrade = "high" | "strong" | "subtle" | "subtlest" | "fail";
+function swatchGrade(si: number, ti: number): SwatchGrade {
+  const apca = swatchApca(si, ti);
+  if (apca === null || apca < 75) return "fail";
+  if (apca >= 100) return "high";
+  if (apca >= 95) return "strong";
+  if (apca >= 90) return "subtle";
+  return "subtlest";
+}
+
 function isBg(si: number, ti: number) {
   return selectedBg.value?.scale === si && selectedBg.value?.step === ti;
 }
@@ -326,10 +339,21 @@ const nearestGrade = computed(() => {
           >
             <!-- Browse mode: dot on surface-capable swatches -->
             <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: markerColor(si, ti) }" />
-            <!-- Surface selected: markers on other swatches -->
+            <!-- Surface selected: markers on other swatches, tiered by
+                 achieved text grade (high/strong/subtle/subtlest/fail). -->
             <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
-              <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: markerColor(si, ti) }">Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'cross-hue-valid'" class="pg-marker pg-marker-cross" :style="{ color: softMarkerColor(si, ti) }">Aa</span>
+              <span
+                v-if="swatchState(si, ti) === 'same-hue-valid'"
+                class="pg-marker"
+                :class="`pg-marker-${swatchGrade(si, ti)}`"
+                :style="{ color: markerColor(si, ti) }"
+              >Aa</span>
+              <span
+                v-else-if="swatchState(si, ti) === 'cross-hue-valid'"
+                class="pg-marker pg-marker-cross"
+                :class="`pg-marker-${swatchGrade(si, ti)}`"
+                :style="{ color: softMarkerColor(si, ti) }"
+              >Aa</span>
               <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
             </template>
           </button>
@@ -474,12 +498,33 @@ const nearestGrade = computed(() => {
   pointer-events: none;
 }
 
-/* Foreground markers */
+/* Foreground markers — tiered by achieved text grade.
+   Larger + bolder = stronger contrast tier (closer to high=100). */
 .pg-marker {
-  font-size: 0.55rem;
-  font-weight: 700;
   line-height: 1;
   pointer-events: none;
+}
+
+/* high = Lc 100+ — full size, bold */
+.pg-marker-high {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+/* strong = Lc 95+ — slightly smaller */
+.pg-marker-strong {
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+/* subtle = Lc 90+ — medium weight */
+.pg-marker-subtle {
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+/* subtlest = Lc 75+ — 'large only' tier. Thin to signal marginal. */
+.pg-marker-subtlest {
+  font-size: 0.5rem;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .pg-marker-cross {

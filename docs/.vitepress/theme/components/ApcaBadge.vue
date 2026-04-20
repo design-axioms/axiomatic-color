@@ -1,17 +1,21 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
 const props = defineProps<{
   value: number;
   target?: number;
   label?: string;
 }>();
 
-const status = props.target
-  ? props.value >= props.target
-    ? "met"
-    : props.value >= props.target * 0.9
-      ? "close"
-      : "unmet"
-  : "info";
+const status = computed(() =>
+  props.target
+    ? props.value >= props.target
+      ? "met"
+      : props.value >= props.target * 0.9
+        ? "close"
+        : "unmet"
+    : "info",
+);
 </script>
 
 <template>
