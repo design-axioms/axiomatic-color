@@ -200,6 +200,18 @@ function swatchState(si: number, ti: number): 'none' | 'same-hue-valid' | 'cross
   return 'cross-hue-valid';
 }
 
+// Which marker variant (if any) to show on a non-bg swatch. Unlike
+// swatchState, this also applies to the selected fg — its marker stays
+// visible so the chosen text tier is legible at a glance.
+type MarkerTier = 'same' | 'cross' | 'fail' | 'none';
+function markerTier(si: number, ti: number): MarkerTier {
+  if (!selectedBg.value) return 'none';
+  if (isBg(si, ti)) return 'none';
+  if (!swatchValid(si, ti)) return 'fail';
+  if (isSameHueRow(si)) return 'same';
+  return 'cross';
+}
+
 // Message shown when clicking a non-surface swatch with no bg selected
 const notSurfaceMsg = ref<string | null>(null);
 
@@ -353,22 +365,25 @@ const nearestGrade = computed(() => {
           >
             <!-- Browse mode: dot on surface-capable swatches -->
             <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: markerColor(si, ti) }" />
-            <!-- Surface selected: markers on other swatches, tiered by
-                 achieved text grade (high/strong/subtle/subtlest/fail). -->
-            <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
+            <!-- Surface selected: markers on all non-bg swatches, tiered by
+                 achieved text grade (high/strong/subtle/subtlest/fail).
+                 The selected fg keeps its Aa because that's the whole
+                 point — it's the text sample. The bg stays empty (it's
+                 the surface/context, not a text choice). -->
+            <template v-else-if="selectedBg && !isBg(si, ti)">
               <span
-                v-if="swatchState(si, ti) === 'same-hue-valid'"
+                v-if="markerTier(si, ti) === 'same'"
                 class="pg-marker"
                 :class="`pg-marker-${swatchGrade(si, ti)}`"
                 :style="{ color: markerColor(si, ti) }"
               >Aa</span>
               <span
-                v-else-if="swatchState(si, ti) === 'cross-hue-valid'"
+                v-else-if="markerTier(si, ti) === 'cross'"
                 class="pg-marker pg-marker-cross"
                 :class="`pg-marker-${swatchGrade(si, ti)}`"
                 :style="{ color: softMarkerColor(si, ti) }"
               >Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
+              <span v-else-if="markerTier(si, ti) === 'fail'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
             </template>
           </button>
         </div>
