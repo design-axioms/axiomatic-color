@@ -392,10 +392,10 @@ const nearestGrade = computed(() => {
             <span class="pg-eq-label" :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }">Surface</span>
           </div>
           <span class="pg-eq-op">+</span>
-          <div v-if="fgColor" class="pg-eq-slab" :style="{ background: bgColor!.css }">
+          <div v-if="fgColor" class="pg-eq-slab pg-eq-slab-fg" :style="{ background: bgColor!.css }">
             <span class="pg-eq-aa" :style="{ color: fgColor!.css }">Aa</span>
           </div>
-          <div v-else class="pg-eq-slab pg-eq-placeholder" :style="{ background: bgColor!.css }">
+          <div v-else class="pg-eq-slab pg-eq-slab-fg pg-eq-placeholder" :style="{ background: bgColor!.css }">
             <span class="pg-eq-ghost" :style="{ color: bgColor!.l > 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }">Aa</span>
           </div>
           <span class="pg-eq-op">=</span>
@@ -491,18 +491,26 @@ const nearestGrade = computed(() => {
   z-index: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
-.pg-swatch.is-bg {
-  outline: 3px solid var(--vp-c-text-1);
+/* bg and fg selection share a common vocabulary: heavy dark outline.
+   Solid = background (surface); dashed = foreground (text). The same
+   treatment is echoed on the equation chips below so the eye connects
+   a chip to its source swatch. A white halo (via box-shadow) keeps the
+   outline visible against any swatch lightness. */
+.pg-swatch.is-bg,
+.pg-swatch.is-fg {
+  outline-color: var(--vp-c-text-1);
+  outline-width: 3px;
   outline-offset: 1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
   transform: scale(1.08);
   z-index: 2;
+}
+.pg-swatch.is-bg {
+  outline-style: solid;
   border-radius: 2px;
 }
 .pg-swatch.is-fg {
-  outline: 3px solid var(--vp-c-brand-1);
-  outline-offset: 1px;
-  transform: scale(1.08);
-  z-index: 2;
+  outline-style: dashed;
 }
 /* Surface-capable dot marker */
 .pg-dot {
@@ -620,6 +628,8 @@ const nearestGrade = computed(() => {
   color: var(--vp-c-text-3);
 }
 
+/* Equation chips echo the swatch outlines (same solid-vs-dashed vocab,
+   same white halo) so the eye links each chip to its source swatch. */
 .pg-eq-slab {
   width: 56px;
   height: 44px;
@@ -627,7 +637,13 @@ const nearestGrade = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  outline: 3px solid var(--vp-c-text-1);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.pg-eq-slab-fg {
+  outline-style: dashed;
 }
 
 .pg-eq-label {
@@ -650,7 +666,8 @@ const nearestGrade = computed(() => {
 }
 
 .pg-eq-placeholder {
-  border: 1px dashed rgba(128, 128, 128, 0.3);
+  outline-style: dashed;
+  outline-color: rgba(128, 128, 128, 0.4);
 }
 
 .pg-eq-op {
