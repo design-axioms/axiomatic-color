@@ -495,22 +495,27 @@ const nearestGrade = computed(() => {
    Solid = background (surface); dashed = foreground (text). The same
    treatment is echoed on the equation chips below so the eye connects
    a chip to its source swatch. A white halo (via box-shadow) keeps the
-   outline visible against any swatch lightness. */
+   outline visible against any swatch lightness.
+
+   `!important` is used because VitePress's base style sets
+   `button:focus:not(:focus-visible) { outline: none !important }` to
+   suppress browser-default focus rings. Our selection outline is a
+   semantic state, not a focus ring, and needs to win. */
 .pg-swatch.is-bg,
 .pg-swatch.is-fg {
-  outline-color: var(--vp-c-text-1);
-  outline-width: 3px;
-  outline-offset: 1px;
+  outline-color: var(--vp-c-text-1) !important;
+  outline-width: 3px !important;
+  outline-offset: 1px !important;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
   transform: scale(1.08);
   z-index: 2;
 }
 .pg-swatch.is-bg {
-  outline-style: solid;
+  outline-style: solid !important;
   border-radius: 2px;
 }
 .pg-swatch.is-fg {
-  outline-style: dashed;
+  outline-style: dashed !important;
 }
 /* Surface-capable dot marker */
 .pg-dot {
