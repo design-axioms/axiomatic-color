@@ -32,7 +32,7 @@ Example output:
   card: L=0.9000, polarity=page
     ⚠ unmet text grades: high, strong, subtle
   spotlight: L=0.1000, polarity=inverted
-  spotlight-card: L=0.1800, polarity=inverted
+  spotlight-card: L=0.1200, polarity=inverted
 
   Composition:
     page ↔ spotlight: 102.6 APCA [guarantee]

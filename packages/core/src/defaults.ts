@@ -16,11 +16,15 @@ export const DEFAULT_CONFIG: SolverConfig = {
       dark: [0.1, 0.18, 0.25, 0.32, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
     },
     inverted: {
-      // Position 0 is most "inverted-committed" (darkest in light mode,
-      // lightest in dark mode). Higher positions step back toward the
-      // opposite polarity's territory without crossing.
-      light: [0.1, 0.14, 0.18, 0.22, 0.26],
-      dark: [0.9, 0.86, 0.82, 0.78, 0.74],
+      // Inverted lives in a narrow lightness band. Two constraints bound it:
+      // - Dark-mode APCA ceiling collapses below L=0.88 (subtle grade
+      //   becomes unreachable), which caps how light an inverted surface
+      //   can be in dark mode.
+      // - Cross-polarity contrast against page needs L>=0.88 in dark mode
+      //   to maintain the 80+ APCA guarantee from composition §6.
+      // Two positions is what genuinely fits within both constraints.
+      light: [0.1, 0.12],
+      dark: [0.9, 0.88],
     },
   },
   surfaces: {
@@ -55,24 +59,16 @@ export const DEFAULT_CONFIG: SolverConfig = {
         description: "Inverted emphasis surface.",
       },
       "spotlight-card": {
-        position: 2,
+        position: 1,
         label: "Spotlight Card",
         description: "Card-like container inside a spotlight region.",
-        states: {
-          hover: { positionOffset: 1 },
-          active: { positionOffset: 2 },
-        },
       },
       "spotlight-action": {
-        position: 2,
+        position: 1,
         label: "Spotlight Action",
         description: "Clickable action surface inside a spotlight region.",
         hue: "accent",
         targetChroma: 0.12,
-        states: {
-          hover: { positionOffset: 1 },
-          active: { positionOffset: 2 },
-        },
       },
     },
   },

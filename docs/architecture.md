@@ -65,7 +65,7 @@ At L = 0.5, the taper preserves full chroma. At L = 0 or L = 1, it reduces chrom
 
 ### Tier 1: Guarantees
 
-- Text on any surface meets its APCA target grade.
+- Text on any surface either meets its APCA target grade or surfaces a diagnostic ("noisy no") naming the grade that couldn't be reached.
 - Cross-polarity surface pairs remain visually distinct with an 80+ APCA gap.
 - Atmosphere is correct and inheritable.
 
