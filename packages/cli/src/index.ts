@@ -7,12 +7,7 @@
  */
 
 import type { SolverConfig } from "@design-axioms/color";
-import {
-  DEFAULT_CONFIG,
-  generateCSS,
-  generateHTML,
-  solve,
-} from "@design-axioms/color";
+import { DEFAULT_CONFIG, generateCSS, generateHTML, solve } from "@design-axioms/color";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -77,26 +72,18 @@ if (command === "build") {
           console.log(`    ⚠ unmet text grades: ${unmetTextGrades.join(", ")}`);
         }
         if (unmetBorderTiers.length > 0) {
-          console.log(
-            `    ⚠ unmet border tiers: ${unmetBorderTiers.join(", ")}`,
-          );
+          console.log(`    ⚠ unmet border tiers: ${unmetBorderTiers.join(", ")}`);
         }
       }
       if (surface.lightnessHighContrast !== undefined) {
-        console.log(
-          `    HC: L=${surface.lightnessHighContrast.toFixed(4)}`,
-        );
+        console.log(`    HC: L=${surface.lightnessHighContrast.toFixed(4)}`);
         if (surface.diagnosticsHighContrast) {
           const hc = surface.diagnosticsHighContrast;
           if (hc.unmetTextGrades.length > 0) {
-            console.log(
-              `      ⚠ HC unmet text grades: ${hc.unmetTextGrades.join(", ")}`,
-            );
+            console.log(`      ⚠ HC unmet text grades: ${hc.unmetTextGrades.join(", ")}`);
           }
           if (hc.unmetBorderTiers.length > 0) {
-            console.log(
-              `      ⚠ HC unmet border tiers: ${hc.unmetBorderTiers.join(", ")}`,
-            );
+            console.log(`      ⚠ HC unmet border tiers: ${hc.unmetBorderTiers.join(", ")}`);
           }
           if (hc.highContrastInDeadZone) {
             console.log(`      ⚠ HC lightness in dead zone (0.46-0.82)`);

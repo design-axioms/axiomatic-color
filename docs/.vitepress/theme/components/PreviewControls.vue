@@ -34,14 +34,14 @@ onMounted(async () => {
 });
 
 const landmarksJson = computed(() => {
-  if (!props.keyColors) return undefined;
+  if (!props.keyColors) return;
   const items = Object.entries(props.keyColors)
     .map(([name, { hue, chroma }]) => ({
       value: hue,
       color: `oklch(0.6 ${chroma} ${hue})`,
       name,
     }))
-    .sort((a, b) => a.value - b.value);
+    .toSorted((a, b) => a.value - b.value);
   return JSON.stringify(items);
 });
 
@@ -100,10 +100,7 @@ function onLandmarkClick(e: Event) {
       <span class="slider-val">{{ chroma.toFixed(2) }}</span>
     </label>
 
-    <DarkToggle
-      :model-value="isDark"
-      @update:model-value="emit('update:isDark', $event)"
-    />
+    <DarkToggle :model-value="isDark" @update:model-value="emit('update:isDark', $event)" />
   </div>
 </template>
 
@@ -145,5 +142,4 @@ function onLandmarkClick(e: Event) {
   text-align: right;
   flex-shrink: 0;
 }
-
 </style>

@@ -3,8 +3,7 @@ import { resolve } from "node:path";
 
 export default defineConfig({
   title: "Axiomatic Color",
-  description:
-    "A physics engine for design — guarantees contrast correctness using APCA",
+  description: "A physics engine for design — guarantees contrast correctness using APCA",
   markdown: {
     math: true,
   },
@@ -18,10 +17,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "@design-axioms/color": resolve(
-          __dirname,
-          "../../packages/core/src/browser-entry.ts",
-        ),
+        "@design-axioms/color": resolve(__dirname, "../../packages/core/src/browser-entry.ts"),
       },
     },
   },
@@ -59,8 +55,6 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [
-      { icon: "github", link: "https://github.com/design-axioms/color" },
-    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/design-axioms/color" }],
   },
 });

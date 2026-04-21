@@ -9,12 +9,7 @@
  * all contrast targets.
  */
 
-import type {
-  Context,
-  ModeScale,
-  SurfaceConfig,
-  SurfaceSpec,
-} from "../types.ts";
+import type { Context, ModeScale, SurfaceConfig, SurfaceSpec } from "../types.ts";
 
 export interface PlannedSurface {
   readonly slug: string;

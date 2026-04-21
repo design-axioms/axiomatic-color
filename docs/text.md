@@ -15,8 +15,9 @@ If a target can't be fully met, the solver reports the shortfall.
 ## Usage
 
 <LiveExample
-  surface="surface-page"
-  :html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px;">
+surface="surface-page"
+:html='`<div class="surface-card" style="padding: 1.25rem; border-radius: 6px;">
+
   <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Account Settings</h1>
   <p class="text-strong" style="font-size: 0.875rem; margin: 0 0 0.25rem;">Manage your profile and preferences.</p>
   <p class="text-subtle" style="font-size: 0.8125rem; margin: 0 0 0.25rem;">Last updated 3 days ago.</p>
@@ -31,8 +32,9 @@ If a target can't be fully met, the solver reports the shortfall.
 />
 
 <LiveExample
-  surface="surface-spotlight"
-  :html='`<div style="padding: 1.25rem;">
+surface="surface-spotlight"
+:html='`<div style="padding: 1.25rem;">
+
   <h1 class="text-high" style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem;">Deployment Status</h1>
   <p class="text-strong" style="font-size: 0.875rem; margin: 0 0 0.25rem;">Production is healthy across all regions.</p>
   <p class="text-subtle" style="font-size: 0.8125rem; margin: 0 0 0.25rem;">Next scheduled check in 12 minutes.</p>

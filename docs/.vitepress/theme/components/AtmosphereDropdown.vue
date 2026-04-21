@@ -14,13 +14,11 @@ const { theme } = useReactiveTheme();
 const keyColors = useKeyColors();
 
 // Async-loaded core functions
-const formatFn = ref<((l: number, c: number, h: number) => string) | null>(
-  null,
-);
-const parseFn = ref<
-  ((color: string) => { hue: number; chroma: number } | null) | null
+const formatFn = ref<((l: number, c: number, h: number) => string) | null>(null);
+const parseFn = ref<((color: string) => { hue: number; chroma: number } | null) | null>(null);
+const displayableFn = ref<
+  ((color: { mode: string; l: number; c: number; h: number }) => boolean) | null
 >(null);
-const displayableFn = ref<((color: { mode: string; l: number; c: number; h: number }) => boolean) | null>(null);
 
 onMounted(async () => {
   const [coreMod, culoriMod] = await Promise.all([
@@ -37,7 +35,8 @@ onMounted(async () => {
 function maxChroma(hue: number): number {
   if (!displayableFn.value) return 0.4;
   const check = displayableFn.value;
-  let lo = 0, hi = 0.4;
+  let lo = 0,
+    hi = 0.4;
   for (let i = 0; i < 20; i++) {
     const mid = (lo + hi) / 2;
     if (check({ mode: "oklch", l: 0.6, c: mid, h: hue })) lo = mid;
@@ -54,8 +53,7 @@ const brandHex = computed(
   () => formatFn.value?.(0.6, brand.chroma.value, brand.hue.value) ?? "#000000",
 );
 const accentHex = computed(
-  () =>
-    formatFn.value?.(0.6, accent.chroma.value, accent.hue.value) ?? "#000000",
+  () => formatFn.value?.(0.6, accent.chroma.value, accent.hue.value) ?? "#000000",
 );
 
 // Per-row editing state
@@ -94,15 +92,10 @@ function commitRow(row: "brand" | "accent") {
 // Semantic presets only (not brand/accent — those are the editable channels)
 const SEMANTIC_KEYS = ["success", "warning", "error"] as const;
 const semanticPresets = computed(() =>
-  SEMANTIC_KEYS.map((name) => [name, keyColors.value[name]] as const).filter(
-    ([, kc]) => kc,
-  ),
+  SEMANTIC_KEYS.map((name) => [name, keyColors.value[name]] as const).filter(([, kc]) => kc),
 );
 
-function isPresetActive(
-  row: "brand" | "accent",
-  kc: { hue: number; chroma: number },
-) {
+function isPresetActive(row: "brand" | "accent", kc: { hue: number; chroma: number }) {
   const h = row === "brand" ? brand.hue.value : accent.hue.value;
   const c = row === "brand" ? brand.chroma.value : accent.chroma.value;
   return Math.abs(h - kc.hue) < 2 && Math.abs(c - kc.chroma) < 0.01;
@@ -119,10 +112,7 @@ const defaultAccentParsed = { hue: 194.769, chroma: 0.108 };
 const brandAnchorChroma = ref(defaultBrandParsed.chroma);
 const accentAnchorChroma = ref(defaultAccentParsed.chroma);
 
-function selectPreset(
-  row: "brand" | "accent",
-  kc: { hue: number; chroma: number; hex: string },
-) {
+function selectPreset(row: "brand" | "accent", kc: { hue: number; chroma: number; hex: string }) {
   if (row === "brand") brandAnchorChroma.value = kc.chroma;
   else accentAnchorChroma.value = kc.chroma;
   theme.value?.setKeyColor(row, kc.hex);
@@ -138,10 +128,7 @@ function resetToDefault(row: "brand" | "accent") {
   const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
   if (row === "brand") brandAnchorChroma.value = def.chroma;
   else accentAnchorChroma.value = def.chroma;
-  theme.value?.setKeyColor(
-    row,
-    row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT,
-  );
+  theme.value?.setKeyColor(row, row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT);
 }
 
 function isModified(row: "brand" | "accent") {
@@ -153,9 +140,9 @@ function isModified(row: "brand" | "accent") {
 
 // Hue landmarks: semantic colors only (not brand/accent)
 const semanticLandmarks = computed(() => {
-  const entries = SEMANTIC_KEYS.map(
-    (name) => [name, keyColors.value[name]] as const,
-  ).filter(([, kc]) => kc);
+  const entries = SEMANTIC_KEYS.map((name) => [name, keyColors.value[name]] as const).filter(
+    ([, kc]) => kc,
+  );
   return JSON.stringify(
     entries.map(([name, kc]) => ({
       value: kc.hue,
@@ -170,21 +157,25 @@ const brandChromaLandmarks = computed(() => {
   const anchor = brandAnchorChroma.value;
   const max = brandMaxChroma.value;
   if (anchor >= max) return "[]";
-  return JSON.stringify([{
-    value: anchor,
-    color: `oklch(0.6 ${anchor} ${brand.hue.value})`,
-    name: "anchor",
-  }]);
+  return JSON.stringify([
+    {
+      value: anchor,
+      color: `oklch(0.6 ${anchor} ${brand.hue.value})`,
+      name: "anchor",
+    },
+  ]);
 });
 const accentChromaLandmarks = computed(() => {
   const anchor = accentAnchorChroma.value;
   const max = accentMaxChroma.value;
   if (anchor >= max) return "[]";
-  return JSON.stringify([{
-    value: anchor,
-    color: `oklch(0.6 ${anchor} ${accent.hue.value})`,
-    name: "anchor",
-  }]);
+  return JSON.stringify([
+    {
+      value: anchor,
+      color: `oklch(0.6 ${anchor} ${accent.hue.value})`,
+      name: "anchor",
+    },
+  ]);
 });
 
 // Slider event handlers — call setHue/setChroma directly (no watches)
@@ -283,9 +274,7 @@ const indicatorStyle = computed(() => {
                 @input="onHueInput('brand', $event)"
                 @landmark-click="onLandmarkClick('brand', $event)"
               />
-              <span class="slider-value"
-                >{{ Math.round(brand.hue.value) }}°</span
-              >
+              <span class="slider-value">{{ Math.round(brand.hue.value) }}°</span>
             </div>
             <div class="slider-row">
               <color-slider
@@ -299,9 +288,7 @@ const indicatorStyle = computed(() => {
                 @input="onChromaInput('brand', $event)"
                 @landmark-click="onChromaLandmarkClick('brand', $event)"
               />
-              <span class="slider-value">{{
-                brand.chroma.value.toFixed(2)
-              }}</span>
+              <span class="slider-value">{{ brand.chroma.value.toFixed(2) }}</span>
             </div>
           </div>
           <div class="panel-presets">
@@ -378,9 +365,7 @@ const indicatorStyle = computed(() => {
                 @input="onHueInput('accent', $event)"
                 @landmark-click="onLandmarkClick('accent', $event)"
               />
-              <span class="slider-value"
-                >{{ Math.round(accent.hue.value) }}°</span
-              >
+              <span class="slider-value">{{ Math.round(accent.hue.value) }}°</span>
             </div>
             <div class="slider-row">
               <color-slider
@@ -394,9 +379,7 @@ const indicatorStyle = computed(() => {
                 @input="onChromaInput('accent', $event)"
                 @landmark-click="onChromaLandmarkClick('accent', $event)"
               />
-              <span class="slider-value">{{
-                accent.chroma.value.toFixed(2)
-              }}</span>
+              <span class="slider-value">{{ accent.chroma.value.toFixed(2) }}</span>
             </div>
           </div>
           <div class="panel-presets">
@@ -435,10 +418,7 @@ const indicatorStyle = computed(() => {
       <!-- Mode controls: viewing context that affects every surface -->
       <div class="mode-row">
         <HcToggle />
-        <DarkToggle
-          :model-value="isDark"
-          @update:model-value="isDark = $event"
-        />
+        <DarkToggle :model-value="isDark" @update:model-value="isDark = $event" />
       </div>
     </div>
   </div>

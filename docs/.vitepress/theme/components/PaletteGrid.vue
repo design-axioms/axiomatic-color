@@ -6,7 +6,12 @@ import ApcaBadge from "./ApcaBadge.vue";
 
 const { isDark } = useDarkMode();
 
-type PaletteStep = { l: number; c: number; h: number; css: string };
+interface PaletteStep {
+  l: number;
+  c: number;
+  h: number;
+  css: string;
+}
 
 // Palette lightness, lazily loaded from the solver package so the grid
 // tracks the real scale rather than a hand-tuned parallel copy.
@@ -19,11 +24,7 @@ type PaletteStep = { l: number; c: number; h: number; css: string };
 // row edge rather than mid-run.
 const paletteLightness = ref<{ light: number[]; dark: number[] } | null>(null);
 
-function generateScale(
-  hue: number,
-  chroma: number,
-  mode: "light" | "dark",
-): PaletteStep[] {
+function generateScale(hue: number, chroma: number, mode: "light" | "dark"): PaletteStep[] {
   const positions = paletteLightness.value?.[mode] ?? [];
   return positions.map((l) => {
     const taper = 1 - Math.abs(2 * l - 1);
@@ -44,9 +45,7 @@ interface ScaleRow {
   steps: { l: number; c: number; h: number; css: string }[];
 }
 
-const mode = computed<"light" | "dark">(() =>
-  isDark.value ? "dark" : "light",
-);
+const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
 
 const scales = computed<ScaleRow[]>(() => {
   const m = mode.value;
@@ -97,8 +96,7 @@ onMounted(async () => {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     for (const [slug, spec] of Object.entries(bucket)) {
-      const label =
-        typeof spec === "number" ? slug : spec.label ?? slug;
+      const label = typeof spec === "number" ? slug : (spec.label ?? slug);
       const light = output.light.surfaces.find((x) => x.slug === slug);
       const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (light && dark)
@@ -151,9 +149,7 @@ const achievedApca = computed(() => {
   return Math.round(contrastFn(fgColor.value.l, bgColor.value.l));
 });
 
-const hasPair = computed(
-  () => bgColor.value !== null && fgColor.value !== null,
-);
+const hasPair = computed(() => bgColor.value !== null && fgColor.value !== null);
 
 function swatchApca(si: number, ti: number): number | null {
   if (!bgColor.value || !contrastFn) return null;
@@ -193,25 +189,28 @@ function isSameHueRow(si: number): boolean {
 // 'same-hue-valid' — expressible, full brightness + Aa
 // 'cross-hue-valid' — contrast works but not expressible — softer
 // 'invalid' — fails contrast — dimmed
-function swatchState(si: number, ti: number): 'none' | 'same-hue-valid' | 'cross-hue-valid' | 'invalid' {
-  if (!selectedBg.value) return 'none';
-  if (isBg(si, ti)) return 'none';
-  if (isFg(si, ti)) return 'none';
-  if (!swatchValid(si, ti)) return 'invalid';
-  if (isSameHueRow(si)) return 'same-hue-valid';
-  return 'cross-hue-valid';
+function swatchState(
+  si: number,
+  ti: number,
+): "none" | "same-hue-valid" | "cross-hue-valid" | "invalid" {
+  if (!selectedBg.value) return "none";
+  if (isBg(si, ti)) return "none";
+  if (isFg(si, ti)) return "none";
+  if (!swatchValid(si, ti)) return "invalid";
+  if (isSameHueRow(si)) return "same-hue-valid";
+  return "cross-hue-valid";
 }
 
 // Which marker variant (if any) to show on a non-bg swatch. Unlike
 // swatchState, this also applies to the selected fg — its marker stays
 // visible so the chosen text tier is legible at a glance.
-type MarkerTier = 'same' | 'cross' | 'fail' | 'none';
+type MarkerTier = "same" | "cross" | "fail" | "none";
 function markerTier(si: number, ti: number): MarkerTier {
-  if (!selectedBg.value) return 'none';
-  if (isBg(si, ti)) return 'none';
-  if (!swatchValid(si, ti)) return 'fail';
-  if (isSameHueRow(si)) return 'same';
-  return 'cross';
+  if (!selectedBg.value) return "none";
+  if (isBg(si, ti)) return "none";
+  if (!swatchValid(si, ti)) return "fail";
+  if (isSameHueRow(si)) return "same";
+  return "cross";
 }
 
 // Message shown when clicking a non-surface swatch with no bg selected
@@ -243,7 +242,10 @@ function clickSwatch(si: number, ti: number) {
       let nearestDist = Infinity;
       for (const s of solvedSurfaces.value) {
         const dist = Math.abs(s.lightness[mode.value] - step.l);
-        if (dist < nearestDist) { nearestDist = dist; nearest = s; }
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = s;
+        }
       }
       notSurfaceMsg.value = nearest
         ? `L=${step.l.toFixed(2)} isn't a surface. Nearest: .surface-${nearest.slug} (L=${nearest.lightness[mode.value].toFixed(2)})`
@@ -288,30 +290,30 @@ const verdictStatus = computed<"met" | "close" | "unmet">(() => {
 // Should this swatch show an 'Aa' label?
 function showAa(si: number, ti: number): boolean {
   const state = swatchState(si, ti);
-  return state === 'same-hue-valid';
+  return state === "same-hue-valid";
 }
 
 // Should this swatch show a dimmed 'Aa' (cross-hue valid)?
 function showCrossAa(si: number, ti: number): boolean {
-  return swatchState(si, ti) === 'cross-hue-valid';
+  return swatchState(si, ti) === "cross-hue-valid";
 }
 
 // Pick black or white for maximum contrast against this swatch
 function markerColor(si: number, ti: number): string {
-  if (!contrastFn) return '#000';
+  if (!contrastFn) return "#000";
   const step = scales.value[si].steps[ti];
   const blackContrast = Math.abs(contrastFn(0, step.l));
   const whiteContrast = Math.abs(contrastFn(1, step.l));
-  return blackContrast > whiteContrast ? '#000' : '#fff';
+  return blackContrast > whiteContrast ? "#000" : "#fff";
 }
 
 // Same logic but slightly softer for secondary markers
 function softMarkerColor(si: number, ti: number): string {
-  if (!contrastFn) return 'rgba(0,0,0,0.65)';
+  if (!contrastFn) return "rgba(0,0,0,0.65)";
   const step = scales.value[si].steps[ti];
   const blackContrast = Math.abs(contrastFn(0, step.l));
   const whiteContrast = Math.abs(contrastFn(1, step.l));
-  return blackContrast > whiteContrast ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.65)';
+  return blackContrast > whiteContrast ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.65)";
 }
 
 const nearestSurface = computed(() => {
@@ -330,7 +332,9 @@ const nearestSurface = computed(() => {
 
 const surfaceDistance = computed(() => {
   if (!bgColor.value || !nearestSurface.value) return null;
-  return Math.round(Math.abs(bgColor.value.l - nearestSurface.value.lightness[mode.value]) * 1000) / 1000;
+  return (
+    Math.round(Math.abs(bgColor.value.l - nearestSurface.value.lightness[mode.value]) * 1000) / 1000
+  );
 });
 
 const nearestGrade = computed(() => {
@@ -373,7 +377,11 @@ const selectedBgHueToken = computed<string | null>(() => {
             @click="clickSwatch(si, ti)"
           >
             <!-- Browse mode: dot on surface-capable swatches -->
-            <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: markerColor(si, ti) }" />
+            <span
+              v-if="!selectedBg && isValidSurface(si, ti)"
+              class="pg-dot"
+              :style="{ background: markerColor(si, ti) }"
+            />
             <!-- Surface selected: markers on all non-bg swatches, tiered by
                  achieved text grade (high/strong/subtle/subtlest/fail).
                  The selected fg keeps its Aa because that's the whole
@@ -385,14 +393,21 @@ const selectedBgHueToken = computed<string | null>(() => {
                 class="pg-marker"
                 :class="`pg-marker-${swatchGrade(si, ti)}`"
                 :style="{ color: markerColor(si, ti) }"
-              >Aa</span>
+                >Aa</span
+              >
               <span
                 v-else-if="markerTier(si, ti) === 'cross'"
                 class="pg-marker pg-marker-cross"
                 :class="`pg-marker-${swatchGrade(si, ti)}`"
                 :style="{ color: softMarkerColor(si, ti) }"
-              >Aa</span>
-              <span v-else-if="markerTier(si, ti) === 'fail'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
+                >Aa</span
+              >
+              <span
+                v-else-if="markerTier(si, ti) === 'fail'"
+                class="pg-marker pg-marker-x"
+                :style="{ color: softMarkerColor(si, ti) }"
+                >×</span
+              >
             </template>
           </button>
         </div>
@@ -404,7 +419,9 @@ const selectedBgHueToken = computed<string | null>(() => {
       <!-- Empty state -->
       <div v-if="!selectedBg" class="pg-ws-empty">
         <span v-if="notSurfaceMsg" class="pg-not-surface">{{ notSurfaceMsg }}</span>
-        <span v-else class="pg-ws-hint">Click a <strong>dotted</strong> swatch to pick a surface.</span>
+        <span v-else class="pg-ws-hint"
+          >Click a <strong>dotted</strong> swatch to pick a surface.</span
+        >
       </div>
 
       <!-- Composition equation: surface + text = result -->
@@ -413,14 +430,30 @@ const selectedBgHueToken = computed<string | null>(() => {
 
         <div class="pg-equation">
           <div class="pg-eq-slab" :style="{ background: bgColor!.css }">
-            <span class="pg-eq-label" :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }">Surface</span>
+            <span
+              class="pg-eq-label"
+              :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }"
+              >Surface</span
+            >
           </div>
           <span class="pg-eq-op">+</span>
-          <div v-if="fgColor" class="pg-eq-slab pg-eq-slab-fg" :style="{ background: bgColor!.css }">
+          <div
+            v-if="fgColor"
+            class="pg-eq-slab pg-eq-slab-fg"
+            :style="{ background: bgColor!.css }"
+          >
             <span class="pg-eq-aa" :style="{ color: fgColor!.css }">Aa</span>
           </div>
-          <div v-else class="pg-eq-slab pg-eq-slab-fg pg-eq-placeholder" :style="{ background: bgColor!.css }">
-            <span class="pg-eq-ghost" :style="{ color: bgColor!.l > 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }">Aa</span>
+          <div
+            v-else
+            class="pg-eq-slab pg-eq-slab-fg pg-eq-placeholder"
+            :style="{ background: bgColor!.css }"
+          >
+            <span
+              class="pg-eq-ghost"
+              :style="{ color: bgColor!.l > 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }"
+              >Aa</span
+            >
           </div>
           <span class="pg-eq-op">=</span>
           <div class="pg-eq-result">
@@ -446,7 +479,10 @@ const selectedBgHueToken = computed<string | null>(() => {
             <Token :name="selectedBgHueToken" />
           </template>
           <span class="pg-eq-tokens-op">+</span>
-          <Token v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75" :name="nearestGrade.label" />
+          <Token
+            v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75"
+            :name="nearestGrade.label"
+          />
           <span v-else-if="!selectedFg" class="pg-eq-pick">pick text above</span>
           <span v-else class="pg-eq-pick">—</span>
         </div>
@@ -457,13 +493,15 @@ const selectedBgHueToken = computed<string | null>(() => {
             <span class="pg-fail-detail">Needs Lc 75+, got {{ achievedApca }}.</span>
           </template>
           <template v-else-if="isCrossHue">
-            <span class="pg-cross-hue">Text inherits the surface hue — this pair isn't expressible.</span>
+            <span class="pg-cross-hue"
+              >Text inherits the surface hue — this pair isn't expressible.</span
+            >
           </template>
         </div>
 
         <p v-if="hasEverCompleted && hasPair" class="pg-annotation">
-          You just did manual contrast checking. The system does this for every
-          combination, in both modes, automatically.
+          You just did manual contrast checking. The system does this for every combination, in both
+          modes, automatically.
         </p>
       </template>
     </div>

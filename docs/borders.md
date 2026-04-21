@@ -7,8 +7,9 @@ Three contrast tiers.
 ## Usage
 
 <LiveExample
-  surface="surface-page"
-  :html='`<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+surface="surface-page"
+:html='`<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+
   <div class="surface-card border-decorative" style="padding: 1rem; border-radius: 6px; border-width: 1px; border-style: solid;">
     <p class="text-strong" style="margin: 0; font-size: 0.875rem;">Decorative border</p>
   </div>
@@ -31,8 +32,9 @@ Three contrast tiers.
 />
 
 <LiveExample
-  surface="surface-spotlight"
-  :html='`<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+surface="surface-spotlight"
+:html='`<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+
   <div class="border-decorative" style="padding: 1rem; border-radius: 6px; border-width: 1px; border-style: solid;">
     <p class="text-strong" style="margin: 0; font-size: 0.875rem;">Section divider</p>
   </div>

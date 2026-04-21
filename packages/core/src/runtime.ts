@@ -18,9 +18,7 @@ export interface ReactiveTheme {
 
 export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
   // Deep-clone so mutations don't affect the caller's config
-  let current: SolverConfig = JSON.parse(
-    JSON.stringify(config ?? DEFAULT_CONFIG),
-  );
+  let current: SolverConfig = JSON.parse(JSON.stringify(config ?? DEFAULT_CONFIG));
 
   const listeners = new Set<() => void>();
 
@@ -32,9 +30,7 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
       highContrastSimulationClass: "hc-simulate",
     };
     const keyColors = current.keyColors;
-    return keyColors
-      ? generateCSS(output, { ...opts, keyColors })
-      : generateCSS(output, opts);
+    return keyColors ? generateCSS(output, { ...opts, keyColors }) : generateCSS(output, opts);
   }
 
   const sheet = new CSSStyleSheet();

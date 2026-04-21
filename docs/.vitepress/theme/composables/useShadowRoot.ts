@@ -1,11 +1,4 @@
-import {
-  onMounted,
-  shallowRef,
-  watch,
-  toValue,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from "vue";
+import { onMounted, shallowRef, watch, toValue, type MaybeRefOrGetter, type ShallowRef } from "vue";
 
 /**
  * Attach a shadow root to a host element and manage adoptedStyleSheets.

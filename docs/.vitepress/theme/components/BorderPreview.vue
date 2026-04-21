@@ -18,8 +18,7 @@ const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
 let solveFn: typeof import("@design-axioms/color").solve | null = null;
-let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null =
-  null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
 
 function rebuildCSS() {
   if (!theme.value || !solveFn || !generateCSSFn) return;
@@ -72,9 +71,7 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Decorative</span>
             <Token name=".border-decorative" />
           </div>
-          <span class="text-subtle bp-specimen-desc"
-            >Subtle container outlines</span
-          >
+          <span class="text-subtle bp-specimen-desc">Subtle container outlines</span>
         </div>
 
         <div class="bp-specimen border-interactive">
@@ -82,9 +79,7 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Interactive</span>
             <Token name=".border-interactive" />
           </div>
-          <span class="text-subtle bp-specimen-desc"
-            >Buttons, inputs, clickable elements</span
-          >
+          <span class="text-subtle bp-specimen-desc">Buttons, inputs, clickable elements</span>
         </div>
 
         <div class="bp-specimen border-critical">
@@ -92,9 +87,7 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Critical</span>
             <Token name=".border-critical" />
           </div>
-          <span class="text-subtle bp-specimen-desc"
-            >Error states, required fields</span
-          >
+          <span class="text-subtle bp-specimen-desc">Error states, required fields</span>
         </div>
       </div>
 
@@ -104,9 +97,7 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Decorative</span>
             <Token name=".border-decorative" />
           </div>
-          <span class="text-subtle bp-specimen-desc"
-            >Same class, inverted surface</span
-          >
+          <span class="text-subtle bp-specimen-desc">Same class, inverted surface</span>
         </div>
 
         <div class="bp-specimen border-interactive">
@@ -122,9 +113,7 @@ onMounted(async () => {
             <span class="text-high bp-specimen-title">Critical</span>
             <Token name=".border-critical" />
           </div>
-          <span class="text-subtle bp-specimen-desc"
-            >Contrast target met on both</span
-          >
+          <span class="text-subtle bp-specimen-desc">Contrast target met on both</span>
         </div>
       </div>
     </div>

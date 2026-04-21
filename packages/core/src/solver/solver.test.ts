@@ -108,9 +108,7 @@ describe("solver", () => {
   });
 
   it("places page-polarity surfaces in the light range (light mode)", () => {
-    const pageSurfaces = output.light.surfaces.filter(
-      (s) => s.polarity === "page",
-    );
+    const pageSurfaces = output.light.surfaces.filter((s) => s.polarity === "page");
     for (const s of pageSurfaces) {
       expect(s.lightness).toBeGreaterThanOrEqual(0.85);
       expect(s.lightness).toBeLessThanOrEqual(1.0);
@@ -118,9 +116,7 @@ describe("solver", () => {
   });
 
   it("places page-polarity surfaces in the dark range (dark mode)", () => {
-    const pageSurfaces = output.dark.surfaces.filter(
-      (s) => s.polarity === "page",
-    );
+    const pageSurfaces = output.dark.surfaces.filter((s) => s.polarity === "page");
     for (const s of pageSurfaces) {
       expect(s.lightness).toBeGreaterThanOrEqual(0.05);
       expect(s.lightness).toBeLessThanOrEqual(0.45);
@@ -136,9 +132,7 @@ describe("solver", () => {
   });
 
   it("classifies cross-polarity pairs as guarantee", () => {
-    const crossPol = output.light.composition.filter(
-      (c) => c.tier === "guarantee",
-    );
+    const crossPol = output.light.composition.filter((c) => c.tier === "guarantee");
     expect(crossPol.length).toBeGreaterThan(0);
     for (const c of crossPol) {
       expect(c.interContrast).toBeGreaterThan(50);
@@ -146,9 +140,7 @@ describe("solver", () => {
   });
 
   it("classifies same-polarity pairs as enhancement", () => {
-    const samePol = output.light.composition.filter(
-      (c) => c.tier === "enhancement",
-    );
+    const samePol = output.light.composition.filter((c) => c.tier === "enhancement");
     expect(samePol.length).toBeGreaterThan(0);
   });
 
@@ -166,10 +158,7 @@ describe("solver", () => {
     // Skip surfaces that already report unmet subtlest grades
     for (const surface of output.dark.surfaces) {
       if (surface.diagnostics?.unmetTextGrades.includes("subtlest")) continue;
-      const achieved = contrastForPair(
-        surface.textValues.subtlest,
-        surface.lightness,
-      );
+      const achieved = contrastForPair(surface.textValues.subtlest, surface.lightness);
       // Allow some slack for safety margins and rounding
       expect(achieved).toBeGreaterThan(70);
     }
@@ -195,17 +184,11 @@ describe("solver", () => {
   it("border values achieve their APCA targets", () => {
     for (const surface of output.light.surfaces) {
       // Decorative (10) — should always be achievable
-      const decorativeApca = contrastForPair(
-        surface.borderValues!.decorative,
-        surface.lightness,
-      );
+      const decorativeApca = contrastForPair(surface.borderValues!.decorative, surface.lightness);
       expect(decorativeApca).toBeGreaterThan(8);
 
       // Interactive (30)
-      const interactiveApca = contrastForPair(
-        surface.borderValues!.interactive,
-        surface.lightness,
-      );
+      const interactiveApca = contrastForPair(surface.borderValues!.interactive, surface.lightness);
       expect(interactiveApca).toBeGreaterThan(25);
     }
   });
@@ -238,10 +221,7 @@ describe("solver", () => {
     const taperedChroma = (action!.chroma ?? 0) * taperFactor;
     const hue = action!.hue ?? 0;
 
-    const achromatic = contrastForPair(
-      action!.textValues.high,
-      action!.lightness,
-    );
+    const achromatic = contrastForPair(action!.textValues.high, action!.lightness);
     const chromatic = contrastWithChroma(
       action!.textValues.high,
       0,
@@ -258,9 +238,7 @@ describe("solver", () => {
   it("propagates role from SurfaceConfig to SolvedSurface", () => {
     const page = output.light.surfaces.find((s) => s.slug === "page");
     const action = output.light.surfaces.find((s) => s.slug === "action");
-    const spotlightAction = output.light.surfaces.find(
-      (s) => s.slug === "spotlight-action",
-    );
+    const spotlightAction = output.light.surfaces.find((s) => s.slug === "spotlight-action");
 
     expect(page!.role).toBe("surface");
     expect(action!.role).toBe("interactive");
@@ -275,30 +253,18 @@ describe("solver", () => {
   it("maps surface role to Canvas/CanvasText under forced-colors", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     // .surface-page is role: "surface" → Canvas + CanvasText
-    const block = css.match(
-      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
-    )?.[0];
+    const block = css.match(/@media \(forced-colors: active\) \{[\s\S]*?\n\}/)?.[0];
     expect(block).toBeDefined();
     expect(block).toMatch(/\.surface-page \{[\s\S]*?--axm-surface: Canvas;/);
-    expect(block).toMatch(
-      /\.surface-page \{[\s\S]*?--axm-text-high: CanvasText;/,
-    );
+    expect(block).toMatch(/\.surface-page \{[\s\S]*?--axm-text-high: CanvasText;/);
   });
 
   it("maps interactive role to ButtonFace/ButtonText/ButtonBorder", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
-    const block = css.match(
-      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
-    )?.[0];
-    expect(block).toMatch(
-      /\.surface-action \{[\s\S]*?--axm-surface: ButtonFace;/,
-    );
-    expect(block).toMatch(
-      /\.surface-action \{[\s\S]*?--axm-text-high: ButtonText;/,
-    );
-    expect(block).toMatch(
-      /\.surface-action \{[\s\S]*?--axm-border-interactive: ButtonBorder;/,
-    );
+    const block = css.match(/@media \(forced-colors: active\) \{[\s\S]*?\n\}/)?.[0];
+    expect(block).toMatch(/\.surface-action \{[\s\S]*?--axm-surface: ButtonFace;/);
+    expect(block).toMatch(/\.surface-action \{[\s\S]*?--axm-text-high: ButtonText;/);
+    expect(block).toMatch(/\.surface-action \{[\s\S]*?--axm-border-interactive: ButtonBorder;/);
   });
 
   it("emits LinkText and GrayText tokens in every forced-colors block", () => {
@@ -317,12 +283,8 @@ describe("solver", () => {
   it("emits prefers-contrast HC block for surfaces with HC scale", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     // Page polarity has HC scale in defaults; inverted does not.
-    expect(css).toContain(
-      "@media (prefers-contrast: more), (prefers-contrast: custom)",
-    );
-    const hcBlock = css.match(
-      /@media \(prefers-contrast[\s\S]*?\n\}/,
-    )?.[0];
+    expect(css).toContain("@media (prefers-contrast: more), (prefers-contrast: custom)");
+    const hcBlock = css.match(/@media \(prefers-contrast[\s\S]*?\n\}/)?.[0];
     expect(hcBlock).toBeDefined();
     expect(hcBlock).toMatch(/\.surface-page \{/);
     expect(hcBlock).toMatch(/\.surface-card \{/);
@@ -416,9 +378,7 @@ describe("solver (rich config)", () => {
   });
 
   it("action-soft has brand hue with chroma", () => {
-    const actionSoft = output.light.surfaces.find(
-      (s) => s.slug === "action-soft",
-    );
+    const actionSoft = output.light.surfaces.find((s) => s.slug === "action-soft");
     expect(actionSoft!.hue).toBeDefined();
     expect(actionSoft!.chroma).toBe(0.08);
   });
@@ -430,10 +390,7 @@ describe("solver (rich config)", () => {
     const taperedChroma = (warning!.chroma ?? 0) * taperFactor;
     const hue = warning!.hue ?? 0;
 
-    const achromatic = contrastForPair(
-      warning!.textValues.subtlest,
-      warning!.lightness,
-    );
+    const achromatic = contrastForPair(warning!.textValues.subtlest, warning!.lightness);
     const chromatic = contrastWithChroma(
       warning!.textValues.subtlest,
       0,
@@ -457,13 +414,9 @@ describe("solver (rich config)", () => {
     // inverted in light mode), and inverted.highContrast.dark[0] = 0.96
     // (light L for inverted in dark mode). After branch swap, the CSS
     // should emit light-dark(0.96..., 0.04...) for --axm-surface.
-    const hcBlock = css.match(
-      /@media \(prefers-contrast[\s\S]*?\n\}/,
-    )?.[0];
+    const hcBlock = css.match(/@media \(prefers-contrast[\s\S]*?\n\}/)?.[0];
     expect(hcBlock).toBeDefined();
-    const spotlight = hcBlock!.match(
-      /\.surface-spotlight \{[^}]+\}/,
-    )?.[0];
+    const spotlight = hcBlock!.match(/\.surface-spotlight \{[^}]+\}/)?.[0];
     expect(spotlight).toBeDefined();
     // First argument of light-dark() for --axm-surface should be the
     // DARK lightness (0.96, from the dark HC scale), not 0.04.
@@ -476,9 +429,7 @@ describe("solver (rich config)", () => {
     const css = generateCSS(output, RICH_CONFIG.options);
     // Isolate the forced-colors block first — there are two .surface-success
     // rules in the CSS (normal + forced-colors).
-    const forcedBlock = css.match(
-      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
-    )?.[0];
+    const forcedBlock = css.match(/@media \(forced-colors: active\) \{[\s\S]*?\n\}/)?.[0];
     expect(forcedBlock).toBeDefined();
     const successBlock = forcedBlock!.match(/\.surface-success \{[^}]+\}/)?.[0];
     expect(successBlock).toBeDefined();
