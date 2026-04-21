@@ -5,6 +5,7 @@ import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 import { useKeyColors } from "../composables/useKeyColors";
 import DarkToggle from "./DarkToggle.vue";
+import HcToggle from "./HcToggle.vue";
 
 const brand = useBrandColor();
 const accent = useAccentColor();
@@ -431,8 +432,9 @@ const indicatorStyle = computed(() => {
           </div>
         </div>
       </details>
-      <!-- Dark toggle at bottom -->
-      <div class="dark-toggle-row">
+      <!-- Mode controls: viewing context that affects every surface -->
+      <div class="mode-row">
+        <HcToggle />
         <DarkToggle
           :model-value="isDark"
           @update:model-value="isDark = $event"
@@ -642,9 +644,10 @@ const indicatorStyle = computed(() => {
   background: var(--vp-c-bg-soft);
 }
 
-.dark-toggle-row {
+.mode-row {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
   padding: 0.375rem 1rem;
   border-top: 1px solid var(--vp-c-divider);
 }

@@ -39,6 +39,8 @@ function generateScale(
 
 interface ScaleRow {
   name: string;
+  /** Key color this row maps to (e.g. "brand"), or null for neutral gray. */
+  keyColor: string | null;
   steps: { l: number; c: number; h: number; css: string }[];
 }
 
@@ -49,12 +51,12 @@ const mode = computed<"light" | "dark">(() =>
 const scales = computed<ScaleRow[]>(() => {
   const m = mode.value;
   return [
-    { name: "Gray", steps: generateScale(0, 0, m) },
-    { name: "Purple", steps: generateScale(288, 0.18, m) },
-    { name: "Teal", steps: generateScale(195, 0.12, m) },
-    { name: "Green", steps: generateScale(145, 0.15, m) },
-    { name: "Amber", steps: generateScale(85, 0.16, m) },
-    { name: "Red", steps: generateScale(25, 0.18, m) },
+    { name: "Gray", keyColor: null, steps: generateScale(0, 0, m) },
+    { name: "Purple", keyColor: "brand", steps: generateScale(288, 0.18, m) },
+    { name: "Teal", keyColor: "accent", steps: generateScale(195, 0.12, m) },
+    { name: "Green", keyColor: "success", steps: generateScale(145, 0.15, m) },
+    { name: "Amber", keyColor: "warning", steps: generateScale(85, 0.16, m) },
+    { name: "Red", keyColor: "error", steps: generateScale(25, 0.18, m) },
   ];
 });
 
@@ -344,6 +346,13 @@ const nearestGrade = computed(() => {
   }
   return best;
 });
+
+// Atmosphere token for the selected surface's row (null for gray).
+const selectedBgHueToken = computed<string | null>(() => {
+  if (!selectedBg.value) return null;
+  const kc = scales.value[selectedBg.value.scale]?.keyColor;
+  return kc ? `.hue-${kc}` : null;
+});
 </script>
 
 <template>
@@ -426,9 +435,16 @@ const nearestGrade = computed(() => {
           </div>
         </div>
 
-        <!-- Tokens row: shows what the selection maps to in the system -->
+        <!-- Tokens row: shows what the selection maps to in the system.
+             Atmosphere (.hue-*) comes from the bg's row — that's the
+             class you'd put on the surface in HTML. Gray rows have no
+             hue token. -->
         <div v-if="nearestSurface" class="pg-eq-tokens">
           <Token :name="`.surface-${nearestSurface.slug}`" />
+          <template v-if="selectedBgHueToken">
+            <span class="pg-eq-tokens-op">+</span>
+            <Token :name="selectedBgHueToken" />
+          </template>
           <span class="pg-eq-tokens-op">+</span>
           <Token v-if="selectedFg && nearestGrade && !isCrossHue && (achievedApca ?? 0) >= 75" :name="nearestGrade.label" />
           <span v-else-if="!selectedFg" class="pg-eq-pick">pick text above</span>

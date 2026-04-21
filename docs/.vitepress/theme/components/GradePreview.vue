@@ -28,6 +28,7 @@ function rebuildCSS() {
     ...config.options,
     selector: ".grade-preview-root",
     keyColors: config.keyColors,
+    highContrastSimulationClass: "hc-simulate",
   });
   ready.value = true;
 }
