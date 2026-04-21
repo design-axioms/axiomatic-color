@@ -48,6 +48,7 @@ function rebuildCSS() {
     ...config.options,
     selector: ".surface-tile-root",
     keyColors: config.keyColors,
+    highContrastSimulationClass: "hc-simulate",
   });
 
   const slugs = new Map<string, { label: string; polarity: string }>();

@@ -102,6 +102,7 @@ function rebuildCSS() {
     ...config.options,
     selector: ".validity-grid-root",
     keyColors: config.keyColors,
+    highContrastSimulationClass: "hc-simulate",
   });
 
   const borderTargets = config.borderTargets ?? defaultConfig.borderTargets!;
