@@ -12,8 +12,12 @@ import type { SolverConfig } from "./types.ts";
 export const DEFAULT_CONFIG: SolverConfig = {
   scale: {
     page: {
-      light: [0.975, 0.955, 0.9, 0.85, 0.78, 0.7, 0.6, 0.5, 0.35, 0.2],
-      dark: [0.1, 0.18, 0.25, 0.32, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+      // Positions 0-4 only. Anything past position 4 falls into the APCA
+      // dead zone (L=0.46-0.82) where targets become unreachable — silent
+      // footguns for custom surfaces. Users who need deeper scales can
+      // author their own.
+      light: [0.975, 0.955, 0.9, 0.85, 0.78],
+      dark: [0.1, 0.18, 0.25, 0.32, 0.4],
     },
     inverted: {
       // Inverted lives in a narrow lightness band. Two constraints bound it:
