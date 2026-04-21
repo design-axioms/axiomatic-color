@@ -4,7 +4,7 @@ import { onMounted, ref } from "vue";
 const active = ref(false);
 
 onMounted(() => {
-  // Preserve state on navigation
+  // Preserve state across navigation
   active.value = document.documentElement.classList.contains("hc-simulate");
 });
 
@@ -20,54 +20,34 @@ function toggle() {
     :class="{ 'is-active': active }"
     type="button"
     :aria-pressed="active"
-    title="Simulate high contrast (prefers-contrast: more)"
+    :aria-label="active ? 'Disable high-contrast simulation' : 'Simulate high contrast'"
+    title="Simulate prefers-contrast: more on system surfaces"
     @click="toggle"
   >
-    <span aria-hidden="true">HC</span>
-    <span class="sr-only">{{ active ? "Disable" : "Enable" }} high-contrast simulation</span>
+    {{ active ? '◉ HC on' : '○ HC' }}
   </button>
 </template>
 
 <style scoped>
 .hc-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.25rem;
-  height: 2.25rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--vp-c-border);
+  padding: 0.25rem 0.65rem;
   border-radius: 6px;
+  border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
   color: var(--vp-c-text-1);
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-size: 0.75rem;
+  font-family: var(--vp-font-family-base);
+  white-space: nowrap;
 }
 
 .hc-toggle:hover {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
 }
 
 .hc-toggle.is-active {
-  background: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
   border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-bg);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  color: var(--vp-c-brand-1);
 }
 </style>
