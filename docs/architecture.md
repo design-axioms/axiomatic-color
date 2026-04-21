@@ -142,17 +142,37 @@ The system registers the following properties:
 - Key color primitives use `--axm-key-{name}-hue` and `--axm-key-{name}-chroma`.
 - Surface-local variables remain class-scoped and are not registered.
 
-## 11. Accessibility: forced colors derive from role
+## 11. Accessibility: derived from role and polarity scale
 
-Forced colors and high-contrast support are derived from the semantic vocabulary the system already carries, plus a single `role` field on each surface. Consumers don't re-author surfaces for accessibility.
+Forced colors and high-contrast support are derived from the semantic vocabulary the system already carries. Two additions earn both regimes:
 
-Each surface declares its role: `surface`, `interactive`, `alert`, or `link`. The role defaults to `surface`, so existing configurations remain correct without changes.
+- A single `role` field on each surface (`surface`, `interactive`, `alert`, or `link`, defaulting to `surface`) drives forced-colors mapping.
+- An optional `highContrast` scale on each `PolarityScale` drives `prefers-contrast: more | custom`.
+
+Consumers don't re-author surfaces for accessibility; existing configurations remain correct.
+
+### Forced colors
 
 The generator emits a `@media (forced-colors: active)` block that remaps each `.surface-*` class to a CSS system color keyword based on role. `surface` uses `Canvas` and `CanvasText`; `interactive` uses `ButtonFace`, `ButtonText`, and `ButtonBorder`; `alert` uses `Canvas` and `CanvasText` with a `Mark` / `MarkText` override that browsers with `Mark` support apply via cascade; `link` uses `LinkText`.
 
 `.text-link` maps to `LinkText` and `.text-disabled` maps to `GrayText` across every role.
 
 The overridden tokens are the same ones the default mode writes — `--axm-surface`, `--axm-text-*`, `--axm-border-*` — so existing utilities keep working without changes.
+
+### High contrast
+
+When a polarity declares a `highContrast` scale, the solver produces a parallel solution against it with tighter default targets (`high: 100, strong: 100, subtle: 95, subtlest: 90`). The generator emits these under `@media (prefers-contrast: more), (prefers-contrast: custom)`.
+
+Two emission rules keep the cascade correct:
+
+- The HC block precedes the forced-colors block. Forced-colors users may match `prefers-contrast: custom`; emitting forced-colors last ensures system colors win.
+- The inverted-polarity branch swap (§1) is replicated inside the HC block. Without it, inverted HC values land in the wrong `light-dark()` branch.
+
+Inverted-polarity surfaces do not require an HC scale — they already sit at the edge of what the architecture allows (§8). In the default config, only `page` has an HC scale; inverted surfaces retain their base lightness under HC, which increases their visual contrast against the pushed `page` surfaces.
+
+### Configurable targets
+
+The library caps `high` at 100 (the APCA practical ceiling). Users with AAA-style requirements override via `config.accessibility.textGrades` and `config.accessibility.borderTargets`.
 
 ## 12. Runtime: `ThemeBuilder`
 

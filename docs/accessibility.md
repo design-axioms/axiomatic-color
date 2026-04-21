@@ -52,9 +52,70 @@ Two new utilities accompany the system color story:
 - `.text-link` — links, underlined. Under forced colors: `LinkText`.
 - `.text-disabled` — disabled text. Under forced colors: `GrayText`.
 
-## High contrast (PR B — not yet shipped)
+## High contrast
 
-`prefers-contrast: more | custom` re-solves surfaces with tighter targets and optionally a separate high-contrast scale. See the PR when it lands.
+`@media (prefers-contrast: more), (prefers-contrast: custom)` re-solves surfaces with tighter targets and an optional separate high-contrast scale.
+
+### How it works
+
+Each `PolarityScale` can optionally declare a `highContrast` companion scale:
+
+```ts
+scale: {
+  page: {
+    light: [0.975, 0.955, 0.9, 0.85, 0.78],
+    dark: [0.1, 0.18, 0.25, 0.32, 0.4],
+    highContrast: {
+      light: [0.99, 0.982, 0.96, 0.94, 0.912],
+      dark: [0.04, 0.072, 0.1, 0.128, 0.16],
+    },
+  },
+  inverted: {
+    // No highContrast: inverted already lives at the edge of what
+    // the architecture allows. HC mode uses target bumps only.
+    light: [0.1, 0.12],
+    dark: [0.9, 0.88],
+  },
+}
+```
+
+When HC is active, the solver re-solves text and border values against:
+
+- The HC scale, if present, and
+- Tighter default targets (`TEXT_GRADES_HIGH_CONTRAST`: `high: 100, strong: 100, subtle: 95, subtlest: 90`).
+
+The generator emits the re-solved values under `@media (prefers-contrast: more), (prefers-contrast: custom)`. This block comes **before** the forced-colors block so forced-colors wins the cascade for users who have both active.
+
+### Configurable targets
+
+The library caps `high` at 100 by default — the APCA practical ceiling. Users with stricter accessibility needs can override:
+
+```ts
+accessibility: {
+  textGrades: { high: 108, strong: 105, subtle: 100, subtlest: 95 },
+  borderTargets: { decorative: 25, interactive: 60, critical: 90 },
+}
+```
+
+### Deriving an HC scale at authoring time
+
+`deriveHcScale` is a helper for the *config-authoring step* — not the runtime. It pushes each position toward its mode's extreme:
+
+```ts
+import { deriveHcScale } from "@design-axioms/color";
+const pageHc = deriveHcScale(base.page, { factor: 0.6 });
+// Inline the result into your config — don't derive at runtime.
+```
+
+The helper is opt-in; most configurations are clearer with explicit arrays.
+
+### Inverted polarity under HC
+
+Inverted surfaces swap `light-dark()` branches at emission time so children inherit `color-scheme: dark` (and vice versa) correctly. The HC media block **replicates the same swap** so inverted HC values land in the right branch. If you hand-author the HC emission (e.g. in a framework that can't run the generator), preserve this.
+
+### Simulating HC in a demo
+
+Set `highContrastSimulationClass: "hc-simulate"` on `generateCSS` options to emit an additional class-triggered copy of the HC rules. A demo can toggle the class on `<html>` to preview HC mode without changing OS settings.
 
 ## Reduced contrast
 

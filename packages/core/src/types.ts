@@ -50,6 +50,27 @@ export const TEXT_GRADES: TextGrades = {
   subtlest: 75,
 } as const;
 
+/**
+ * High-contrast default targets.
+ *
+ * The library defaults are conservative: `high` stays capped at 100 (the
+ * APCA practical ceiling), and each lower grade bumps up one tier. Users
+ * with stricter accessibility needs can override via
+ * `config.accessibility.textGrades`.
+ */
+export const TEXT_GRADES_HIGH_CONTRAST: TextGrades = {
+  high: 100,
+  strong: 100,
+  subtle: 95,
+  subtlest: 90,
+} as const;
+
+/**
+ * APCA dead zone — the lightness range where neither polarity can
+ * produce adequate text contrast. Surfaces placed here get diagnostics.
+ */
+export const DEAD_ZONE = { min: 0.46, max: 0.82 } as const;
+
 // --- Safety Margins ---
 
 /**
@@ -88,10 +109,19 @@ export type ModeScale = readonly number[];
  * A polarity's scale across both modes.
  * Both modes must have the same length — a surface at position N must
  * exist in both light and dark.
+ *
+ * `highContrast` is an optional parallel scale used under
+ * `prefers-contrast: more | custom`. When present, the solver produces
+ * a second set of solved values against it; when absent, HC mode falls
+ * back to bumping targets on the base scale.
  */
 export interface PolarityScale {
   readonly light: ModeScale;
   readonly dark: ModeScale;
+  readonly highContrast?: {
+    readonly light: ModeScale;
+    readonly dark: ModeScale;
+  };
 }
 
 /**
@@ -190,6 +220,15 @@ export interface CompositionReport {
 // --- Solver Config ---
 
 /**
+ * Border contrast targets per tier.
+ */
+export interface BorderTargets {
+  readonly decorative: number;
+  readonly interactive: number;
+  readonly critical: number;
+}
+
+/**
  * Full configuration for the solver.
  */
 export interface SolverConfig {
@@ -203,10 +242,17 @@ export interface SolverConfig {
     };
     readonly maxRotation: number;
   };
-  readonly borderTargets?: {
-    readonly decorative: number;
-    readonly interactive: number;
-    readonly critical: number;
+  readonly borderTargets?: BorderTargets;
+  /**
+   * Accessibility target overrides applied under high-contrast conditions.
+   *
+   * Library defaults cap `high` at 100 (the ceiling) and bump the
+   * remaining grades up one tier. Users with AAA-style requirements can
+   * override these to push harder.
+   */
+  readonly accessibility?: {
+    readonly textGrades?: TextGrades;
+    readonly borderTargets?: BorderTargets;
   };
   readonly options?: {
     readonly prefix?: string;
@@ -217,31 +263,59 @@ export interface SolverConfig {
 // --- Solver Output ---
 
 /**
+ * Pre-solved text lightness values, keyed by grade.
+ */
+export interface SolvedTextValues {
+  readonly high: number;
+  readonly strong: number;
+  readonly subtle: number;
+  readonly subtlest: number;
+}
+
+/**
+ * Pre-solved border lightness values, keyed by tier.
+ */
+export interface SolvedBorderValues {
+  readonly decorative: number;
+  readonly interactive: number;
+  readonly critical: number;
+}
+
+/**
+ * Diagnostics for a single solved surface.
+ */
+export interface SurfaceDiagnostics {
+  readonly unmetTextGrades: readonly string[];
+  readonly unmetBorderTiers: readonly string[];
+  /** True when the surface's HC lightness falls in the APCA dead zone. */
+  readonly highContrastInDeadZone?: boolean;
+}
+
+/**
  * Solved values for a single surface in a single mode.
+ *
+ * The `*HighContrast` fields are populated only when the config has a
+ * high-contrast scale (or when HC target bumps are meaningful against
+ * the base scale). Consumers that don't render under prefers-contrast
+ * can ignore them.
  */
 export interface SolvedSurface {
   readonly slug: string;
   readonly polarity: Polarity;
   readonly role: SurfaceRole;
   readonly lightness: number;
-  readonly textValues: {
-    readonly high: number;
-    readonly strong: number;
-    readonly subtle: number;
-    readonly subtlest: number;
-  };
-  readonly borderValues?: {
-    readonly decorative: number;
-    readonly interactive: number;
-    readonly critical: number;
-  };
-  readonly diagnostics?: {
-    readonly unmetTextGrades: readonly string[];
-    readonly unmetBorderTiers: readonly string[];
-  };
+  readonly textValues: SolvedTextValues;
+  readonly borderValues?: SolvedBorderValues;
+  readonly diagnostics?: SurfaceDiagnostics;
   readonly hue?: number;
   readonly chroma?: number;
   readonly states?: Record<string, { readonly lightness: number }>;
+
+  // --- High contrast companions ---
+  readonly lightnessHighContrast?: number;
+  readonly textValuesHighContrast?: SolvedTextValues;
+  readonly borderValuesHighContrast?: SolvedBorderValues;
+  readonly diagnosticsHighContrast?: SurfaceDiagnostics;
 }
 
 /**

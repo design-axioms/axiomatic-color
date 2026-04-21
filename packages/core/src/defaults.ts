@@ -18,6 +18,15 @@ export const DEFAULT_CONFIG: SolverConfig = {
       // author their own.
       light: [0.975, 0.955, 0.9, 0.85, 0.78],
       dark: [0.1, 0.18, 0.25, 0.32, 0.4],
+      // HC scale pushes each position toward its mode's extreme.
+      // Derived via deriveHcScale({ factor: 0.6 }); values inlined.
+      // Position 4 in light mode still falls short of high=100 (ceiling
+      // ~89), so HC diagnostics will flag it — surfaces at that position
+      // in HC mode are a known noisy-no case.
+      highContrast: {
+        light: [0.99, 0.982, 0.96, 0.94, 0.912],
+        dark: [0.04, 0.072, 0.1, 0.128, 0.16],
+      },
     },
     inverted: {
       // Inverted lives in a narrow lightness band. Two constraints bound it:
@@ -27,6 +36,10 @@ export const DEFAULT_CONFIG: SolverConfig = {
       // - Cross-polarity contrast against page needs L>=0.88 in dark mode
       //   to maintain the 80+ APCA guarantee from composition §6.
       // Two positions is what genuinely fits within both constraints.
+      //
+      // No highContrast scale: inverted is already at the edge of what
+      // the architecture allows. HC mode uses target bumps only against
+      // the base inverted scale.
       light: [0.1, 0.12],
       dark: [0.9, 0.88],
     },

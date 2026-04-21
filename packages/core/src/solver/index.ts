@@ -10,17 +10,21 @@ import type {
   Context,
   Mode,
   Polarity,
+  SolvedBorderValues,
   SolvedMode,
   SolvedSurface,
+  SolvedTextValues,
   SolverConfig,
+  SurfaceDiagnostics,
   SurfaceSpec,
   SolverOutput,
 } from "../types.ts";
-import { TEXT_GRADES } from "../types.ts";
+import { TEXT_GRADES, TEXT_GRADES_HIGH_CONTRAST } from "../types.ts";
 import { converter, parse } from "culori";
 import { normalizeSurface, planSurfacePlacements } from "./planner.ts";
 import {
   classifyComposition,
+  isInDeadZone,
   solveBorderValues,
   solveTextValues,
   validateTargets,
@@ -36,8 +40,23 @@ function solvePolarity(
   config: SolverConfig,
   surfaceSpecs: { readonly [slug: string]: SurfaceSpec },
 ): SolvedSurface[] {
-  const scale = config.scale[ctx.polarity][ctx.mode];
+  const polarityScale = config.scale[ctx.polarity];
+  const scale = polarityScale[ctx.mode];
   const placements = planSurfacePlacements(ctx, scale, surfaceSpecs);
+
+  // High-contrast solve setup: use the HC scale if present, otherwise
+  // reuse the base scale and rely on target bumps alone.
+  const hcScaleForMode = polarityScale.highContrast?.[ctx.mode];
+  const hcTextGrades =
+    config.accessibility?.textGrades ?? TEXT_GRADES_HIGH_CONTRAST;
+  const hcBorderTargets =
+    config.accessibility?.borderTargets ?? config.borderTargets;
+  const hasHcStory =
+    hcScaleForMode !== undefined || config.accessibility !== undefined;
+  const hcPlacements = hcScaleForMode
+    ? planSurfacePlacements(ctx, hcScaleForMode, surfaceSpecs)
+    : placements;
+
   const solved: SolvedSurface[] = [];
 
   for (const [slug, spec] of Object.entries(surfaceSpecs)) {
@@ -68,10 +87,51 @@ function solvePolarity(
       ...TEXT_GRADES,
     });
     const unmetBorderTiers = config.borderTargets
-      ? validateTargets(planned.lightness, chroma, config.borderTargets)
+      ? validateTargets(planned.lightness, chroma, { ...config.borderTargets })
       : [];
     const hasDiagnostics =
       unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
+
+    // High-contrast companions.
+    let hcLightness: number | undefined;
+    let hcTextValues: SolvedTextValues | undefined;
+    let hcBorderValues: SolvedBorderValues | undefined;
+    let hcDiagnostics: SurfaceDiagnostics | undefined;
+
+    if (hasHcStory) {
+      const hcPlanned = hcPlacements.get(slug);
+      if (hcPlanned) {
+        hcLightness = hcPlanned.lightness;
+        hcTextValues = solveTextValues(
+          ctx,
+          hcLightness,
+          chroma,
+          hcTextGrades,
+        );
+        hcBorderValues = hcBorderTargets
+          ? solveBorderValues(ctx, hcLightness, chroma, hcBorderTargets)
+          : undefined;
+
+        const hcUnmetTextGrades = validateTargets(hcLightness, chroma, {
+          ...hcTextGrades,
+        });
+        const hcUnmetBorderTiers = hcBorderTargets
+          ? validateTargets(hcLightness, chroma, { ...hcBorderTargets })
+          : [];
+        const hcInDeadZone = isInDeadZone(hcLightness);
+        if (
+          hcUnmetTextGrades.length > 0 ||
+          hcUnmetBorderTiers.length > 0 ||
+          hcInDeadZone
+        ) {
+          hcDiagnostics = {
+            unmetTextGrades: hcUnmetTextGrades,
+            unmetBorderTiers: hcUnmetBorderTiers,
+            ...(hcInDeadZone ? { highContrastInDeadZone: true } : {}),
+          };
+        }
+      }
+    }
 
     solved.push({
       slug,
@@ -81,13 +141,22 @@ function solvePolarity(
       textValues,
       ...(borderValues ? { borderValues } : {}),
       ...(hasDiagnostics
-        ? { diagnostics: { unmetTextGrades, unmetBorderTiers } }
+        ? {
+            diagnostics: {
+              unmetTextGrades,
+              unmetBorderTiers,
+            },
+          }
         : {}),
       ...(surface.hue ? { hue: resolveHue(surface.hue, config) } : {}),
       ...(surface.targetChroma !== undefined
         ? { chroma: surface.targetChroma }
         : {}),
       ...(Object.keys(states).length > 0 ? { states } : {}),
+      ...(hcLightness !== undefined ? { lightnessHighContrast: hcLightness } : {}),
+      ...(hcTextValues ? { textValuesHighContrast: hcTextValues } : {}),
+      ...(hcBorderValues ? { borderValuesHighContrast: hcBorderValues } : {}),
+      ...(hcDiagnostics ? { diagnosticsHighContrast: hcDiagnostics } : {}),
     });
   }
 
