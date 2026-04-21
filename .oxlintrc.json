@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "promise", "import", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "warn"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "rules": {
+    "eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "unicorn/no-null": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/consistent-type-imports": "error",
+    "typescript/consistent-type-definitions": ["error", "interface"],
+    "import/no-cycle": "error",
+    "import/no-unassigned-import": "off",
+    "import/max-dependencies": "off",
+    "eslint/max-lines-per-function": "off",
+    "eslint/max-lines": "off",
+    "eslint/no-inline-comments": "off",
+    "eslint/sort-vars": "off",
+    "eslint/no-loop-func": "off",
+    "promise/always-return": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-immediate-mutation": "off",
+    "unicorn/no-useless-switch-case": "off",
+    "unicorn/no-useless-undefined": "off",
+    "unicorn/prefer-at": "off",
+    "unicorn/prefer-dom-node-append": "off",
+    "unicorn/prefer-query-selector": "off",
+    "unicorn/prefer-string-replace-all": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/prefer-type-error": "off"
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/__snapshots__/**",
+    "**/.vitepress/cache/**",
+    "**/.vitepress/dist/**",
+    "demo.html",
+    "demo.css",
+    "*.timestamp-*.mjs"
+  ]
+}

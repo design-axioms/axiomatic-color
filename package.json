@@ -1,17 +1,17 @@
 {
-  "private": true,
   "name": "axiomatic-color-workspace",
+  "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=24"
-  },
-  "packageManager": "pnpm@10.6.5",
   "scripts": {
-    "build": "pnpm --filter './packages/*' build",
+    "build": "pnpm --filter \"./packages/*\" build",
     "test": "vitest run",
     "check": "tsc --build",
-    "lint": "eslint .",
-    "clean": "pnpm --filter './packages/*' clean",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "prepare": "lefthook install",
+    "clean": "pnpm --filter \"./packages/*\" clean",
     "cli": "node --conditions=design-axioms:source packages/cli/src/index.ts",
     "demo:dev": "vite --config demo/vite.config.ts",
     "docs:dev": "vitepress dev docs",
@@ -25,11 +25,18 @@
     "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.2",
     "culori": "^4.0.1",
+    "lefthook": "^2.1.6",
     "markdown-it-mathjax3": "^4.3.2",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
     "shiki": "^4.0.2",
     "typescript": "6.0.2",
     "vite": "^8.0.3",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.2"
-  }
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.6.5"
 }
