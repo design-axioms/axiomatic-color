@@ -47,6 +47,7 @@ export default defineConfig({
           { text: "Borders", link: "/borders" },
           { text: "Atmosphere", link: "/atmosphere" },
           { text: "Composition", link: "/composition" },
+          { text: "Accessibility", link: "/accessibility" },
         ],
       },
       {

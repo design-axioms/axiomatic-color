@@ -33,8 +33,16 @@ export const DEFAULT_CONFIG: SolverConfig = {
   },
   surfaces: {
     page: {
-      page: { position: 0, label: "Page", description: "Base background of the application." },
-      workspace: { position: 1, label: "Workspace", description: "Elevated workspace area." },
+      page: {
+        position: 0,
+        label: "Page",
+        description: "Base background of the application.",
+      },
+      workspace: {
+        position: 1,
+        label: "Workspace",
+        description: "Elevated workspace area.",
+      },
       card: {
         position: 2,
         label: "Card",
@@ -50,6 +58,7 @@ export const DEFAULT_CONFIG: SolverConfig = {
         description: "Clickable action surface (button).",
         hue: "accent",
         targetChroma: 0.12,
+        role: "interactive",
         states: {
           hover: { positionOffset: 1 },
           active: { positionOffset: 2 },
@@ -73,6 +82,7 @@ export const DEFAULT_CONFIG: SolverConfig = {
         description: "Clickable action surface inside a spotlight region.",
         hue: "accent",
         targetChroma: 0.12,
+        role: "interactive",
       },
     },
   },

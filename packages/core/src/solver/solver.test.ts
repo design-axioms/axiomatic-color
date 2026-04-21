@@ -43,9 +43,27 @@ const RICH_CONFIG: SolverConfig = {
           active: { positionOffset: 2 },
         },
       },
-      success: { position: 2, label: "Success", hue: "success", targetChroma: 0.08 },
-      warning: { position: 2, label: "Warning", hue: "warning", targetChroma: 0.1 },
-      error: { position: 2, label: "Error", hue: "error", targetChroma: 0.12 },
+      success: {
+        position: 2,
+        label: "Success",
+        hue: "success",
+        targetChroma: 0.08,
+        role: "alert",
+      },
+      warning: {
+        position: 2,
+        label: "Warning",
+        hue: "warning",
+        targetChroma: 0.1,
+        role: "alert",
+      },
+      error: {
+        position: 2,
+        label: "Error",
+        hue: "error",
+        targetChroma: 0.12,
+        role: "alert",
+      },
     },
     inverted: {
       spotlight: { position: 0, label: "Spotlight" },
@@ -228,6 +246,65 @@ describe("solver", () => {
     expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.4);
   });
 
+  it("propagates role from SurfaceConfig to SolvedSurface", () => {
+    const page = output.light.surfaces.find((s) => s.slug === "page");
+    const action = output.light.surfaces.find((s) => s.slug === "action");
+    const spotlightAction = output.light.surfaces.find(
+      (s) => s.slug === "spotlight-action",
+    );
+
+    expect(page!.role).toBe("surface");
+    expect(action!.role).toBe("interactive");
+    expect(spotlightAction!.role).toBe("interactive");
+  });
+
+  it("emits a forced-colors media block", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).toContain("@media (forced-colors: active)");
+  });
+
+  it("maps surface role to Canvas/CanvasText under forced-colors", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    // .surface-page is role: "surface" → Canvas + CanvasText
+    const block = css.match(
+      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
+    )?.[0];
+    expect(block).toBeDefined();
+    expect(block).toMatch(/\.surface-page \{[\s\S]*?--axm-surface: Canvas;/);
+    expect(block).toMatch(
+      /\.surface-page \{[\s\S]*?--axm-text-high: CanvasText;/,
+    );
+  });
+
+  it("maps interactive role to ButtonFace/ButtonText/ButtonBorder", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    const block = css.match(
+      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
+    )?.[0];
+    expect(block).toMatch(
+      /\.surface-action \{[\s\S]*?--axm-surface: ButtonFace;/,
+    );
+    expect(block).toMatch(
+      /\.surface-action \{[\s\S]*?--axm-text-high: ButtonText;/,
+    );
+    expect(block).toMatch(
+      /\.surface-action \{[\s\S]*?--axm-border-interactive: ButtonBorder;/,
+    );
+  });
+
+  it("emits LinkText and GrayText tokens in every forced-colors block", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    // LinkText and GrayText are role-independent: every surface gets them.
+    expect(css).toMatch(/--axm-text-link: LinkText;/);
+    expect(css).toMatch(/--axm-text-disabled: GrayText;/);
+  });
+
+  it("emits .text-link and .text-disabled utilities", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).toMatch(/\.text-link \{[^}]*--axm-text-link/);
+    expect(css).toMatch(/\.text-disabled \{[^}]*--axm-text-disabled/);
+  });
+
   it("CSS output matches golden master", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     expect(css).toMatchSnapshot();
@@ -296,6 +373,24 @@ describe("solver (rich config)", () => {
 
     // Safety margin for C=0.10 is 3.0 pts
     expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.0);
+  });
+
+  it("alert role emits Canvas then Mark cascade fallback", () => {
+    const css = generateCSS(output, RICH_CONFIG.options);
+    // Isolate the forced-colors block first — there are two .surface-success
+    // rules in the CSS (normal + forced-colors).
+    const forcedBlock = css.match(
+      /@media \(forced-colors: active\) \{[\s\S]*?\n\}/,
+    )?.[0];
+    expect(forcedBlock).toBeDefined();
+    const successBlock = forcedBlock!.match(/\.surface-success \{[^}]+\}/)?.[0];
+    expect(successBlock).toBeDefined();
+    // Both CanvasText (baseline) and Mark (enhancement) should appear
+    // as text-high values, in that order.
+    const canvasIdx = successBlock!.indexOf("--axm-text-high: CanvasText");
+    const markIdx = successBlock!.indexOf("--axm-text-high: Mark");
+    expect(canvasIdx).toBeGreaterThanOrEqual(0);
+    expect(markIdx).toBeGreaterThan(canvasIdx);
   });
 
   it("CSS output matches golden master for rich config", () => {

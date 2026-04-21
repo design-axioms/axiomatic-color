@@ -167,11 +167,137 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 .text-strong { color: var(--axm-text-strong); }
 .text-subtle { color: var(--axm-text-subtle); }
 .text-subtlest { color: var(--axm-text-subtlest); }
+.text-link { color: var(--axm-text-link, var(--axm-text-strong)); text-decoration: underline; }
+.text-disabled { color: var(--axm-text-disabled, var(--axm-text-subtlest)); }
 
 /* Border utilities — consume nearest surface context */
 .border-decorative { border-color: var(--axm-border-decorative); }
 .border-interactive { border-color: var(--axm-border-interactive); }
-.border-critical { border-color: var(--axm-border-critical); }"
+.border-critical { border-color: var(--axm-border-critical); }
+
+/* Forced colors — cede to OS palette per surface role */
+@media (forced-colors: active) {
+  .surface-page {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-workspace {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-card {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-input {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-action-soft {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-success {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-high: Mark;
+    --axm-text-strong: Mark;
+    --axm-text-subtle: Mark;
+    --axm-text-subtlest: Mark;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-warning {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-high: Mark;
+    --axm-text-strong: Mark;
+    --axm-text-subtle: Mark;
+    --axm-text-subtlest: Mark;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-error {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-high: Mark;
+    --axm-text-strong: Mark;
+    --axm-text-subtle: Mark;
+    --axm-text-subtlest: Mark;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-spotlight {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+}"
 `;
 
 exports[`solver > CSS output matches golden master 1`] = `
@@ -317,9 +443,99 @@ exports[`solver > CSS output matches golden master 1`] = `
 .text-strong { color: var(--axm-text-strong); }
 .text-subtle { color: var(--axm-text-subtle); }
 .text-subtlest { color: var(--axm-text-subtlest); }
+.text-link { color: var(--axm-text-link, var(--axm-text-strong)); text-decoration: underline; }
+.text-disabled { color: var(--axm-text-disabled, var(--axm-text-subtlest)); }
 
 /* Border utilities — consume nearest surface context */
 .border-decorative { border-color: var(--axm-border-decorative); }
 .border-interactive { border-color: var(--axm-border-interactive); }
-.border-critical { border-color: var(--axm-border-critical); }"
+.border-critical { border-color: var(--axm-border-critical); }
+
+/* Forced colors — cede to OS palette per surface role */
+@media (forced-colors: active) {
+  .surface-page {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-workspace {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-card {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-action {
+    --axm-surface: ButtonFace;
+    --axm-text-high: ButtonText;
+    --axm-text-strong: ButtonText;
+    --axm-text-subtle: ButtonText;
+    --axm-text-subtlest: ButtonText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: ButtonBorder;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-spotlight {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-spotlight-card {
+    --axm-surface: Canvas;
+    --axm-text-high: CanvasText;
+    --axm-text-strong: CanvasText;
+    --axm-text-subtle: CanvasText;
+    --axm-text-subtlest: CanvasText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: CanvasText;
+    --axm-border-critical: CanvasText;
+  }
+  .surface-spotlight-action {
+    --axm-surface: ButtonFace;
+    --axm-text-high: ButtonText;
+    --axm-text-strong: ButtonText;
+    --axm-text-subtle: ButtonText;
+    --axm-text-subtlest: ButtonText;
+    --axm-text-link: LinkText;
+    --axm-text-disabled: GrayText;
+    --axm-border-decorative: CanvasText;
+    --axm-border-interactive: ButtonBorder;
+    --axm-border-critical: CanvasText;
+  }
+}"
 `;
