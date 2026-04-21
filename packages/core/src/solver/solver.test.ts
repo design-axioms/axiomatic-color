@@ -10,96 +10,53 @@ import { solve } from "./index.ts";
  * with independent hues, and a wider surface ladder than the default.
  */
 const RICH_CONFIG: SolverConfig = {
-  anchors: {
+  scale: {
     page: {
-      light: { start: 1.0, end: 0.9 },
-      dark: { start: 0.1, end: 0.4 },
+      light: [0.975, 0.955, 0.92, 0.88, 0.82, 0.75, 0.65, 0.55, 0.4, 0.25],
+      dark: [0.1, 0.15, 0.22, 0.3, 0.38, 0.48, 0.58, 0.68, 0.78, 0.88],
     },
     inverted: {
-      light: { start: 0.1, end: 0.0 },
-      dark: { start: 0.9, end: 1.0 },
-    },
-    keyColors: {
-      brand: "#6e56cf",
-      success: "#22c55e",
-      warning: "#eab308",
-      error: "#ef4444",
+      light: [0.1, 0.08, 0.06, 0.04, 0.02],
+      dark: [0.9, 0.92, 0.94, 0.96, 0.98],
     },
   },
-  groups: [
-    {
-      name: "Base",
-      surfaces: [
-        { slug: "page", label: "Page", polarity: "page" },
-        { slug: "workspace", label: "Workspace", polarity: "page" },
-      ],
+  surfaces: {
+    page: {
+      page: { position: 0, label: "Page" },
+      workspace: { position: 1, label: "Workspace" },
+      card: {
+        position: 2,
+        label: "Card",
+        states: {
+          hover: { positionOffset: 1 },
+          active: { positionOffset: 2 },
+        },
+      },
+      input: { position: 3, label: "Input" },
+      "action-soft": {
+        position: 4,
+        label: "Soft Action",
+        hue: "brand",
+        targetChroma: 0.08,
+        states: {
+          hover: { positionOffset: 1 },
+          active: { positionOffset: 2 },
+        },
+      },
+      success: { position: 2, label: "Success", hue: "success", targetChroma: 0.08 },
+      warning: { position: 2, label: "Warning", hue: "warning", targetChroma: 0.1 },
+      error: { position: 2, label: "Error", hue: "error", targetChroma: 0.12 },
     },
-    {
-      name: "Content",
-      surfaces: [
-        {
-          slug: "card",
-          label: "Card",
-          polarity: "page",
-          contrastOffset: { light: 15, dark: 15 },
-          states: [
-            { name: "hover", offset: -5 },
-            { name: "active", offset: -10 },
-          ],
-        },
-        {
-          slug: "input",
-          label: "Input",
-          polarity: "page",
-          contrastOffset: { light: 10, dark: 10 },
-        },
-        {
-          slug: "action-soft",
-          label: "Soft Action",
-          polarity: "page",
-          hue: "brand",
-          targetChroma: 0.08,
-          contrastOffset: { light: 20, dark: 20 },
-          states: [
-            { name: "hover", offset: -5 },
-            { name: "active", offset: -10 },
-          ],
-        },
-      ],
+    inverted: {
+      spotlight: { position: 0, label: "Spotlight" },
     },
-    {
-      name: "Status",
-      surfaces: [
-        {
-          slug: "success",
-          label: "Success",
-          polarity: "page",
-          hue: "success",
-          targetChroma: 0.08,
-        },
-        {
-          slug: "warning",
-          label: "Warning",
-          polarity: "page",
-          hue: "warning",
-          targetChroma: 0.10,
-        },
-        {
-          slug: "error",
-          label: "Error",
-          polarity: "page",
-          hue: "error",
-          targetChroma: 0.12,
-        },
-      ],
-    },
-    {
-      name: "Emphasis",
-      surfaces: [
-        { slug: "spotlight", label: "Spotlight", polarity: "inverted" },
-      ],
-    },
-  ],
+  },
+  keyColors: {
+    brand: "#6e56cf",
+    success: "#22c55e",
+    warning: "#eab308",
+    error: "#ef4444",
+  },
   borderTargets: { decorative: 10, interactive: 30, critical: 80 },
   options: { prefix: "axm", selector: ":root" },
 };

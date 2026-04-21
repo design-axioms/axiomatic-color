@@ -3,9 +3,10 @@
  *
  * Architecture decisions encoded here:
  * - Mode is binary (light/dark), not continuous — driven by `light-dark()`
- * - Polarity selects between two independent lightness ladders
+ * - Polarity selects between two independent lightness scales
  * - Context = Polarity × Mode — the minimal input for all color math
  * - Surfaces have semantic identity, not positional (no nesting depth)
+ * - A surface's lightness is its scale position — no optimization, no spreading
  */
 
 // --- Primitives ---
@@ -15,7 +16,7 @@ export type Polarity = "page" | "inverted";
 
 /**
  * The minimal context for all color math operations.
- * Polarity selects the lightness ladder; mode selects the branch.
+ * Polarity selects the lightness scale; mode selects the branch.
  */
 export interface Context {
   readonly polarity: Polarity;
@@ -68,69 +69,87 @@ export const SAFETY_MARGINS: readonly SafetyMargin[] = [
   { chroma: 0.2, margin: 5 },
 ] as const;
 
-// --- Anchors ---
+// --- Scale ---
 
 /**
- * A single mode's anchor endpoints.
- * Surfaces are placed between start and end on the lightness axis.
+ * A lightness scale for one mode (light or dark).
+ *
+ * Surface positions index directly into this array. The array length
+ * defines the number of available positions; surfaces choose which ones
+ * to occupy.
+ *
+ * Architecture (§3): each polarity has its own independent scale.
+ * The page scale and inverted scale can have different lengths and
+ * spacing — they are context resets, not two ends of the same line.
  */
-export interface ModeAnchors {
-  readonly start: number; // lightness (0–1)
-  readonly end: number; // lightness (0–1)
+export type ModeScale = readonly number[];
+
+/**
+ * A polarity's scale across both modes.
+ * Both modes must have the same length — a surface at position N must
+ * exist in both light and dark.
+ */
+export interface PolarityScale {
+  readonly light: ModeScale;
+  readonly dark: ModeScale;
 }
 
 /**
- * Anchor configuration for one polarity (page or inverted).
- * Each polarity has independent light/dark anchor sets.
+ * Full scale configuration.
+ * Two independent polarity scales (§3).
  */
-export interface PolarityAnchors {
-  readonly light: ModeAnchors;
-  readonly dark: ModeAnchors;
-}
-
-/**
- * Full anchor configuration.
- * Two independent polarity ladders, per architecture decision §8.
- */
-export interface Anchors {
-  readonly page: PolarityAnchors;
-  readonly inverted: PolarityAnchors;
-  readonly keyColors?: Record<string, string>;
+export interface Scale {
+  readonly page: PolarityScale;
+  readonly inverted: PolarityScale;
 }
 
 // --- Surfaces ---
 
-/** Interaction state offset for a surface. */
+/**
+ * Interaction state offset, expressed as a step along the scale.
+ *
+ * Positive = move toward higher-index (darker-in-light, lighter-in-dark).
+ * Negative = move toward lower-index.
+ *
+ * Example: on a page surface at position 2, `positionOffset: 1` resolves
+ * to `scale.page.light[3]` / `scale.page.dark[3]`.
+ */
 export interface SurfaceState {
-  readonly name: string;
-  readonly offset: number; // APCA contrast offset from base
+  readonly positionOffset: number;
 }
 
 /**
  * Configuration for a single semantic surface.
  *
  * Key principle (§7): a surface's lightness is determined by its semantic
- * identity (slug + polarity + group position), not by DOM nesting.
+ * identity (slug + polarity + scale position), not by DOM nesting.
  */
 export interface SurfaceConfig {
-  readonly slug: string;
-  readonly label: string;
+  readonly position: number;
+  readonly label?: string;
   readonly description?: string;
-  readonly polarity: Polarity;
-  readonly contrastOffset?: { readonly light?: number; readonly dark?: number };
-  readonly hue?: string; // key color name or number
+  readonly hue?: string; // key color name
   readonly targetChroma?: number;
-  readonly states?: readonly SurfaceState[];
+  readonly states?: { readonly [stateName: string]: SurfaceState };
 }
 
 /**
- * A group of surfaces placed together on the lightness ladder.
- * Groups are ordered — earlier groups are closer to the start anchor.
+ * A surface is either a bare position (shorthand) or a full config.
+ * Shorthand `{ card: 2 }` is equivalent to `{ card: { position: 2 } }`.
  */
-export interface SurfaceGroup {
-  readonly name: string;
-  readonly surfaces: readonly SurfaceConfig[];
-  readonly gapBefore?: number;
+export type SurfaceSpec = number | SurfaceConfig;
+
+/**
+ * Surfaces grouped by polarity.
+ *
+ * The outer keys (`page` / `inverted`) encode polarity as a structural
+ * fact rather than a per-surface tag (§3: polarity is a context reset).
+ * Surface slugs are the inner keys and should be unique across both
+ * buckets.
+ */
+export interface Surfaces {
+  readonly page: { readonly [slug: string]: SurfaceSpec };
+  readonly inverted: { readonly [slug: string]: SurfaceSpec };
 }
 
 // --- Composition Classification ---
@@ -141,7 +160,6 @@ export interface SurfaceGroup {
  * The solver classifies each surface relationship:
  * - guarantee: cross-polarity, massive APCA gap
  * - enhancement: same-polarity lightness stagger (real but not load-bearing)
- * - unclassified: no direct relationship (different branches of the tree)
  */
 export type CompositionTier = "guarantee" | "enhancement";
 
@@ -158,8 +176,9 @@ export interface CompositionReport {
  * Full configuration for the solver.
  */
 export interface SolverConfig {
-  readonly anchors: Anchors;
-  readonly groups: readonly SurfaceGroup[];
+  readonly scale: Scale;
+  readonly surfaces: Surfaces;
+  readonly keyColors?: Record<string, string>;
   readonly hueShift?: {
     readonly curve: {
       readonly p1: [number, number];

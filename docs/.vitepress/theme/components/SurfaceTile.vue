@@ -47,13 +47,16 @@ function rebuildCSS() {
   css.value = generateCSSFn(output, {
     ...config.options,
     selector: ".surface-tile-root",
-    keyColors: config.anchors.keyColors,
+    keyColors: config.keyColors,
   });
 
   const slugs = new Map<string, { label: string; polarity: string }>();
-  for (const group of config.groups) {
-    for (const s of group.surfaces) {
-      slugs.set(s.slug, { label: s.label, polarity: s.polarity });
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      slugs.set(slug, { label, polarity });
     }
   }
 

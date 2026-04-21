@@ -6,7 +6,7 @@ Named regions with fixed lightness. Each surface establishes text and border tok
 
 <SurfaceMap />
 
-The map shows five surfaces across two polarities. Four share **page polarity**: light in light mode, dark in dark mode. <Token name=".surface-spotlight" /> uses **inverted polarity**, so it stays opposite page-polarity surfaces with at least <ApcaBadge :value="87" :target="80" /> contrast.
+The map shows seven surfaces across two polarities. Four share **page polarity**: light in light mode, dark in dark mode. Three share **inverted polarity** (<Token name=".surface-spotlight" />, <Token name=".surface-spotlight-card" />, <Token name=".surface-spotlight-action" />), so they stay opposite page-polarity surfaces with at least <ApcaBadge :value="87" :target="80" /> contrast.
 
 ## Usage
 

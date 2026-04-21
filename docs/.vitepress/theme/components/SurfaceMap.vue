@@ -30,19 +30,22 @@ function rebuildCSS() {
   css.value = generateCSSFn(output, {
     ...config.options,
     selector: ".surface-map-root",
-    keyColors: config.anchors.keyColors,
+    keyColors: config.keyColors,
   });
 
   const result: SurfaceInfo[] = [];
-  for (const group of config.groups) {
-    for (const s of group.surfaces) {
-      const light = output.light.surfaces.find((x) => x.slug === s.slug);
-      const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      const light = output.light.surfaces.find((x) => x.slug === slug);
+      const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (!light || !dark) continue;
       result.push({
-        slug: s.slug,
-        label: s.label,
-        polarity: s.polarity,
+        slug,
+        label,
+        polarity,
         lightness: { light: light.lightness, dark: dark.lightness },
       });
     }
@@ -136,16 +139,47 @@ function surfaceBySlug(slug: string) {
         </div>
 
         <div class="map-spotlight surface-spotlight">
-          <div class="map-title">
-            <span class="map-name text-high">Spotlight</span>
-            <span class="map-role text-subtlest"
-              >Inverted · High-emphasis callout</span
+          <div class="map-label">
+            <div class="map-title">
+              <span class="map-name text-high">Spotlight</span>
+              <span class="map-role text-subtlest"
+                >Inverted · High-emphasis callout</span
+              >
+              <Token name=".surface-spotlight" />
+            </div>
+            <span class="map-l text-subtlest"
+              >L={{
+                fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0)
+              }}</span
             >
-            <Token name=".surface-spotlight" />
           </div>
-          <span class="map-l text-subtlest"
-            >L={{ fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0) }}</span
-          >
+
+          <div class="map-cards">
+            <div class="map-card surface-spotlight-card">
+              <div class="map-title">
+                <span class="map-name text-high">Spotlight Card</span>
+                <span class="map-role text-subtlest">Content container</span>
+                <Token name=".surface-spotlight-card" />
+              </div>
+              <span class="map-l text-subtlest"
+                >L={{
+                  fmt(surfaceBySlug("spotlight-card")?.lightness[mode] ?? 0)
+                }}</span
+              >
+            </div>
+            <div class="map-card surface-spotlight-action hue-accent">
+              <div class="map-title">
+                <span class="map-name text-high">Spotlight Action</span>
+                <span class="map-role text-subtlest">Interactive element</span>
+                <Token name=".surface-spotlight-action" />
+              </div>
+              <span class="map-l text-subtlest"
+                >L={{
+                  fmt(surfaceBySlug("spotlight-action")?.lightness[mode] ?? 0)
+                }}</span
+              >
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -230,8 +264,7 @@ function surfaceBySlug(slug: string) {
 
 .map-spotlight {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  flex-direction: column;
   margin-top: 0.6rem;
   padding: 0.65rem 0.75rem;
   border-radius: 6px;

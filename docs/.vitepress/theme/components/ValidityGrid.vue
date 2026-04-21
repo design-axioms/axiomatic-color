@@ -101,7 +101,7 @@ function rebuildCSS() {
   css.value = generateCSSFn(output, {
     ...config.options,
     selector: ".validity-grid-root",
-    keyColors: config.anchors.keyColors,
+    keyColors: config.keyColors,
   });
 
   const borderTargets = config.borderTargets ?? defaultConfig.borderTargets!;
@@ -110,13 +110,12 @@ function rebuildCSS() {
   const modeOutput = m === "light" ? output.light : output.dark;
   const surfaceConfigs: { slug: string; label: string; polarity: string }[] =
     [];
-  for (const group of config.groups) {
-    for (const s of group.surfaces) {
-      surfaceConfigs.push({
-        slug: s.slug,
-        label: s.label,
-        polarity: s.polarity,
-      });
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      surfaceConfigs.push({ slug, label, polarity });
     }
   }
 

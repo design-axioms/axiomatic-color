@@ -15,7 +15,7 @@ export function getSystemStyleSheet(): Promise<CSSStyleSheet> {
   return (systemSheetPromise ??= Promise.resolve().then(() => {
     const output = solve(DEFAULT_CONFIG);
     const opts = { ...DEFAULT_CONFIG.options, selector: ":host" as const };
-    const keyColors = DEFAULT_CONFIG.anchors.keyColors;
+    const keyColors = DEFAULT_CONFIG.keyColors;
     const cssText = keyColors
       ? generateCSS(output, { ...opts, keyColors })
       : generateCSS(output, opts);

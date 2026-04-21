@@ -23,7 +23,7 @@ The solver validates whether the system's guarantees can be met. It pre-solves l
 
 The solver performs the following work:
 
-- It places surfaces on the lightness ladder by polarity, group order, and contrast offset.
+- It looks up each surface's lightness from the declared scale at the surface's position.
 - It pre-solves text lightness for all grades on all surfaces in both modes.
 - It pre-solves border lightness for all tiers on all surfaces in both modes.
 - It computes hue-aware safety margins.
@@ -32,7 +32,7 @@ The solver performs the following work:
 
 The solver does not compute intermediate mode states, because `light-dark()` removes that requirement. It also does not track DOM nesting depth or parent-relative composition.
 
-When a target cannot be met — for example, "high" grade text (Lc 100) on a mid-tone surface — the solver does not silently compromise. It solves for the best achievable contrast, reports the unmet target, and includes the actual ceiling in its diagnostics. This "noisy no" supports informed tradeoffs about surface placement, anchor ranges, and contrast targets.
+When a target cannot be met — for example, "high" grade text (Lc 100) on a mid-tone surface — the solver does not silently compromise. It solves for the best achievable contrast, reports the unmet target, and includes the actual ceiling in its diagnostics. This "noisy no" supports informed tradeoffs about scale design, surface positions, and contrast targets.
 
 ## 3. Text derivation
 
@@ -65,7 +65,7 @@ At L = 0.5, the taper preserves full chroma. At L = 0 or L = 1, it reduces chrom
 
 ### Tier 1: Guarantees
 
-- Text on any surface meets its APCA target grade.
+- Text on any surface either meets its APCA target grade or surfaces a diagnostic ("noisy no") naming the grade that couldn't be reached.
 - Cross-polarity surface pairs remain visually distinct with an 80+ APCA gap.
 - Atmosphere is correct and inheritable.
 
@@ -88,13 +88,13 @@ A surface's lightness is fixed by its semantic name and the current mode and pol
 - The solver has no depth parameter, so it solves each surface once per mode and polarity.
 - CSS resets local tokens per <Token name=".surface-*" /> class, and descendants inherit the nearest surface context.
 
-## 8. Polarity: two independent ladders
+## 8. Polarity: two independent scales
 
-Page-polarity and inverted-polarity surfaces live on independent lightness ladders. A polarity flip is a context reset, not a nesting level.
+Page-polarity and inverted-polarity surfaces live on independent lightness scales. A polarity flip is a context reset, not a nesting level.
 
-- Page surfaces share one contrast budget solved against page anchors.
-- Inverted surfaces share a separate budget solved against inverted anchors.
-- An inverted surface inside a page surface is solved independently on its own ladder.
+- Each polarity declares its own scale — an array of lightness values per mode.
+- Surfaces pick a position; the solver looks up the lightness and pre-solves text and border contrast against it.
+- An inverted surface inside a page surface is solved independently on its own scale. Scales can have different lengths and spacing.
 
 ## 9. Atmosphere: orthogonal to lightness
 

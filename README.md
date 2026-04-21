@@ -28,7 +28,7 @@ import { DEFAULT_CONFIG, generateCSS, solve } from "@design-axioms/color";
 const output = solve(DEFAULT_CONFIG);
 const css = generateCSS(output, {
   ...DEFAULT_CONFIG.options,
-  keyColors: DEFAULT_CONFIG.anchors.keyColors,
+  keyColors: DEFAULT_CONFIG.keyColors,
 });
 ```
 

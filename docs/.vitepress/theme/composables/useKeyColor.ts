@@ -21,7 +21,7 @@ let coreLoaded = false;
 function syncFromConfig(name: string, theme: ReactiveTheme) {
   const state = instances.get(name);
   if (!state || !parseKeyColorFn) return;
-  const hex = theme.getConfig().anchors.keyColors?.[name];
+  const hex = theme.getConfig().keyColors?.[name];
   if (hex) {
     const parsed = parseKeyColorFn(hex);
     if (parsed) {

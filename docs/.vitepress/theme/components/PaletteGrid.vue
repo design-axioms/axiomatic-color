@@ -6,17 +6,25 @@ import ApcaBadge from "./ApcaBadge.vue";
 
 const { isDark } = useDarkMode();
 
+type PaletteStep = { l: number; c: number; h: number; css: string };
+
+// Palette lightness, lazily loaded from the solver package so the grid
+// tracks the real scale rather than a hand-tuned parallel copy.
+//
+// Layout: page scale first (position 0 → N), then inverted scale in its
+// natural order (position 0 = most-extreme-inverted). At the polarity
+// boundary the scale turns around (light mode: bright → dark → back-up
+// slightly) but at those low lightness values the turn-around is
+// imperceptible; what matters is that un-dotted swatches end up at the
+// row edge rather than mid-run.
+const paletteLightness = ref<{ light: number[]; dark: number[] } | null>(null);
+
 function generateScale(
   hue: number,
   chroma: number,
   mode: "light" | "dark",
-): { l: number; c: number; h: number; css: string }[] {
-  // Positions chosen to align with solved surface lightness values.
-  // Page surfaces cluster near L=0.90-0.98 (light), inverted near L=0.10-0.20.
-  const lightSteps = [0.98, 0.96, 0.92, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.18, 0.10];
-  const darkSteps = [0.10, 0.18, 0.25, 0.35, 0.40, 0.50, 0.60, 0.70, 0.80, 0.88, 0.93, 0.97];
-  const positions = mode === "light" ? lightSteps : darkSteps;
-
+): PaletteStep[] {
+  const positions = paletteLightness.value?.[mode] ?? [];
   return positions.map((l) => {
     const taper = 1 - Math.abs(2 * l - 1);
     const c = chroma * taper;
@@ -74,16 +82,27 @@ const TEXT_GRADE_TARGETS = [
 onMounted(async () => {
   const mod = await import("@design-axioms/color");
   contrastFn = mod.contrastForPair;
-  const output = mod.solve(mod.DEFAULT_CONFIG);
+  const config = mod.DEFAULT_CONFIG;
+  const output = mod.solve(config);
+
+  paletteLightness.value = {
+    light: [...config.scale.page.light, ...config.scale.inverted.light],
+    dark: [...config.scale.page.dark, ...config.scale.inverted.dark],
+  };
+
   const refs: SolvedRef[] = [];
-  for (const group of mod.DEFAULT_CONFIG.groups) {
-    for (const s of group.surfaces) {
-      const light = output.light.surfaces.find((x) => x.slug === s.slug);
-      const dark = output.dark.surfaces.find((x) => x.slug === s.slug);
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label =
+        typeof spec === "number" ? slug : spec.label ?? slug;
+      const light = output.light.surfaces.find((x) => x.slug === slug);
+      const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (light && dark)
         refs.push({
-          slug: s.slug,
-          label: s.label,
+          slug,
+          label,
           lightness: { light: light.lightness, dark: dark.lightness },
         });
     }
@@ -144,6 +163,19 @@ function swatchValid(si: number, ti: number): boolean {
   return apca !== null && apca >= 75;
 }
 
+// Which text grade (if any) the fg-on-selected-bg pair achieves.
+// Mirrors TEXT_GRADES from the core package: high=100, strong=95,
+// subtle=90, subtlest=75. subtlest is the 'large only' floor.
+type SwatchGrade = "high" | "strong" | "subtle" | "subtlest" | "fail";
+function swatchGrade(si: number, ti: number): SwatchGrade {
+  const apca = swatchApca(si, ti);
+  if (apca === null || apca < 75) return "fail";
+  if (apca >= 100) return "high";
+  if (apca >= 95) return "strong";
+  if (apca >= 90) return "subtle";
+  return "subtlest";
+}
+
 function isBg(si: number, ti: number) {
   return selectedBg.value?.scale === si && selectedBg.value?.step === ti;
 }
@@ -166,6 +198,18 @@ function swatchState(si: number, ti: number): 'none' | 'same-hue-valid' | 'cross
   if (!swatchValid(si, ti)) return 'invalid';
   if (isSameHueRow(si)) return 'same-hue-valid';
   return 'cross-hue-valid';
+}
+
+// Which marker variant (if any) to show on a non-bg swatch. Unlike
+// swatchState, this also applies to the selected fg — its marker stays
+// visible so the chosen text tier is legible at a glance.
+type MarkerTier = 'same' | 'cross' | 'fail' | 'none';
+function markerTier(si: number, ti: number): MarkerTier {
+  if (!selectedBg.value) return 'none';
+  if (isBg(si, ti)) return 'none';
+  if (!swatchValid(si, ti)) return 'fail';
+  if (isSameHueRow(si)) return 'same';
+  return 'cross';
 }
 
 // Message shown when clicking a non-surface swatch with no bg selected
@@ -223,6 +267,20 @@ watch(mode, reset);
 const isCrossHue = computed(() => {
   if (!selectedBg.value || !selectedFg.value) return false;
   return selectedBg.value.scale !== selectedFg.value.scale;
+});
+
+// Badge status for the composition equation. Mirrors the verdict text:
+//   Fails      -> unmet  (Lc < 75)
+//   Wrong hue  -> close  (cross-hue, any Lc)
+//   Large only -> close  (same-hue, Lc 75-89)
+//   Pass       -> met    (same-hue, Lc 90+)
+// Keeps the badge color honest: green only when the verdict is 'Pass'.
+const verdictStatus = computed<"met" | "close" | "unmet">(() => {
+  const apca = achievedApca.value ?? 0;
+  if (apca < 75) return "unmet";
+  if (isCrossHue.value) return "close";
+  if (apca >= 90) return "met";
+  return "close";
 });
 
 // Should this swatch show an 'Aa' label?
@@ -307,11 +365,25 @@ const nearestGrade = computed(() => {
           >
             <!-- Browse mode: dot on surface-capable swatches -->
             <span v-if="!selectedBg && isValidSurface(si, ti)" class="pg-dot" :style="{ background: markerColor(si, ti) }" />
-            <!-- Surface selected: markers on other swatches -->
-            <template v-else-if="selectedBg && !isBg(si, ti) && !isFg(si, ti)">
-              <span v-if="swatchState(si, ti) === 'same-hue-valid'" class="pg-marker" :style="{ color: markerColor(si, ti) }">Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'cross-hue-valid'" class="pg-marker pg-marker-cross" :style="{ color: softMarkerColor(si, ti) }">Aa</span>
-              <span v-else-if="swatchState(si, ti) === 'invalid'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
+            <!-- Surface selected: markers on all non-bg swatches, tiered by
+                 achieved text grade (high/strong/subtle/subtlest/fail).
+                 The selected fg keeps its Aa because that's the whole
+                 point — it's the text sample. The bg stays empty (it's
+                 the surface/context, not a text choice). -->
+            <template v-else-if="selectedBg && !isBg(si, ti)">
+              <span
+                v-if="markerTier(si, ti) === 'same'"
+                class="pg-marker"
+                :class="`pg-marker-${swatchGrade(si, ti)}`"
+                :style="{ color: markerColor(si, ti) }"
+              >Aa</span>
+              <span
+                v-else-if="markerTier(si, ti) === 'cross'"
+                class="pg-marker pg-marker-cross"
+                :class="`pg-marker-${swatchGrade(si, ti)}`"
+                :style="{ color: softMarkerColor(si, ti) }"
+              >Aa</span>
+              <span v-else-if="markerTier(si, ti) === 'fail'" class="pg-marker pg-marker-x" :style="{ color: softMarkerColor(si, ti) }">×</span>
             </template>
           </button>
         </div>
@@ -335,16 +407,16 @@ const nearestGrade = computed(() => {
             <span class="pg-eq-label" :style="{ color: markerColor(selectedBg!.scale, selectedBg!.step) }">Surface</span>
           </div>
           <span class="pg-eq-op">+</span>
-          <div v-if="fgColor" class="pg-eq-slab" :style="{ background: bgColor!.css }">
+          <div v-if="fgColor" class="pg-eq-slab pg-eq-slab-fg" :style="{ background: bgColor!.css }">
             <span class="pg-eq-aa" :style="{ color: fgColor!.css }">Aa</span>
           </div>
-          <div v-else class="pg-eq-slab pg-eq-placeholder" :style="{ background: bgColor!.css }">
+          <div v-else class="pg-eq-slab pg-eq-slab-fg pg-eq-placeholder" :style="{ background: bgColor!.css }">
             <span class="pg-eq-ghost" :style="{ color: bgColor!.l > 0.5 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }">Aa</span>
           </div>
           <span class="pg-eq-op">=</span>
           <div class="pg-eq-result">
             <template v-if="selectedFg">
-              <ApcaBadge :value="achievedApca ?? 0" :target="75" />
+              <ApcaBadge :value="achievedApca ?? 0" :status="verdictStatus" />
               <span v-if="(achievedApca ?? 0) < 75" class="pg-verdict fail">Fails</span>
               <span v-else-if="isCrossHue" class="pg-verdict close">Wrong hue</span>
               <span v-else-if="(achievedApca ?? 0) >= 90" class="pg-verdict pass">Pass</span>
@@ -434,18 +506,31 @@ const nearestGrade = computed(() => {
   z-index: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
-.pg-swatch.is-bg {
-  outline: 3px solid var(--vp-c-text-1);
-  outline-offset: 1px;
+/* bg and fg selection share a common vocabulary: heavy dark outline.
+   Solid = background (surface); dashed = foreground (text). The same
+   treatment is echoed on the equation chips below so the eye connects
+   a chip to its source swatch. A white halo (via box-shadow) keeps the
+   outline visible against any swatch lightness.
+
+   `!important` is used because VitePress's base style sets
+   `button:focus:not(:focus-visible) { outline: none !important }` to
+   suppress browser-default focus rings. Our selection outline is a
+   semantic state, not a focus ring, and needs to win. */
+.pg-swatch.is-bg,
+.pg-swatch.is-fg {
+  outline-color: var(--vp-c-text-1) !important;
+  outline-width: 3px !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
   transform: scale(1.08);
   z-index: 2;
+}
+.pg-swatch.is-bg {
+  outline-style: solid !important;
   border-radius: 2px;
 }
 .pg-swatch.is-fg {
-  outline: 3px solid var(--vp-c-brand-1);
-  outline-offset: 1px;
-  transform: scale(1.08);
-  z-index: 2;
+  outline-style: dashed !important;
 }
 /* Surface-capable dot marker */
 .pg-dot {
@@ -455,12 +540,33 @@ const nearestGrade = computed(() => {
   pointer-events: none;
 }
 
-/* Foreground markers */
+/* Foreground markers — tiered by achieved text grade.
+   Larger + bolder = stronger contrast tier (closer to high=100). */
 .pg-marker {
-  font-size: 0.55rem;
-  font-weight: 700;
   line-height: 1;
   pointer-events: none;
+}
+
+/* high = Lc 100+ — full size, bold */
+.pg-marker-high {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+/* strong = Lc 95+ — slightly smaller */
+.pg-marker-strong {
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+/* subtle = Lc 90+ — medium weight */
+.pg-marker-subtle {
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+/* subtlest = Lc 75+ — 'large only' tier. Thin to signal marginal. */
+.pg-marker-subtlest {
+  font-size: 0.5rem;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .pg-marker-cross {
@@ -542,6 +648,8 @@ const nearestGrade = computed(() => {
   color: var(--vp-c-text-3);
 }
 
+/* Equation chips echo the swatch outlines (same solid-vs-dashed vocab,
+   same white halo) so the eye links each chip to its source swatch. */
 .pg-eq-slab {
   width: 56px;
   height: 44px;
@@ -549,7 +657,13 @@ const nearestGrade = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  outline: 3px solid var(--vp-c-text-1);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.pg-eq-slab-fg {
+  outline-style: dashed;
 }
 
 .pg-eq-label {
@@ -572,7 +686,8 @@ const nearestGrade = computed(() => {
 }
 
 .pg-eq-placeholder {
-  border: 1px dashed rgba(128, 128, 128, 0.3);
+  outline-style: dashed;
+  outline-color: rgba(128, 128, 128, 0.4);
 }
 
 .pg-eq-op {

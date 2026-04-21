@@ -16,7 +16,7 @@ export function generateHTML(
   output: SolverOutput,
   config: SolverConfig,
 ): string {
-  const keyColors = config.anchors.keyColors;
+  const keyColors = config.keyColors;
   const css = generateCSS(output, {
     ...config.options,
     ...(keyColors ? { keyColors } : {}),
@@ -74,9 +74,12 @@ function buildSwatchData(
   config: SolverConfig,
 ): SwatchInfo[] {
   const labels = new Map<string, string>();
-  for (const group of config.groups) {
-    for (const surface of group.surfaces) {
-      labels.set(surface.slug, surface.label);
+  for (const polarity of ["page", "inverted"] as const) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      labels.set(slug, label);
     }
   }
 
