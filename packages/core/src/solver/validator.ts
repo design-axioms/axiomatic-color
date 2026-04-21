@@ -19,24 +19,29 @@ import {
   textCeiling,
 } from "../math.ts";
 import type {
+  BorderTargets,
   CompositionReport,
   CompositionTier,
   Context,
-  SolvedSurface,
+  SolvedBorderValues,
+  SolvedTextValues,
+  TextGrades,
 } from "../types.ts";
-import { TEXT_GRADES } from "../types.ts";
+import { DEAD_ZONE, TEXT_GRADES } from "../types.ts";
 
 /**
  * Pre-solve text lightness values for a surface.
  *
  * For each grade, binary-search the foreground lightness that achieves
- * the target APCA against the surface background.
+ * the target APCA against the surface background. When `targets` is
+ * omitted, the default grades are used.
  */
 export function solveTextValues(
   ctx: Context,
   surfaceLightness: number,
   chroma: number,
-): SolvedSurface["textValues"] {
+  targets: TextGrades = TEXT_GRADES,
+): SolvedTextValues {
   const margin = safetyMarginForChroma(chroma);
 
   // Determine the foreground search range based on polarity
@@ -63,10 +68,10 @@ export function solveTextValues(
   }
 
   return {
-    high: solveGrade(TEXT_GRADES.high),
-    strong: solveGrade(TEXT_GRADES.strong),
-    subtle: solveGrade(TEXT_GRADES.subtle),
-    subtlest: solveGrade(TEXT_GRADES.subtlest),
+    high: solveGrade(targets.high),
+    strong: solveGrade(targets.strong),
+    subtle: solveGrade(targets.subtle),
+    subtlest: solveGrade(targets.subtlest),
   };
 }
 
@@ -80,12 +85,8 @@ export function solveBorderValues(
   ctx: Context,
   surfaceLightness: number,
   chroma: number,
-  targets: {
-    readonly decorative: number;
-    readonly interactive: number;
-    readonly critical: number;
-  },
-): NonNullable<SolvedSurface["borderValues"]> {
+  targets: BorderTargets,
+): SolvedBorderValues {
   const margin = safetyMarginForChroma(chroma);
 
   const usesDarkForeground =
@@ -122,7 +123,7 @@ export function solveBorderValues(
 export function validateTargets(
   surfaceLightness: number,
   chroma: number,
-  targets: Record<string, number>,
+  targets: { readonly [name: string]: number },
 ): string[] {
   const ceiling = textCeiling(surfaceLightness);
   const margin = safetyMarginForChroma(chroma);
@@ -145,6 +146,15 @@ export function validateTextContrast(
   chroma: number,
 ): string[] {
   return validateTargets(surfaceLightness, chroma, { ...TEXT_GRADES });
+}
+
+/**
+ * Test whether a lightness value falls in the APCA dead zone
+ * (L ≈ 0.46–0.82), where neither polarity can produce adequate text
+ * contrast. Surfaces here get a diagnostic but are not rejected.
+ */
+export function isInDeadZone(lightness: number): boolean {
+  return lightness >= DEAD_ZONE.min && lightness <= DEAD_ZONE.max;
 }
 
 /**

@@ -175,6 +175,100 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
 .border-interactive { border-color: var(--axm-border-interactive); }
 .border-critical { border-color: var(--axm-border-critical); }
 
+/* High contrast — re-solved with tighter targets/scale */
+@media (prefers-contrast: more), (prefers-contrast: custom) {
+  .surface-page {
+    --axm-surface: light-dark(oklch(0.9900 calc(var(--axm-chroma) * (1 - abs(2 * 0.9900 - 1))) var(--axm-hue)), oklch(0.0400 calc(var(--axm-chroma) * (1 - abs(2 * 0.0400 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.2748 calc(var(--axm-chroma) * (1 - abs(2 * 0.2748 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.2748 calc(var(--axm-chroma) * (1 - abs(2 * 0.2748 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.3426 calc(var(--axm-chroma) * (1 - abs(2 * 0.3426 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3961 calc(var(--axm-chroma) * (1 - abs(2 * 0.3961 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4837 calc(var(--axm-chroma) * (1 - abs(2 * 0.4837 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-workspace {
+    --axm-surface: light-dark(oklch(0.9820 calc(var(--axm-chroma) * (1 - abs(2 * 0.9820 - 1))) var(--axm-hue)), oklch(0.0600 calc(var(--axm-chroma) * (1 - abs(2 * 0.0600 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.2372 calc(var(--axm-chroma) * (1 - abs(2 * 0.2372 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.2372 calc(var(--axm-chroma) * (1 - abs(2 * 0.2372 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.3231 calc(var(--axm-chroma) * (1 - abs(2 * 0.3231 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3772 calc(var(--axm-chroma) * (1 - abs(2 * 0.3772 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4694 calc(var(--axm-chroma) * (1 - abs(2 * 0.4694 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-card {
+    --axm-surface: light-dark(oklch(0.9680 calc(var(--axm-chroma) * (1 - abs(2 * 0.9680 - 1))) var(--axm-hue)), oklch(0.0880 calc(var(--axm-chroma) * (1 - abs(2 * 0.0880 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2789 calc(var(--axm-chroma) * (1 - abs(2 * 0.2789 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3465 calc(var(--axm-chroma) * (1 - abs(2 * 0.3465 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4441 calc(var(--axm-chroma) * (1 - abs(2 * 0.4441 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-input {
+    --axm-surface: light-dark(oklch(0.9520 calc(var(--axm-chroma) * (1 - abs(2 * 0.9520 - 1))) var(--axm-hue)), oklch(0.1200 calc(var(--axm-chroma) * (1 - abs(2 * 0.1200 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2112 calc(var(--axm-chroma) * (1 - abs(2 * 0.2112 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3112 calc(var(--axm-chroma) * (1 - abs(2 * 0.3112 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4184 calc(var(--axm-chroma) * (1 - abs(2 * 0.4184 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-action-soft {
+    --axm-surface: light-dark(oklch(0.9280 calc(var(--axm-chroma) * (1 - abs(2 * 0.9280 - 1))) var(--axm-hue)), oklch(0.1520 calc(var(--axm-chroma) * (1 - abs(2 * 0.1520 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9776 calc(var(--axm-chroma) * (1 - abs(2 * 0.9776 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9776 calc(var(--axm-chroma) * (1 - abs(2 * 0.9776 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9536 calc(var(--axm-chroma) * (1 - abs(2 * 0.9536 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9295 calc(var(--axm-chroma) * (1 - abs(2 * 0.9295 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5846 calc(var(--axm-chroma) * (1 - abs(2 * 0.5846 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.3426 calc(var(--axm-chroma) * (1 - abs(2 * 0.3426 - 1))) var(--axm-hue)), oklch(0.8807 calc(var(--axm-chroma) * (1 - abs(2 * 0.8807 - 1))) var(--axm-hue)));
+  }
+  .surface-success {
+    --axm-surface: light-dark(oklch(0.9680 calc(var(--axm-chroma) * (1 - abs(2 * 0.9680 - 1))) var(--axm-hue)), oklch(0.0880 calc(var(--axm-chroma) * (1 - abs(2 * 0.0880 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9766 calc(var(--axm-chroma) * (1 - abs(2 * 0.9766 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9766 calc(var(--axm-chroma) * (1 - abs(2 * 0.9766 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2200 calc(var(--axm-chroma) * (1 - abs(2 * 0.2200 - 1))) var(--axm-hue)), oklch(0.9536 calc(var(--axm-chroma) * (1 - abs(2 * 0.9536 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3152 calc(var(--axm-chroma) * (1 - abs(2 * 0.3152 - 1))) var(--axm-hue)), oklch(0.9295 calc(var(--axm-chroma) * (1 - abs(2 * 0.9295 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5846 calc(var(--axm-chroma) * (1 - abs(2 * 0.5846 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4184 calc(var(--axm-chroma) * (1 - abs(2 * 0.4184 - 1))) var(--axm-hue)), oklch(0.8807 calc(var(--axm-chroma) * (1 - abs(2 * 0.8807 - 1))) var(--axm-hue)));
+  }
+  .surface-warning {
+    --axm-surface: light-dark(oklch(0.9680 calc(var(--axm-chroma) * (1 - abs(2 * 0.9680 - 1))) var(--axm-hue)), oklch(0.0880 calc(var(--axm-chroma) * (1 - abs(2 * 0.0880 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9776 calc(var(--axm-chroma) * (1 - abs(2 * 0.9776 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9776 calc(var(--axm-chroma) * (1 - abs(2 * 0.9776 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2109 calc(var(--axm-chroma) * (1 - abs(2 * 0.2109 - 1))) var(--axm-hue)), oklch(0.9536 calc(var(--axm-chroma) * (1 - abs(2 * 0.9536 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3086 calc(var(--axm-chroma) * (1 - abs(2 * 0.3086 - 1))) var(--axm-hue)), oklch(0.9325 calc(var(--axm-chroma) * (1 - abs(2 * 0.9325 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5880 calc(var(--axm-chroma) * (1 - abs(2 * 0.5880 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4147 calc(var(--axm-chroma) * (1 - abs(2 * 0.4147 - 1))) var(--axm-hue)), oklch(0.8838 calc(var(--axm-chroma) * (1 - abs(2 * 0.8838 - 1))) var(--axm-hue)));
+  }
+  .surface-error {
+    --axm-surface: light-dark(oklch(0.9680 calc(var(--axm-chroma) * (1 - abs(2 * 0.9680 - 1))) var(--axm-hue)), oklch(0.0880 calc(var(--axm-chroma) * (1 - abs(2 * 0.0880 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9806 calc(var(--axm-chroma) * (1 - abs(2 * 0.9806 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9806 calc(var(--axm-chroma) * (1 - abs(2 * 0.9806 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.1935 calc(var(--axm-chroma) * (1 - abs(2 * 0.1935 - 1))) var(--axm-hue)), oklch(0.9566 calc(var(--axm-chroma) * (1 - abs(2 * 0.9566 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3032 calc(var(--axm-chroma) * (1 - abs(2 * 0.3032 - 1))) var(--axm-hue)), oklch(0.9325 calc(var(--axm-chroma) * (1 - abs(2 * 0.9325 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5914 calc(var(--axm-chroma) * (1 - abs(2 * 0.5914 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4110 calc(var(--axm-chroma) * (1 - abs(2 * 0.4110 - 1))) var(--axm-hue)), oklch(0.8838 calc(var(--axm-chroma) * (1 - abs(2 * 0.8838 - 1))) var(--axm-hue)));
+  }
+  .surface-spotlight {
+    --axm-surface: light-dark(oklch(0.9600 calc(var(--axm-chroma) * (1 - abs(2 * 0.9600 - 1))) var(--axm-hue)), oklch(0.0400 calc(var(--axm-chroma) * (1 - abs(2 * 0.0400 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2541 calc(var(--axm-chroma) * (1 - abs(2 * 0.2541 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3309 calc(var(--axm-chroma) * (1 - abs(2 * 0.3309 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4331 calc(var(--axm-chroma) * (1 - abs(2 * 0.4331 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+}
+
 /* Forced colors — cede to OS palette per surface role */
 @media (forced-colors: active) {
   .surface-page {
@@ -450,6 +544,50 @@ exports[`solver > CSS output matches golden master 1`] = `
 .border-decorative { border-color: var(--axm-border-decorative); }
 .border-interactive { border-color: var(--axm-border-interactive); }
 .border-critical { border-color: var(--axm-border-critical); }
+
+/* High contrast — re-solved with tighter targets/scale */
+@media (prefers-contrast: more), (prefers-contrast: custom) {
+  .surface-page {
+    --axm-surface: light-dark(oklch(0.9900 calc(var(--axm-chroma) * (1 - abs(2 * 0.9900 - 1))) var(--axm-hue)), oklch(0.0400 calc(var(--axm-chroma) * (1 - abs(2 * 0.0400 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.2748 calc(var(--axm-chroma) * (1 - abs(2 * 0.2748 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.2748 calc(var(--axm-chroma) * (1 - abs(2 * 0.2748 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.3426 calc(var(--axm-chroma) * (1 - abs(2 * 0.3426 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3961 calc(var(--axm-chroma) * (1 - abs(2 * 0.3961 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4837 calc(var(--axm-chroma) * (1 - abs(2 * 0.4837 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-workspace {
+    --axm-surface: light-dark(oklch(0.9820 calc(var(--axm-chroma) * (1 - abs(2 * 0.9820 - 1))) var(--axm-hue)), oklch(0.0720 calc(var(--axm-chroma) * (1 - abs(2 * 0.0720 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.2372 calc(var(--axm-chroma) * (1 - abs(2 * 0.2372 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.2372 calc(var(--axm-chroma) * (1 - abs(2 * 0.2372 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.3231 calc(var(--axm-chroma) * (1 - abs(2 * 0.3231 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3772 calc(var(--axm-chroma) * (1 - abs(2 * 0.3772 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4694 calc(var(--axm-chroma) * (1 - abs(2 * 0.4694 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-card {
+    --axm-surface: light-dark(oklch(0.9600 calc(var(--axm-chroma) * (1 - abs(2 * 0.9600 - 1))) var(--axm-hue)), oklch(0.1000 calc(var(--axm-chroma) * (1 - abs(2 * 0.1000 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9657 calc(var(--axm-chroma) * (1 - abs(2 * 0.9657 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.2541 calc(var(--axm-chroma) * (1 - abs(2 * 0.2541 - 1))) var(--axm-hue)), oklch(0.9416 calc(var(--axm-chroma) * (1 - abs(2 * 0.9416 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.3309 calc(var(--axm-chroma) * (1 - abs(2 * 0.3309 - 1))) var(--axm-hue)), oklch(0.9174 calc(var(--axm-chroma) * (1 - abs(2 * 0.9174 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5641 calc(var(--axm-chroma) * (1 - abs(2 * 0.5641 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.4331 calc(var(--axm-chroma) * (1 - abs(2 * 0.4331 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
+  }
+  .surface-action {
+    --axm-surface: light-dark(oklch(0.9600 calc(var(--axm-chroma) * (1 - abs(2 * 0.9600 - 1))) var(--axm-hue)), oklch(0.1000 calc(var(--axm-chroma) * (1 - abs(2 * 0.1000 - 1))) var(--axm-hue)));
+    --axm-text-high: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9806 calc(var(--axm-chroma) * (1 - abs(2 * 0.9806 - 1))) var(--axm-hue)));
+    --axm-text-strong: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9806 calc(var(--axm-chroma) * (1 - abs(2 * 0.9806 - 1))) var(--axm-hue)));
+    --axm-text-subtle: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9566 calc(var(--axm-chroma) * (1 - abs(2 * 0.9566 - 1))) var(--axm-hue)));
+    --axm-text-subtlest: light-dark(oklch(0.2830 calc(var(--axm-chroma) * (1 - abs(2 * 0.2830 - 1))) var(--axm-hue)), oklch(0.9325 calc(var(--axm-chroma) * (1 - abs(2 * 0.9325 - 1))) var(--axm-hue)));
+    --axm-border-decorative: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)));
+    --axm-border-interactive: light-dark(oklch(0.5000 calc(var(--axm-chroma) * (1 - abs(2 * 0.5000 - 1))) var(--axm-hue)), oklch(0.5914 calc(var(--axm-chroma) * (1 - abs(2 * 0.5914 - 1))) var(--axm-hue)));
+    --axm-border-critical: light-dark(oklch(0.3998 calc(var(--axm-chroma) * (1 - abs(2 * 0.3998 - 1))) var(--axm-hue)), oklch(0.8838 calc(var(--axm-chroma) * (1 - abs(2 * 0.8838 - 1))) var(--axm-hue)));
+  }
+}
 
 /* Forced colors — cede to OS palette per surface role */
 @media (forced-colors: active) {

@@ -26,7 +26,11 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
 
   function buildCSS(): string {
     const output = solve(current);
-    const opts = { ...current.options, selector: ":host" as const };
+    const opts = {
+      ...current.options,
+      selector: ":host" as const,
+      highContrastSimulationClass: "hc-simulate",
+    };
     const keyColors = current.keyColors;
     return keyColors
       ? generateCSS(output, { ...opts, keyColors })

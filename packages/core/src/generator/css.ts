@@ -21,6 +21,14 @@ interface GeneratorOptions {
   prefix?: string;
   selector?: string;
   keyColors?: Record<string, string>;
+  /**
+   * When set, also emit a class-triggered copy of the high-contrast
+   * overrides that matches any ancestor with this class. Intended for
+   * demo/preview simulation — a docs demo can apply the class to
+   * visualize HC mode without changing OS settings. Leave unset in
+   * production CSS; rely on the media query alone.
+   */
+  highContrastSimulationClass?: string;
 }
 
 /**
@@ -55,6 +63,21 @@ export function generateCSS(
   // Hue utilities — atmosphere modifiers from key colors
   if (keyColors) {
     sections.push(generateHueUtilities(prefix, keyColors));
+  }
+
+  // High-contrast overrides — re-solve with tighter targets/scale.
+  // Must come BEFORE forced-colors so forced-colors wins the cascade
+  // for users who have both (per MDN: `prefers-contrast: custom` matches
+  // forced-colors users).
+  const hcSection = generateHighContrast(output, prefix);
+  if (hcSection) sections.push(hcSection);
+  if (options.highContrastSimulationClass) {
+    const simSection = generateHighContrastSimulation(
+      output,
+      prefix,
+      options.highContrastSimulationClass,
+    );
+    if (simSection) sections.push(simSection);
   }
 
   // Forced-colors overrides — cede colors to OS palette per surface role
@@ -284,6 +307,187 @@ function forcedColorsForRole(role: SurfaceRole): {
         fg: ["CanvasText"],
       };
   }
+}
+
+/**
+ * Emit high-contrast overrides under
+ * `@media (prefers-contrast: more), (prefers-contrast: custom)`.
+ *
+ * For each surface with HC companion values (light + dark both present),
+ * write a rule that updates --axm-surface / --axm-text-* / --axm-border-*
+ * to the HC-solved values.
+ *
+ * CRITICAL: inverted surfaces require the same branch swap as the base
+ * surface class. Without it, HC values land in the wrong light-dark()
+ * branch for inverted surfaces, breaking polarity under HC mode.
+ *
+ * Returns null if no surface has HC companion values — nothing to emit.
+ */
+function generateHighContrast(
+  output: SolverOutput,
+  prefix: string,
+): string | null {
+  const slugs = new Set<string>();
+  for (const s of output.light.surfaces) {
+    if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
+  }
+  for (const s of output.dark.surfaces) {
+    if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
+  }
+  if (slugs.size === 0) return null;
+
+  const lines: string[] = [
+    "/* High contrast — re-solved with tighter targets/scale */",
+    "@media (prefers-contrast: more), (prefers-contrast: custom) {",
+  ];
+
+  for (const slug of slugs) {
+    const light = output.light.surfaces.find((s) => s.slug === slug);
+    const dark = output.dark.surfaces.find((s) => s.slug === slug);
+    if (!light || !dark) continue;
+    if (
+      light.lightnessHighContrast === undefined ||
+      dark.lightnessHighContrast === undefined ||
+      !light.textValuesHighContrast ||
+      !dark.textValuesHighContrast
+    ) {
+      continue;
+    }
+
+    // Branch swap for inverted polarity, matching generateSurfaceClass.
+    // Without this, HC values land in the wrong light-dark() branch and
+    // inverted surfaces invert the wrong way under HC.
+    const [lb, db] =
+      light.polarity === "inverted" ? [dark, light] : [light, dark];
+
+    const lbL = lb.lightnessHighContrast!;
+    const dbL = db.lightnessHighContrast!;
+    const lbText = lb.textValuesHighContrast!;
+    const dbText = db.textValuesHighContrast!;
+    const lbBorders = lb.borderValuesHighContrast;
+    const dbBorders = db.borderValuesHighContrast;
+
+    const body: string[] = [];
+    body.push(
+      `    --${prefix}-surface: ${lightDarkColor(lbL, dbL, prefix)};`,
+    );
+    body.push(
+      `    --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`,
+    );
+    body.push(
+      `    --${prefix}-text-strong: ${lightDarkColor(lbText.strong, dbText.strong, prefix)};`,
+    );
+    body.push(
+      `    --${prefix}-text-subtle: ${lightDarkColor(lbText.subtle, dbText.subtle, prefix)};`,
+    );
+    body.push(
+      `    --${prefix}-text-subtlest: ${lightDarkColor(lbText.subtlest, dbText.subtlest, prefix)};`,
+    );
+    if (lbBorders && dbBorders) {
+      body.push(
+        `    --${prefix}-border-decorative: ${lightDarkColor(lbBorders.decorative, dbBorders.decorative, prefix)};`,
+      );
+      body.push(
+        `    --${prefix}-border-interactive: ${lightDarkColor(lbBorders.interactive, dbBorders.interactive, prefix)};`,
+      );
+      body.push(
+        `    --${prefix}-border-critical: ${lightDarkColor(lbBorders.critical, dbBorders.critical, prefix)};`,
+      );
+    }
+
+    lines.push(`  .surface-${slug} {`);
+    lines.push(...body);
+    lines.push("  }");
+  }
+
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/**
+ * Emit a class-triggered HC variant for demo/preview simulation.
+ *
+ * Produces selectors like `.hc-simulate .surface-page { ... }` so a docs
+ * demo can add a class to the root and visualize HC mode. Uses the same
+ * values and branch-swap as the media-query block.
+ */
+function generateHighContrastSimulation(
+  output: SolverOutput,
+  prefix: string,
+  simClass: string,
+): string | null {
+  const slugs = new Set<string>();
+  for (const s of output.light.surfaces) {
+    if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
+  }
+  for (const s of output.dark.surfaces) {
+    if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
+  }
+  if (slugs.size === 0) return null;
+
+  const lines: string[] = [
+    `/* High contrast simulation — class-triggered for demo preview */`,
+  ];
+
+  for (const slug of slugs) {
+    const light = output.light.surfaces.find((s) => s.slug === slug);
+    const dark = output.dark.surfaces.find((s) => s.slug === slug);
+    if (
+      !light ||
+      !dark ||
+      light.lightnessHighContrast === undefined ||
+      dark.lightnessHighContrast === undefined ||
+      !light.textValuesHighContrast ||
+      !dark.textValuesHighContrast
+    ) {
+      continue;
+    }
+    const [lb, db] =
+      light.polarity === "inverted" ? [dark, light] : [light, dark];
+    const lbL = lb.lightnessHighContrast!;
+    const dbL = db.lightnessHighContrast!;
+    const lbText = lb.textValuesHighContrast!;
+    const dbText = db.textValuesHighContrast!;
+    const lbBorders = lb.borderValuesHighContrast;
+    const dbBorders = db.borderValuesHighContrast;
+
+    const body: string[] = [];
+    body.push(`  --${prefix}-surface: ${lightDarkColor(lbL, dbL, prefix)};`);
+    body.push(
+      `  --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`,
+    );
+    body.push(
+      `  --${prefix}-text-strong: ${lightDarkColor(lbText.strong, dbText.strong, prefix)};`,
+    );
+    body.push(
+      `  --${prefix}-text-subtle: ${lightDarkColor(lbText.subtle, dbText.subtle, prefix)};`,
+    );
+    body.push(
+      `  --${prefix}-text-subtlest: ${lightDarkColor(lbText.subtlest, dbText.subtlest, prefix)};`,
+    );
+    if (lbBorders && dbBorders) {
+      body.push(
+        `  --${prefix}-border-decorative: ${lightDarkColor(lbBorders.decorative, dbBorders.decorative, prefix)};`,
+      );
+      body.push(
+        `  --${prefix}-border-interactive: ${lightDarkColor(lbBorders.interactive, dbBorders.interactive, prefix)};`,
+      );
+      body.push(
+        `  --${prefix}-border-critical: ${lightDarkColor(lbBorders.critical, dbBorders.critical, prefix)};`,
+      );
+    }
+
+    // Match three ways so the class can sit on <html>, on the same
+    // element as the surface, or (via :host-context) on an ancestor of
+    // a shadow-root host.
+    lines.push(
+      `.${simClass} .surface-${slug}, .${simClass}.surface-${slug}, :host-context(.${simClass}) .surface-${slug} {`,
+    );
+    lines.push(...body);
+    lines.push(`}`);
+  }
+
+  return lines.join("\n");
 }
 
 function generateForcedColors(output: SolverOutput, prefix: string): string {

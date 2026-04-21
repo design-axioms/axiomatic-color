@@ -82,6 +82,27 @@ if (command === "build") {
           );
         }
       }
+      if (surface.lightnessHighContrast !== undefined) {
+        console.log(
+          `    HC: L=${surface.lightnessHighContrast.toFixed(4)}`,
+        );
+        if (surface.diagnosticsHighContrast) {
+          const hc = surface.diagnosticsHighContrast;
+          if (hc.unmetTextGrades.length > 0) {
+            console.log(
+              `      ⚠ HC unmet text grades: ${hc.unmetTextGrades.join(", ")}`,
+            );
+          }
+          if (hc.unmetBorderTiers.length > 0) {
+            console.log(
+              `      ⚠ HC unmet border tiers: ${hc.unmetBorderTiers.join(", ")}`,
+            );
+          }
+          if (hc.highContrastInDeadZone) {
+            console.log(`      ⚠ HC lightness in dead zone (0.46-0.82)`);
+          }
+        }
+      }
     }
     console.log(`\n  Composition:`);
     for (const c of mode.composition) {

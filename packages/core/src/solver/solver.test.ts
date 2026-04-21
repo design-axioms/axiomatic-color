@@ -14,10 +14,19 @@ const RICH_CONFIG: SolverConfig = {
     page: {
       light: [0.975, 0.955, 0.92, 0.88, 0.82, 0.75, 0.65, 0.55, 0.4, 0.25],
       dark: [0.1, 0.15, 0.22, 0.3, 0.38, 0.48, 0.58, 0.68, 0.78, 0.88],
+      highContrast: {
+        light: [0.99, 0.982, 0.968, 0.952, 0.928, 0.9, 0.86, 0.82, 0.76, 0.7],
+        dark: [0.04, 0.06, 0.088, 0.12, 0.152, 0.192, 0.232, 0.272, 0.312, 0.352],
+      },
     },
     inverted: {
       light: [0.1, 0.08, 0.06, 0.04, 0.02],
       dark: [0.9, 0.92, 0.94, 0.96, 0.98],
+      // Inverted HC scale lets us verify the branch swap under HC.
+      highContrast: {
+        light: [0.04, 0.03, 0.02, 0.01, 0],
+        dark: [0.96, 0.97, 0.98, 0.99, 1],
+      },
     },
   },
   surfaces: {
@@ -305,6 +314,69 @@ describe("solver", () => {
     expect(css).toMatch(/\.text-disabled \{[^}]*--axm-text-disabled/);
   });
 
+  it("emits prefers-contrast HC block for surfaces with HC scale", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    // Page polarity has HC scale in defaults; inverted does not.
+    expect(css).toContain(
+      "@media (prefers-contrast: more), (prefers-contrast: custom)",
+    );
+    const hcBlock = css.match(
+      /@media \(prefers-contrast[\s\S]*?\n\}/,
+    )?.[0];
+    expect(hcBlock).toBeDefined();
+    expect(hcBlock).toMatch(/\.surface-page \{/);
+    expect(hcBlock).toMatch(/\.surface-card \{/);
+    // Inverted surfaces have no HC scale, so they're not in the block.
+    expect(hcBlock).not.toMatch(/\.surface-spotlight \{/);
+  });
+
+  it("HC block comes before forced-colors in emission order", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    const hcIdx = css.indexOf("@media (prefers-contrast:");
+    const fcIdx = css.indexOf("@media (forced-colors:");
+    expect(hcIdx).toBeGreaterThan(0);
+    expect(fcIdx).toBeGreaterThan(hcIdx);
+  });
+
+  it("populates lightnessHighContrast on surfaces with HC scale", () => {
+    const page = output.light.surfaces.find((s) => s.slug === "page");
+    const spotlight = output.light.surfaces.find((s) => s.slug === "spotlight");
+    expect(page!.lightnessHighContrast).toBeDefined();
+    expect(page!.textValuesHighContrast).toBeDefined();
+    // Inverted has no HC scale, so no companion fields.
+    expect(spotlight!.lightnessHighContrast).toBeUndefined();
+  });
+
+  it("HC scale pushes page.light toward brighter extremes", () => {
+    const page = output.light.surfaces.find((s) => s.slug === "page");
+    // Base light page L = 0.975; HC pushes toward 1.
+    expect(page!.lightnessHighContrast!).toBeGreaterThan(page!.lightness);
+  });
+
+  it("HC scale pushes page.dark toward darker extremes", () => {
+    const page = output.dark.surfaces.find((s) => s.slug === "page");
+    // Base dark page L = 0.1; HC pushes toward 0.
+    expect(page!.lightnessHighContrast!).toBeLessThan(page!.lightness);
+  });
+
+  it("emits class-triggered HC simulation when the option is set", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      highContrastSimulationClass: "hc-simulate",
+    });
+    // Descendant, same-element, and :host-context selectors are all emitted
+    // in one combined selector so they can share a body.
+    expect(css).toMatch(/\.hc-simulate \.surface-page/);
+    expect(css).toMatch(/\.hc-simulate\.surface-page/);
+    expect(css).toMatch(/:host-context\(\.hc-simulate\) \.surface-page/);
+  });
+
+  it("omits simulation block when highContrastSimulationClass is unset", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).not.toMatch(/\.hc-simulate/);
+    expect(css).not.toMatch(/:host-context/);
+  });
+
   it("CSS output matches golden master", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     expect(css).toMatchSnapshot();
@@ -373,6 +445,31 @@ describe("solver (rich config)", () => {
 
     // Safety margin for C=0.10 is 3.0 pts
     expect(Math.abs(achromatic - chromatic)).toBeLessThan(3.0);
+  });
+
+  it("HC block replicates inverted-polarity branch swap", () => {
+    const css = generateCSS(output, RICH_CONFIG.options);
+    // The spotlight surface is inverted. Its HC values under light-dark()
+    // must be swapped so the first slot holds the dark L (since
+    // color-scheme: dark is set on inverted surfaces).
+    //
+    // In RICH_CONFIG: inverted.highContrast.light[0] = 0.04 (dark L for
+    // inverted in light mode), and inverted.highContrast.dark[0] = 0.96
+    // (light L for inverted in dark mode). After branch swap, the CSS
+    // should emit light-dark(0.96..., 0.04...) for --axm-surface.
+    const hcBlock = css.match(
+      /@media \(prefers-contrast[\s\S]*?\n\}/,
+    )?.[0];
+    expect(hcBlock).toBeDefined();
+    const spotlight = hcBlock!.match(
+      /\.surface-spotlight \{[^}]+\}/,
+    )?.[0];
+    expect(spotlight).toBeDefined();
+    // First argument of light-dark() for --axm-surface should be the
+    // DARK lightness (0.96, from the dark HC scale), not 0.04.
+    expect(spotlight).toMatch(
+      /--axm-surface: light-dark\(oklch\(0\.9600[\s\S]*?,[\s\S]*?oklch\(0\.0400/,
+    );
   });
 
   it("alert role emits Canvas then Mark cascade fallback", () => {
