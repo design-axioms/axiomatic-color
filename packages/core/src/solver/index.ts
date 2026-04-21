@@ -76,6 +76,7 @@ function solvePolarity(
     solved.push({
       slug,
       polarity: ctx.polarity,
+      role: surface.role ?? "surface",
       lightness: planned.lightness,
       textValues,
       ...(borderValues ? { borderValues } : {}),
@@ -101,7 +102,10 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
   const surfaces: SolvedSurface[] = [];
 
   // Solve each polarity bucket independently (§3)
-  for (const polarity of ["page", "inverted"] as const satisfies readonly Polarity[]) {
+  for (const polarity of [
+    "page",
+    "inverted",
+  ] as const satisfies readonly Polarity[]) {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     const ctx: Context = { polarity, mode };

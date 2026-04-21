@@ -142,7 +142,19 @@ The system registers the following properties:
 - Key color primitives use `--axm-key-{name}-hue` and `--axm-key-{name}-chroma`.
 - Surface-local variables remain class-scoped and are not registered.
 
-## 11. Runtime: `ThemeBuilder`
+## 11. Accessibility: forced colors derive from role
+
+Forced colors and high-contrast support are derived from the semantic vocabulary the system already carries, plus a single `role` field on each surface. Consumers don't re-author surfaces for accessibility.
+
+Each surface declares its role: `surface`, `interactive`, `alert`, or `link`. The role defaults to `surface`, so existing configurations remain correct without changes.
+
+The generator emits a `@media (forced-colors: active)` block that remaps each `.surface-*` class to a CSS system color keyword based on role. `surface` uses `Canvas` and `CanvasText`; `interactive` uses `ButtonFace`, `ButtonText`, and `ButtonBorder`; `alert` uses `Canvas` and `CanvasText` with a `Mark` / `MarkText` override that browsers with `Mark` support apply via cascade; `link` uses `LinkText`.
+
+`.text-link` maps to `LinkText` and `.text-disabled` maps to `GrayText` across every role.
+
+The overridden tokens are the same ones the default mode writes — `--axm-surface`, `--axm-text-*`, `--axm-border-*` — so existing utilities keep working without changes.
+
+## 12. Runtime: `ThemeBuilder`
 
 The generated CSS handles mode switching through `light-dark()` and `color-scheme`. Polarity inversion on mode toggle requires JavaScript.
 
@@ -157,7 +169,7 @@ When the root is light, inverted surfaces such as spotlight have `color-scheme: 
 
 The implementation is framework-agnostic. Vue integration uses a `useThemeBuilder(rootRef)` composable that watches a template ref and manages the lifecycle.
 
-## 12. Runtime: constructible stylesheets
+## 13. Runtime: constructible stylesheets
 
 Shadow DOM components, including token pills in the docs and possible consumer components, need the system CSS inside their shadow roots. Injecting a `<style>` element into each shadow root duplicates parsing work.
 
@@ -171,7 +183,7 @@ This approach targets Baseline 2023, including Chrome 73+, Firefox 101+, and Saf
 
 Per-component styles, such as host layout and icon sizing, use separate small `CSSStyleSheet` instances that are also shared across instances of the same component type.
 
-## 13. Runtime: custom elements
+## 14. Runtime: custom elements
 
 The package exports web components for UI primitives used by both the docs site and standalone consumers.
 

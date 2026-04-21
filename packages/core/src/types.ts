@@ -119,6 +119,22 @@ export interface SurfaceState {
 }
 
 /**
+ * Semantic role of a surface.
+ *
+ * Drives accessibility regimes (forced-colors, prefers-contrast) without
+ * re-authoring the rest of the config. The role is what tells the
+ * generator which system color to cede to under `forced-colors: active`.
+ *
+ * - "surface" — standard content surface (Canvas / CanvasText)
+ * - "interactive" — button-like (ButtonFace / ButtonText / ButtonBorder)
+ * - "alert" — status/notification (prefers Mark/MarkText, falls back to Canvas)
+ * - "link" — hyperlink (LinkText)
+ *
+ * Default is "surface".
+ */
+export type SurfaceRole = "surface" | "interactive" | "alert" | "link";
+
+/**
  * Configuration for a single semantic surface.
  *
  * Key principle (§7): a surface's lightness is determined by its semantic
@@ -130,6 +146,7 @@ export interface SurfaceConfig {
   readonly description?: string;
   readonly hue?: string; // key color name
   readonly targetChroma?: number;
+  readonly role?: SurfaceRole;
   readonly states?: { readonly [stateName: string]: SurfaceState };
 }
 
@@ -205,6 +222,7 @@ export interface SolverConfig {
 export interface SolvedSurface {
   readonly slug: string;
   readonly polarity: Polarity;
+  readonly role: SurfaceRole;
   readonly lightness: number;
   readonly textValues: {
     readonly high: number;

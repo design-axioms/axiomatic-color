@@ -12,7 +12,7 @@
  * - Taper as single calc() expression (§5)
  */
 
-import type { SolvedSurface, SolverOutput } from "../types.ts";
+import type { SolvedSurface, SolverOutput, SurfaceRole } from "../types.ts";
 import { converter, formatHex, parse } from "culori";
 
 const toOklch = converter("oklch");
@@ -56,6 +56,9 @@ export function generateCSS(
   if (keyColors) {
     sections.push(generateHueUtilities(prefix, keyColors));
   }
+
+  // Forced-colors overrides — cede colors to OS palette per surface role
+  sections.push(generateForcedColors(output, prefix));
 
   return sections.join("\n\n");
 }
@@ -219,11 +222,17 @@ function generateStateClass(
 }
 
 function generateTextUtilities(prefix: string): string {
+  // .text-link defaults to the strongest tier so links stay readable
+  // even before forced-colors overrides LinkText.
+  // .text-disabled defaults to subtlest and is remapped to GrayText
+  // under forced-colors.
   return `/* Text utilities — consume nearest surface context */
 .text-high { color: var(--${prefix}-text-high); }
 .text-strong { color: var(--${prefix}-text-strong); }
 .text-subtle { color: var(--${prefix}-text-subtle); }
-.text-subtlest { color: var(--${prefix}-text-subtlest); }`;
+.text-subtlest { color: var(--${prefix}-text-subtlest); }
+.text-link { color: var(--${prefix}-text-link, var(--${prefix}-text-strong)); text-decoration: underline; }
+.text-disabled { color: var(--${prefix}-text-disabled, var(--${prefix}-text-subtlest)); }`;
 }
 
 function generateBorderUtilities(prefix: string): string {
@@ -231,6 +240,103 @@ function generateBorderUtilities(prefix: string): string {
 .border-decorative { border-color: var(--${prefix}-border-decorative); }
 .border-interactive { border-color: var(--${prefix}-border-interactive); }
 .border-critical { border-color: var(--${prefix}-border-critical); }`;
+}
+
+/**
+ * System color mapping per surface role under `forced-colors: active`.
+ *
+ * When forced-colors is on, the OS supplies a restricted palette
+ * (CSS system color keywords). We cede our solved oklch() values and
+ * map each surface to the appropriate system keyword based on its role.
+ *
+ * `alert` uses a cascade fallback: declare Canvas/CanvasText first, then
+ * override with Mark/MarkText — browsers that support Mark use it,
+ * older ones keep the Canvas baseline.
+ */
+function forcedColorsForRole(role: SurfaceRole): {
+  bg: string;
+  fg: readonly string[];
+  border?: string;
+} {
+  switch (role) {
+    case "interactive":
+      return {
+        bg: "ButtonFace",
+        fg: ["ButtonText"],
+        border: "ButtonBorder",
+      };
+    case "alert":
+      // Baseline + enhancement. Browsers that support Mark will apply
+      // the second declaration; older ones keep the Canvas baseline.
+      return {
+        bg: "Canvas",
+        fg: ["CanvasText", "Mark"],
+      };
+    case "link":
+      return {
+        bg: "Canvas",
+        fg: ["LinkText"],
+      };
+    case "surface":
+    default:
+      return {
+        bg: "Canvas",
+        fg: ["CanvasText"],
+      };
+  }
+}
+
+function generateForcedColors(output: SolverOutput, prefix: string): string {
+  const lines: string[] = [
+    "/* Forced colors — cede to OS palette per surface role */",
+    "@media (forced-colors: active) {",
+  ];
+
+  // One rule per surface slug. Use the light-mode solved surface as
+  // the source of role (role is mode-invariant).
+  const slugs = new Set<string>();
+  for (const s of output.light.surfaces) slugs.add(s.slug);
+  for (const s of output.dark.surfaces) slugs.add(s.slug);
+
+  for (const slug of slugs) {
+    const surface = output.light.surfaces.find((s) => s.slug === slug);
+    if (!surface) continue;
+
+    const mapping = forcedColorsForRole(surface.role);
+
+    const body: string[] = [];
+    body.push(`    --${prefix}-surface: ${mapping.bg};`);
+
+    // Text tokens all map to the role's primary fg. For alert-role the
+    // fg array has two entries (e.g. [CanvasText, Mark]) — the second
+    // overrides the first via cascade, so browsers that support Mark
+    // use it and others keep the Canvas baseline.
+    for (const fg of mapping.fg) {
+      body.push(`    --${prefix}-text-high: ${fg};`);
+      body.push(`    --${prefix}-text-strong: ${fg};`);
+      body.push(`    --${prefix}-text-subtle: ${fg};`);
+      body.push(`    --${prefix}-text-subtlest: ${fg};`);
+    }
+
+    // Role-independent: links always get LinkText, disabled always GrayText.
+    body.push(`    --${prefix}-text-link: LinkText;`);
+    body.push(`    --${prefix}-text-disabled: GrayText;`);
+
+    // Border tokens: decorative + critical use the same text color so
+    // they contrast against Canvas; interactive uses ButtonBorder when
+    // applicable, else CanvasText.
+    const borderPrimary = mapping.border ?? "CanvasText";
+    body.push(`    --${prefix}-border-decorative: CanvasText;`);
+    body.push(`    --${prefix}-border-interactive: ${borderPrimary};`);
+    body.push(`    --${prefix}-border-critical: CanvasText;`);
+
+    lines.push(`  .surface-${slug} {`);
+    lines.push(...body);
+    lines.push("  }");
+  }
+
+  lines.push("}");
+  return lines.join("\n");
 }
 
 /** Parse a key color to oklch hue and chroma. */
