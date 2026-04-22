@@ -67,18 +67,18 @@ At L = 0.5, the taper preserves full chroma. At L = 0 or L = 1, it reduces chrom
 
 - Text on any surface either meets its APCA target grade or surfaces a diagnostic ("noisy no") naming the grade that couldn't be reached.
 - Cross-polarity surface pairs remain visually distinct with an 80+ APCA gap.
+- Same-polarity surfaces are perceptibly distinguishable. When lightness stagger alone reaches APCA Lc 45 (the non-text discernibility threshold), the system uses it; otherwise the system emits a distinction mechanism (default: an inset 1px border sourced from `--axm-border-decorative`). Atmosphere (`targetChroma > 0`) rescues a surface from this rule — a colored surface is already distinguishable from an achromatic one.
 - Atmosphere is correct and inheritable.
 
 ### Tier 2: Enhancements
 
-- Same-polarity surfaces can differ by small lightness steps.
 - Hover and active states can use lightness shifts.
-- These values are real and non-zero, but they are not sufficient by themselves to guarantee visual distinction.
+- Lightness stagger between surfaces, when it exists above the tier-1 threshold, carries real perceptual weight beyond distinguishability.
 
 ### Tier 3: Out of scope
 
-- Multi-signal visual hierarchy remains outside the color system.
-- Consumers that need stronger surface distinction must add other signals.
+- Multi-signal visual hierarchy (elevation, shadows, spacing) remains outside the color system.
+- Consumers that want a different distinction mechanism (actual border, outline, shadow, etc.) can configure `distinction.mechanism` or override per-surface.
 
 ## 7. Surface identity: semantic, not positional
 

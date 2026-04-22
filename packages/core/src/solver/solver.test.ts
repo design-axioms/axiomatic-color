@@ -339,6 +339,107 @@ describe("solver", () => {
     expect(css).not.toMatch(/:host-context/);
   });
 
+  // --- Distinction rule (§6 tier-1) ---
+
+  it("flags same-polarity surfaces below APCA threshold as needing distinction", () => {
+    const workspace = output.light.surfaces.find((s) => s.slug === "workspace");
+    const card = output.light.surfaces.find((s) => s.slug === "card");
+    expect(workspace!.needsDistinction).toBe(true);
+    expect(card!.needsDistinction).toBe(true);
+  });
+
+  it("atmosphere (targetChroma > 0) rescues a surface from needing distinction", () => {
+    const action = output.light.surfaces.find((s) => s.slug === "action");
+    // action shares position 2 with card, but has targetChroma 0.12,
+    // so the colored hue distinguishes it from the achromatic siblings.
+    expect(action!.chroma).toBeGreaterThan(0);
+    expect(action!.needsDistinction).toBeUndefined();
+  });
+
+  it("outermost surface (position 0) never carries distinction", () => {
+    const page = output.light.surfaces.find((s) => s.slug === "page");
+    const spotlight = output.light.surfaces.find((s) => s.slug === "spotlight");
+    expect(page!.needsDistinction).toBeUndefined();
+    expect(spotlight!.needsDistinction).toBeUndefined();
+  });
+
+  it("emits the distinction declaration on flagged surfaces", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    // workspace and card both need distinction; page and action don't.
+    expect(css).toMatch(
+      /\.surface-workspace \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+    );
+    expect(css).toMatch(
+      /\.surface-card \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+    );
+    // Page rule should NOT have a box-shadow distinction line.
+    const pageBlock = css.match(/\.surface-page \{[^}]+\}/)?.[0];
+    expect(pageBlock).toBeDefined();
+    expect(pageBlock).not.toMatch(/box-shadow:/);
+  });
+
+  it("respects per-surface overrides: false disables a would-be distinction", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      distinction: { overrides: { workspace: false } },
+    });
+    const workspaceBlock = css.match(/\.surface-workspace \{[^}]+\}/)?.[0];
+    expect(workspaceBlock).toBeDefined();
+    expect(workspaceBlock).not.toMatch(/box-shadow:/);
+    // card still gets one
+    expect(css).toMatch(/\.surface-card \{[\s\S]*?box-shadow: inset 0 0 0 1px/);
+  });
+
+  it("respects per-surface overrides: string emits literal CSS", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      distinction: { overrides: { card: "outline: 2px dashed red" } },
+    });
+    expect(css).toMatch(/\.surface-card \{[\s\S]*?outline: 2px dashed red;/);
+  });
+
+  it("mechanism: border emits a real border instead of inset shadow", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      distinction: { mechanism: "border" },
+    });
+    expect(css).toMatch(
+      /\.surface-workspace \{[\s\S]*?border: 1px solid var\(--axm-border-decorative\);/,
+    );
+    expect(css).not.toMatch(/box-shadow: inset 0 0 0 1px/);
+  });
+
+  it("mechanism: none skips all distinction emission", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      distinction: { mechanism: "none" },
+    });
+    expect(css).not.toMatch(/box-shadow: inset 0 0 0 1px var\(--axm-border-/);
+  });
+
+  it("threshold override: Infinity makes every non-outermost surface distinct", () => {
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      distinction: { threshold: Number.POSITIVE_INFINITY },
+    };
+    const out = solve(cfg);
+    const action = out.light.surfaces.find((s) => s.slug === "action");
+    // At infinite threshold, even atmosphere-rescued surfaces would
+    // normally need it — but our rule preserves atmosphere rescue
+    // regardless of threshold, so action stays undistinguished.
+    expect(action!.needsDistinction).toBeUndefined();
+    const workspace = out.light.surfaces.find((s) => s.slug === "workspace");
+    expect(workspace!.needsDistinction).toBe(true);
+  });
+
+  it("threshold override: 0 disables all distinction", () => {
+    const cfg = { ...DEFAULT_CONFIG, distinction: { threshold: 0 } };
+    const out = solve(cfg);
+    for (const s of out.light.surfaces) {
+      expect(s.needsDistinction).toBeUndefined();
+    }
+  });
+
   it("CSS output matches golden master", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     expect(css).toMatchSnapshot();

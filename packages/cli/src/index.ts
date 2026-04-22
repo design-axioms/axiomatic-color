@@ -47,6 +47,7 @@ if (command === "build") {
   const css = generateCSS(output, {
     ...config.options,
     ...(config.keyColors && { keyColors: config.keyColors }),
+    ...(config.distinction && { distinction: config.distinction }),
   });
 
   if (outputPath) {
@@ -75,8 +76,14 @@ if (command === "build") {
           console.log(`    ⚠ unmet border tiers: ${unmetBorderTiers.join(", ")}`);
         }
       }
+      if (surface.needsDistinction) {
+        console.log(`    ◻ distinction required (base)`);
+      }
       if (surface.lightnessHighContrast !== undefined) {
         console.log(`    HC: L=${surface.lightnessHighContrast.toFixed(4)}`);
+        if (surface.needsDistinctionHighContrast) {
+          console.log(`      ◻ distinction required (HC)`);
+        }
         if (surface.diagnosticsHighContrast) {
           const hc = surface.diagnosticsHighContrast;
           if (hc.unmetTextGrades.length > 0) {

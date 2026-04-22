@@ -29,6 +29,7 @@ function rebuildCSS() {
     selector: ".border-preview-root",
     keyColors: config.keyColors,
     highContrastSimulationClass: "hc-simulate",
+    ...(config.distinction && { distinction: config.distinction }),
   });
   ready.value = true;
 }

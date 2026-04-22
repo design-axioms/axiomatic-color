@@ -71,6 +71,19 @@ export const TEXT_GRADES_HIGH_CONTRAST: TextGrades = {
  */
 export const DEAD_ZONE = { min: 0.46, max: 0.82 } as const;
 
+/**
+ * Default APCA threshold for cross-surface distinction.
+ *
+ * Derived from APCA's "essential non-text content" guidance (Lc 45):
+ * above this, a surface edge is reliably perceivable for the same
+ * population our text targets are calibrated for. Below it, the
+ * library emits a distinction mechanism so adjacent surfaces remain
+ * structurally distinguishable.
+ *
+ * See architecture §6.
+ */
+export const DISTINCTION_THRESHOLD_DEFAULT = 45;
+
 // --- Safety Margins ---
 
 /**
@@ -229,6 +242,49 @@ export interface BorderTargets {
 }
 
 /**
+ * Mechanism for distinguishing adjacent same-polarity surfaces whose
+ * lightness gap falls below the perceptibility threshold.
+ *
+ * - `inset` — inset box-shadow, no layout shift
+ * - `border` — actual CSS border, affects box size
+ * - `none` — skip distinction entirely (users who want their own)
+ */
+export type DistinctionMechanism = "inset" | "border" | "none";
+
+/**
+ * Which border token to source the distinction color from.
+ */
+export type DistinctionToken = "decorative" | "interactive";
+
+/**
+ * Per-surface override for the distinction rule.
+ *
+ * - `true` — force distinction even if the rule wouldn't emit it
+ * - `false` — skip distinction even if the rule would emit it
+ * - a string — emit this literal CSS snippet instead of the default
+ *   mechanism (advanced escape hatch, e.g. `"outline: 2px solid red"`).
+ */
+export type DistinctionOverride = boolean | string;
+
+/**
+ * Configuration for cross-surface distinction (§6 tier-1 guarantee).
+ *
+ * The library emits a distinction mechanism on each surface whose
+ * worst-case same-polarity sibling falls below `threshold` APCA, unless
+ * atmosphere (targetChroma > 0) already distinguishes the pair.
+ */
+export interface DistinctionConfig {
+  /** APCA threshold below which distinction is required. Default: 45. */
+  readonly threshold?: number;
+  /** How to render distinction. Default: "inset". */
+  readonly mechanism?: DistinctionMechanism;
+  /** Which border token to source the color from. Default: "decorative". */
+  readonly token?: DistinctionToken;
+  /** Per-surface overrides keyed by slug. */
+  readonly overrides?: { readonly [slug: string]: DistinctionOverride };
+}
+
+/**
  * Full configuration for the solver.
  */
 export interface SolverConfig {
@@ -243,6 +299,8 @@ export interface SolverConfig {
     readonly maxRotation: number;
   };
   readonly borderTargets?: BorderTargets;
+  /** Cross-surface distinction (§6 tier-1). Library defaults apply if unset. */
+  readonly distinction?: DistinctionConfig;
   /**
    * Accessibility target overrides applied under high-contrast conditions.
    *
@@ -311,11 +369,23 @@ export interface SolvedSurface {
   readonly chroma?: number;
   readonly states?: Record<string, { readonly lightness: number }>;
 
+  /**
+   * True when the surface needs a distinction mechanism emitted in base
+   * mode (its worst same-polarity sibling falls below the APCA threshold
+   * and atmosphere doesn't rescue the pair).
+   *
+   * Outermost surfaces (position 0 in their polarity) never carry
+   * distinction — they have no outer container to be distinguished from.
+   */
+  readonly needsDistinction?: boolean;
+
   // --- High contrast companions ---
   readonly lightnessHighContrast?: number;
   readonly textValuesHighContrast?: SolvedTextValues;
   readonly borderValuesHighContrast?: SolvedBorderValues;
   readonly diagnosticsHighContrast?: SurfaceDiagnostics;
+  /** Like `needsDistinction`, computed against HC lightness values. */
+  readonly needsDistinctionHighContrast?: boolean;
 }
 
 /**

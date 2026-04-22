@@ -19,7 +19,8 @@ import type {
   SurfaceSpec,
   SolverOutput,
 } from "../types.ts";
-import { TEXT_GRADES, TEXT_GRADES_HIGH_CONTRAST } from "../types.ts";
+import { DISTINCTION_THRESHOLD_DEFAULT, TEXT_GRADES, TEXT_GRADES_HIGH_CONTRAST } from "../types.ts";
+import { contrastForPair } from "../math.ts";
 import { converter, parse } from "culori";
 import { normalizeSurface, planSurfacePlacements } from "./planner.ts";
 import {
@@ -149,19 +150,112 @@ function solvePolarity(
 }
 
 /**
+ * Decide whether each surface needs distinction and annotate it.
+ *
+ * Rule (§6 tier-1): a surface S needs distinction when, within its own
+ * polarity, at least one other surface O has both:
+ *   - APCA(S.L, O.L) below threshold (perceptibility floor), AND
+ *   - neither S nor O has atmosphere to distinguish it (targetChroma > 0).
+ *
+ * Outermost surfaces (position 0 in their polarity) never carry
+ * distinction — they have nothing outside them to be distinguished from.
+ *
+ * Returns a new array with `needsDistinction` and
+ * `needsDistinctionHighContrast` populated.
+ */
+function annotateDistinction(
+  surfaces: readonly SolvedSurface[],
+  threshold: number,
+  minPositions: Map<string, number>,
+): SolvedSurface[] {
+  const byPolarity = new Map<Polarity, SolvedSurface[]>();
+  for (const s of surfaces) {
+    const list = byPolarity.get(s.polarity) ?? [];
+    list.push(s);
+    byPolarity.set(s.polarity, list);
+  }
+
+  function needsFor(
+    subject: SolvedSurface,
+    siblings: readonly SolvedSurface[],
+    lightnessOf: (s: SolvedSurface) => number | undefined,
+  ): boolean {
+    const lightness = lightnessOf(subject);
+    if (lightness === undefined) return false;
+    // Outermost in polarity — nothing to distinguish against
+    if ((minPositions.get(subject.slug) ?? 0) === 0) return false;
+    const subjectAtm = (subject.chroma ?? 0) > 0;
+    for (const other of siblings) {
+      if (other.slug === subject.slug) continue;
+      const otherL = lightnessOf(other);
+      if (otherL === undefined) continue;
+      const otherAtm = (other.chroma ?? 0) > 0;
+      // Atmosphere rescues any pair where either side has chroma —
+      // a colored surface is already perceptually distinct from a
+      // neutral one (or from another colored surface with a different
+      // hue).
+      if (subjectAtm || otherAtm) continue;
+      const gap = contrastForPair(lightness, otherL);
+      if (gap < threshold) return true;
+    }
+    return false;
+  }
+
+  return surfaces.map((s): SolvedSurface => {
+    const siblings = byPolarity.get(s.polarity) ?? [];
+    const base = needsFor(s, siblings, (x) => x.lightness);
+    const hc = needsFor(s, siblings, (x) => x.lightnessHighContrast);
+    return {
+      ...s,
+      ...(base ? { needsDistinction: true } : {}),
+      ...(hc ? { needsDistinctionHighContrast: true } : {}),
+    };
+  });
+}
+
+/**
+ * Collect the minimum position of each slug within its polarity.
+ * Used to identify "outermost" surfaces (position 0 in their polarity),
+ * which never carry distinction.
+ */
+function minPositionBySlug(config: SolverConfig): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const polarity of ["page", "inverted"] as const satisfies readonly Polarity[]) {
+    const bucket = config.surfaces[polarity];
+    if (!bucket) continue;
+    for (const [slug, spec] of Object.entries(bucket)) {
+      const surface = normalizeSurface(spec);
+      const current = result.get(slug);
+      if (current === undefined || surface.position < current) {
+        result.set(slug, surface.position);
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Run the solver for a single mode, producing all surface solutions.
  */
 function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
   const composition: CompositionReport[] = [];
-  const surfaces: SolvedSurface[] = [];
+  const raw: SolvedSurface[] = [];
 
   // Solve each polarity bucket independently (§3)
   for (const polarity of ["page", "inverted"] as const satisfies readonly Polarity[]) {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     const ctx: Context = { polarity, mode };
-    surfaces.push(...solvePolarity(ctx, config, bucket));
+    raw.push(...solvePolarity(ctx, config, bucket));
   }
+
+  // Annotate distinction after all surfaces in the mode are solved.
+  // Disabled mechanism means "do nothing" — caller wants to handle it.
+  const threshold = config.distinction?.threshold ?? DISTINCTION_THRESHOLD_DEFAULT;
+  const shouldAnnotate = config.distinction?.mechanism !== "none";
+  const surfaces = shouldAnnotate
+    ? annotateDistinction(raw, threshold, minPositionBySlug(config))
+    : raw;
 
   // Classify composition for all surface pairs
   for (let i = 0; i < surfaces.length; i++) {
