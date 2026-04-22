@@ -184,17 +184,16 @@ function annotateDistinction(
     if (lightness === undefined) return false;
     // Outermost in polarity — nothing to distinguish against
     if ((minPositions.get(subject.slug) ?? 0) === 0) return false;
-    const subjectAtm = (subject.chroma ?? 0) > 0;
     for (const other of siblings) {
       if (other.slug === subject.slug) continue;
       const otherL = lightnessOf(other);
       if (otherL === undefined) continue;
-      const otherAtm = (other.chroma ?? 0) > 0;
-      // Atmosphere rescues any pair where either side has chroma —
-      // a colored surface is already perceptually distinct from a
-      // neutral one (or from another colored surface with a different
-      // hue).
-      if (subjectAtm || otherAtm) continue;
+      // Atmosphere does NOT rescue distinction. Per §9, atmosphere
+      // is orthogonal to lightness and tapers at extremes (§5) — so
+      // a colored surface at high lightness delivers very little
+      // actual chroma and can't carry a lightness-space distinction
+      // job. Distinguishability between surfaces is a lightness
+      // concern; atmosphere is a secondary signal layered on top.
       const gap = contrastForPair(lightness, otherL);
       if (gap < threshold) return true;
     }

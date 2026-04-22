@@ -121,11 +121,12 @@ Set `highContrastSimulationClass: "hc-simulate"` on `generateCSS` options to emi
 
 The system guarantees that adjacent same-polarity surfaces stay visually distinguishable. When lightness stagger falls below APCA Lc 45, the generator emits a distinction mechanism — by default an inset 1px border sourced from `--axm-border-decorative`.
 
-The rule is checked per-mode (base and HC) and per-surface, with three outs:
+The rule is checked per-mode (base and HC) and per-surface. Two outs:
 
-- Atmosphere (`targetChroma > 0`) rescues the surface — a colored hue already distinguishes it from neutral siblings.
 - The outermost surface in each polarity (position 0) never carries distinction — there is nothing outside it to be distinguished from.
 - Per-surface overrides (`distinction.overrides`) let users opt out (`false`), opt in (`true`), or supply their own CSS snippet.
+
+Atmosphere (`targetChroma > 0`) does **not** rescue the rule. The taper in §5 reduces effective chroma to near-zero at the lightness extremes where our surfaces live, so a colored surface next to an achromatic one of the same lightness is still at the same lightness — and that's what spatial perception reads. Atmosphere is a secondary signal layered on top of the lightness-derived distinction.
 
 ### Configuration
 

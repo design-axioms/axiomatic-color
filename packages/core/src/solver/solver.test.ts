@@ -348,12 +348,15 @@ describe("solver", () => {
     expect(card!.needsDistinction).toBe(true);
   });
 
-  it("atmosphere (targetChroma > 0) rescues a surface from needing distinction", () => {
+  it("atmosphere does NOT rescue distinction (chroma tapers at extremes, §5)", () => {
     const action = output.light.surfaces.find((s) => s.slug === "action");
-    // action shares position 2 with card, but has targetChroma 0.12,
-    // so the colored hue distinguishes it from the achromatic siblings.
+    // action has targetChroma: 0.12 at position 2 (L=0.90). The safe
+    // bicone taper reduces effective chroma to ~0.024 at that lightness,
+    // so it can't carry the distinction. The rule flags action just
+    // like card — atmosphere is a secondary signal, not a lightness
+    // substitute.
     expect(action!.chroma).toBeGreaterThan(0);
-    expect(action!.needsDistinction).toBeUndefined();
+    expect(action!.needsDistinction).toBe(true);
   });
 
   it("outermost surface (position 0) never carries distinction", () => {
@@ -365,12 +368,15 @@ describe("solver", () => {
 
   it("emits the distinction declaration on flagged surfaces", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
-    // workspace and card both need distinction; page and action don't.
+    // Every non-outermost same-polarity surface needs distinction now.
     expect(css).toMatch(
       /\.surface-workspace \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
     );
     expect(css).toMatch(
       /\.surface-card \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+    );
+    expect(css).toMatch(
+      /\.surface-action \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
     );
     // Page rule should NOT have a box-shadow distinction line.
     const pageBlock = css.match(/\.surface-page \{[^}]+\}/)?.[0];
@@ -423,13 +429,16 @@ describe("solver", () => {
       distinction: { threshold: Number.POSITIVE_INFINITY },
     };
     const out = solve(cfg);
-    const action = out.light.surfaces.find((s) => s.slug === "action");
-    // At infinite threshold, even atmosphere-rescued surfaces would
-    // normally need it — but our rule preserves atmosphere rescue
-    // regardless of threshold, so action stays undistinguished.
-    expect(action!.needsDistinction).toBeUndefined();
-    const workspace = out.light.surfaces.find((s) => s.slug === "workspace");
-    expect(workspace!.needsDistinction).toBe(true);
+    for (const s of out.light.surfaces) {
+      // page and spotlight are outermost in their polarities; they
+      // stay undistinguished regardless of threshold.
+      const outermost = s.slug === "page" || s.slug === "spotlight";
+      if (outermost) {
+        expect(s.needsDistinction).toBeUndefined();
+      } else {
+        expect(s.needsDistinction).toBe(true);
+      }
+    }
   });
 
   it("threshold override: 0 disables all distinction", () => {

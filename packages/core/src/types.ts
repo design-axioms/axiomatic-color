@@ -270,8 +270,13 @@ export type DistinctionOverride = boolean | string;
  * Configuration for cross-surface distinction (§6 tier-1 guarantee).
  *
  * The library emits a distinction mechanism on each surface whose
- * worst-case same-polarity sibling falls below `threshold` APCA, unless
- * atmosphere (targetChroma > 0) already distinguishes the pair.
+ * worst-case same-polarity sibling falls below `threshold` APCA.
+ *
+ * Atmosphere (`targetChroma > 0`) does not rescue a pair: atmosphere
+ * tapers at lightness extremes (§5), so a colored surface at high
+ * lightness delivers very little actual chroma and can't carry a
+ * lightness-space distinction job. Distinguishability is a lightness
+ * concern; atmosphere is a secondary signal layered on top.
  */
 export interface DistinctionConfig {
   /** APCA threshold below which distinction is required. Default: 45. */
@@ -371,8 +376,7 @@ export interface SolvedSurface {
 
   /**
    * True when the surface needs a distinction mechanism emitted in base
-   * mode (its worst same-polarity sibling falls below the APCA threshold
-   * and atmosphere doesn't rescue the pair).
+   * mode (its worst same-polarity sibling falls below the APCA threshold).
    *
    * Outermost surfaces (position 0 in their polarity) never carry
    * distinction — they have no outer container to be distinguished from.
