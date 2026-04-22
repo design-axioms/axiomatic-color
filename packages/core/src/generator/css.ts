@@ -34,10 +34,7 @@ interface GeneratorOptions {
 /**
  * Generate the complete CSS for a solved color system.
  */
-export function generateCSS(
-  output: SolverOutput,
-  options: GeneratorOptions = {},
-): string {
+export function generateCSS(output: SolverOutput, options: GeneratorOptions = {}): string {
   const prefix = options.prefix ?? "axm";
   const selector = options.selector ?? ":root";
 
@@ -91,9 +88,7 @@ function generateRoot(
   prefix: string,
   keyColors?: Record<string, string>,
 ): string {
-  const keyColorLines = keyColors
-    ? generateKeyColorPrimitives(prefix, keyColors)
-    : "";
+  const keyColorLines = keyColors ? generateKeyColorPrimitives(prefix, keyColors) : "";
   return `/* Root — color-scheme drives light-dark() */
 ${selector} {
   color-scheme: light;
@@ -145,13 +140,7 @@ function generateSurfaces(output: SolverOutput, prefix: string): string {
         const darkState = dark.states?.[stateName];
         if (lightState && darkState) {
           lines.push(
-            generateStateClass(
-              slug,
-              stateName,
-              lightState.lightness,
-              darkState.lightness,
-              prefix,
-            ),
+            generateStateClass(slug, stateName, lightState.lightness, darkState.lightness, prefix),
           );
         }
       }
@@ -200,11 +189,9 @@ function generateSurfaceClass(
   // opposite mode's values. Combined with color-scheme flipping,
   // this makes nesting work: children inherit color-scheme and
   // resolve their own light-dark() to the correct branch.
-  const [lb, db] =
-    light.polarity === "inverted" ? [dark, light] : [light, dark];
+  const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
 
-  const colorScheme =
-    light.polarity === "inverted" ? `\n  color-scheme: dark;` : "";
+  const colorScheme = light.polarity === "inverted" ? `\n  color-scheme: dark;` : "";
 
   return `.surface-${slug} {
   --${prefix}-surface: ${lightDarkColor(lb.lightness, db.lightness, prefix)};
@@ -323,10 +310,7 @@ function forcedColorsForRole(role: SurfaceRole): {
  *
  * Returns null if no surface has HC companion values — nothing to emit.
  */
-function generateHighContrast(
-  output: SolverOutput,
-  prefix: string,
-): string | null {
+function generateHighContrast(output: SolverOutput, prefix: string): string | null {
   const slugs = new Set<string>();
   for (const s of output.light.surfaces) {
     if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
@@ -357,8 +341,7 @@ function generateHighContrast(
     // Branch swap for inverted polarity, matching generateSurfaceClass.
     // Without this, HC values land in the wrong light-dark() branch and
     // inverted surfaces invert the wrong way under HC.
-    const [lb, db] =
-      light.polarity === "inverted" ? [dark, light] : [light, dark];
+    const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
 
     const lbL = lb.lightnessHighContrast!;
     const dbL = db.lightnessHighContrast!;
@@ -368,12 +351,8 @@ function generateHighContrast(
     const dbBorders = db.borderValuesHighContrast;
 
     const body: string[] = [];
-    body.push(
-      `    --${prefix}-surface: ${lightDarkColor(lbL, dbL, prefix)};`,
-    );
-    body.push(
-      `    --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`,
-    );
+    body.push(`    --${prefix}-surface: ${lightDarkColor(lbL, dbL, prefix)};`);
+    body.push(`    --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`);
     body.push(
       `    --${prefix}-text-strong: ${lightDarkColor(lbText.strong, dbText.strong, prefix)};`,
     );
@@ -425,9 +404,7 @@ function generateHighContrastSimulation(
   }
   if (slugs.size === 0) return null;
 
-  const lines: string[] = [
-    `/* High contrast simulation — class-triggered for demo preview */`,
-  ];
+  const lines: string[] = [`/* High contrast simulation — class-triggered for demo preview */`];
 
   for (const slug of slugs) {
     const light = output.light.surfaces.find((s) => s.slug === slug);
@@ -442,8 +419,7 @@ function generateHighContrastSimulation(
     ) {
       continue;
     }
-    const [lb, db] =
-      light.polarity === "inverted" ? [dark, light] : [light, dark];
+    const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
     const lbL = lb.lightnessHighContrast!;
     const dbL = db.lightnessHighContrast!;
     const lbText = lb.textValuesHighContrast!;
@@ -453,9 +429,7 @@ function generateHighContrastSimulation(
 
     const body: string[] = [];
     body.push(`  --${prefix}-surface: ${lightDarkColor(lbL, dbL, prefix)};`);
-    body.push(
-      `  --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`,
-    );
+    body.push(`  --${prefix}-text-high: ${lightDarkColor(lbText.high, dbText.high, prefix)};`);
     body.push(
       `  --${prefix}-text-strong: ${lightDarkColor(lbText.strong, dbText.strong, prefix)};`,
     );
@@ -544,9 +518,7 @@ function generateForcedColors(output: SolverOutput, prefix: string): string {
 }
 
 /** Parse a key color to oklch hue and chroma. */
-export function parseKeyColor(
-  color: string,
-): { hue: number; chroma: number } | null {
+export function parseKeyColor(color: string): { hue: number; chroma: number } | null {
   const parsed = parse(color);
   if (!parsed) return null;
   const oklch = toOklch(parsed);
@@ -562,18 +534,13 @@ export function formatOklchHex(l: number, c: number, h: number): string {
 }
 
 /** Generate key color primitive variables for the root block. */
-function generateKeyColorPrimitives(
-  prefix: string,
-  keyColors: Record<string, string>,
-): string {
+function generateKeyColorPrimitives(prefix: string, keyColors: Record<string, string>): string {
   const lines: string[] = [];
   for (const [name, value] of Object.entries(keyColors)) {
     const parsed = parseKeyColor(value);
     if (!parsed) continue;
     lines.push(`  --${prefix}-key-${name}-hue: ${parsed.hue.toFixed(4)};`);
-    lines.push(
-      `  --${prefix}-key-${name}-chroma: ${parsed.chroma.toFixed(4)};`,
-    );
+    lines.push(`  --${prefix}-key-${name}-chroma: ${parsed.chroma.toFixed(4)};`);
   }
   return lines.length > 0 ? "\n" + lines.join("\n") : "";
 }
@@ -583,10 +550,7 @@ function generateKeyColorPrimitives(
  * These override atmosphere (hue/chroma) without touching lightness.
  * Per the composition algebra: M(Sigma) -> <H_brand, C_brand, L>
  */
-function generateHueUtilities(
-  prefix: string,
-  keyColors: Record<string, string>,
-): string {
+function generateHueUtilities(prefix: string, keyColors: Record<string, string>): string {
   const lines: string[] = ["/* Hue utilities — atmosphere modifiers */"];
   for (const name of Object.keys(keyColors)) {
     lines.push(`.hue-${name} {

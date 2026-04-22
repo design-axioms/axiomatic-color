@@ -37,8 +37,7 @@ const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
 let solveFn: typeof import("@design-axioms/color").solve | null = null;
-let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null =
-  null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
 
 function rebuildCSS() {
   if (!theme.value || !solveFn || !generateCSSFn) return;
@@ -56,7 +55,7 @@ function rebuildCSS() {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     for (const [slug, spec] of Object.entries(bucket)) {
-      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      const label = typeof spec === "number" ? slug : (spec.label ?? slug);
       slugs.set(slug, { label, polarity });
     }
   }
@@ -125,9 +124,7 @@ onMounted(async () => {
   t.subscribe(() => rebuildCSS());
 });
 
-const mode = computed<"light" | "dark">(() =>
-  isDark.value ? "dark" : "light",
-);
+const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
 
 function surfaceBySlug(slug: string) {
   return surfaces.value.find((s) => s.slug === slug);
@@ -175,9 +172,7 @@ function fmt(n: number): string {
           <div class="comp-label">
             <span class="comp-name text-high">Workspace</span>
             <span class="comp-meta text-subtlest"
-              >L={{
-                fmt(surfaceBySlug("workspace")?.lightness[mode] ?? 0)
-              }}</span
+              >L={{ fmt(surfaceBySlug("workspace")?.lightness[mode] ?? 0) }}</span
             >
           </div>
           <div class="comp-body">
@@ -192,9 +187,7 @@ function fmt(n: number): string {
                 <div class="comp-label">
                   <span class="comp-name text-high">Card</span>
                   <span class="comp-meta text-subtlest"
-                    >L={{
-                      fmt(surfaceBySlug("card")?.lightness[mode] ?? 0)
-                    }}</span
+                    >L={{ fmt(surfaceBySlug("card")?.lightness[mode] ?? 0) }}</span
                   >
                 </div>
                 <div class="comp-text-col">
@@ -212,9 +205,7 @@ function fmt(n: number): string {
                 <div class="comp-label">
                   <span class="comp-name text-high">Action</span>
                   <span class="comp-meta text-subtlest"
-                    >L={{
-                      fmt(surfaceBySlug("action")?.lightness[mode] ?? 0)
-                    }}</span
+                    >L={{ fmt(surfaceBySlug("action")?.lightness[mode] ?? 0) }}</span
                   >
                 </div>
                 <div class="comp-text-col">
@@ -227,9 +218,7 @@ function fmt(n: number): string {
               <div class="comp-label">
                 <span class="comp-name text-high">Spotlight</span>
                 <span class="comp-meta text-subtlest"
-                  >inverted · L={{
-                    fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0)
-                  }}</span
+                  >inverted · L={{ fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0) }}</span
                 >
               </div>
               <div class="comp-text-row">

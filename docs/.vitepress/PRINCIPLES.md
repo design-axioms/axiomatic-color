@@ -14,6 +14,7 @@ Every element on this site that lives inside a surface is styled using the syste
 - Background → applied automatically by the surface class
 
 **Never do this:**
+
 ```css
 /* WRONG: reaching for the variable directly */
 .my-label {
@@ -22,6 +23,7 @@ Every element on this site that lives inside a surface is styled using the syste
 ```
 
 **Do this instead:**
+
 ```html
 <!-- RIGHT: using the class -->
 <span class="my-label text-high">Label</span>
@@ -37,12 +39,12 @@ Every element on this site that lives inside a surface is styled using the syste
 
 There are two categories of styling on this site:
 
-| Category | Source | Examples |
-| -------- | ------ | -------- |
-| System content | `@design-axioms/color` classes | Text on surfaces, borders, backgrounds |
+| Category             | Source                                 | Examples                                           |
+| -------------------- | -------------------------------------- | -------------------------------------------------- |
+| System content       | `@design-axioms/color` classes         | Text on surfaces, borders, backgrounds             |
 | Documentation chrome | VitePress theme variables (`--vp-c-*`) | Toolbar buttons, slider labels, component outlines |
 
-The distinction: if an element is *inside a surface context* and represents content that the color system is responsible for, use system classes. If it's documentation UI that frames the content (controls, labels, chrome), use VitePress theme variables.
+The distinction: if an element is _inside a surface context_ and represents content that the color system is responsible for, use system classes. If it's documentation UI that frames the content (controls, labels, chrome), use VitePress theme variables.
 
 ### Reusable components
 

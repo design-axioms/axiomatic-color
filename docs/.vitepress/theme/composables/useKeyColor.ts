@@ -9,11 +9,8 @@ interface KeyColorState {
   setChroma(c: number): void;
 }
 
-let parseKeyColorFn:
-  | ((color: string) => { hue: number; chroma: number } | null)
-  | null = null;
-let formatOklchHexFn: ((l: number, c: number, h: number) => string) | null =
-  null;
+let parseKeyColorFn: ((color: string) => { hue: number; chroma: number } | null) | null = null;
+let formatOklchHexFn: ((l: number, c: number, h: number) => string) | null = null;
 
 const instances = new Map<string, KeyColorState>();
 let coreLoaded = false;
@@ -51,17 +48,13 @@ export function useKeyColor(name: string): KeyColorState {
   function setHue(h: number) {
     hue.value = h;
     if (!formatOklchHexFn) return;
-    ready.then((t) =>
-      t.setKeyColor(name, formatOklchHexFn!(0.6, chroma.value, h)),
-    );
+    ready.then((t) => t.setKeyColor(name, formatOklchHexFn!(0.6, chroma.value, h)));
   }
 
   function setChroma(c: number) {
     chroma.value = c;
     if (!formatOklchHexFn) return;
-    ready.then((t) =>
-      t.setKeyColor(name, formatOklchHexFn!(0.6, c, hue.value)),
-    );
+    ready.then((t) => t.setKeyColor(name, formatOklchHexFn!(0.6, c, hue.value)));
   }
 
   const state: KeyColorState = { hue, chroma, setHue, setChroma };

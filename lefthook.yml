@@ -1,0 +1,26 @@
+# Git hooks via lefthook. Install with `pnpm lefthook install`.
+# Bypass a single hook with `LEFTHOOK=0 git commit ...`.
+
+pre-commit:
+  # fmt and lint operate on overlapping staged files and both rewrite them.
+  # Running in parallel would let their writes race, so we use piped order:
+  # format first, then lint --fix reads the formatted text.
+  piped: true
+  commands:
+    fmt:
+      # Format staged files. Only runs on files the commit actually touches.
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs,vue,css,scss,md,json,jsonc,yaml,yml,toml}"
+      run: pnpm exec oxfmt --write {staged_files}
+      stage_fixed: true
+    lint:
+      # Lint staged TS/JS/Vue script blocks. Auto-fix what we can.
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs,vue}"
+      run: pnpm exec oxlint --fix {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    typecheck:
+      run: pnpm check
+    test:
+      run: pnpm test

@@ -25,9 +25,7 @@ function colorAt(l: number): string {
 const lightSurfaces = ref<Array<{ name: string; l: number }>>([]);
 const darkSurfaces = ref<Array<{ name: string; l: number }>>([]);
 
-const surfaces = computed(() =>
-  isDark.value ? darkSurfaces.value : lightSurfaces.value,
-);
+const surfaces = computed(() => (isDark.value ? darkSurfaces.value : lightSurfaces.value));
 
 onMounted(async () => {
   const { solve, DEFAULT_CONFIG } = await import("@design-axioms/color");
@@ -42,7 +40,7 @@ onMounted(async () => {
       const bucket = DEFAULT_CONFIG.surfaces[polarity];
       if (!bucket) continue;
       for (const [slug, spec] of Object.entries(bucket)) {
-        const label = typeof spec === "number" ? slug : spec.label ?? slug;
+        const label = typeof spec === "number" ? slug : (spec.label ?? slug);
         const solved = output[mode].surfaces.find((x) => x.slug === slug);
         if (!solved) continue;
         result.push({ name: label, l: solved.lightness });
@@ -127,10 +125,7 @@ function connectorPath(l: number, index: number): string {
           class="taper-marker"
           :style="{ left: surfaceLeft(s.l) }"
         >
-          <div
-            class="taper-tick"
-            :class="s.l > 0.5 ? 'tick-dark' : 'tick-light'"
-          ></div>
+          <div class="taper-tick" :class="s.l > 0.5 ? 'tick-dark' : 'tick-light'"></div>
         </div>
       </div>
     </div>
@@ -157,10 +152,7 @@ function connectorPath(l: number, index: number): string {
       <div v-for="s in surfaces" :key="s.name" class="taper-surface">
         <div class="taper-swatch-pair">
           <div class="taper-swatch" :style="{ background: colorAt(s.l) }"></div>
-          <div
-            class="taper-swatch neutral"
-            :style="{ background: surfaceNeutral(s.l) }"
-          ></div>
+          <div class="taper-swatch neutral" :style="{ background: surfaceNeutral(s.l) }"></div>
         </div>
         <div class="taper-surface-info">
           <span class="taper-surface-name">{{ s.name }}</span>

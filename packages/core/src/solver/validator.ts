@@ -141,10 +141,7 @@ export function validateTargets(
 /**
  * Validate text contrast grades for a surface.
  */
-export function validateTextContrast(
-  surfaceLightness: number,
-  chroma: number,
-): string[] {
+export function validateTextContrast(surfaceLightness: number, chroma: number): string[] {
   return validateTargets(surfaceLightness, chroma, { ...TEXT_GRADES });
 }
 

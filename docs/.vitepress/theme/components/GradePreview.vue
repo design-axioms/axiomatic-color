@@ -17,8 +17,7 @@ const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
 let solveFn: typeof import("@design-axioms/color").solve | null = null;
-let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null =
-  null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
 
 function rebuildCSS() {
   if (!theme.value || !solveFn || !generateCSSFn) return;
@@ -70,12 +69,10 @@ onMounted(async () => {
         <div class="gp-article">
           <h3 class="text-high gp-heading">Dashboard Overview</h3>
           <p class="text-strong gp-body">
-            Your project has 12 deployments this week with 99.8% uptime across
-            all regions.
+            Your project has 12 deployments this week with 99.8% uptime across all regions.
           </p>
           <p class="text-subtle gp-secondary">
-            3 deployments are pending review. Check the activity log for
-            details.
+            3 deployments are pending review. Check the activity log for details.
           </p>
           <span class="text-subtlest gp-meta">Updated 2 minutes ago</span>
         </div>
@@ -104,12 +101,9 @@ onMounted(async () => {
         <div class="gp-article">
           <h3 class="text-high gp-heading">New Feature Available</h3>
           <p class="text-strong gp-body">
-            Edge Functions now support streaming responses with automatic
-            compression.
+            Edge Functions now support streaming responses with automatic compression.
           </p>
-          <p class="text-subtle gp-secondary">
-            Available on Pro and Enterprise plans.
-          </p>
+          <p class="text-subtle gp-secondary">Available on Pro and Enterprise plans.</p>
           <span class="text-subtlest gp-meta">Announced today</span>
         </div>
         <div class="gp-legend border-decorative">

@@ -47,12 +47,9 @@ function solvePolarity(
   // High-contrast solve setup: use the HC scale if present, otherwise
   // reuse the base scale and rely on target bumps alone.
   const hcScaleForMode = polarityScale.highContrast?.[ctx.mode];
-  const hcTextGrades =
-    config.accessibility?.textGrades ?? TEXT_GRADES_HIGH_CONTRAST;
-  const hcBorderTargets =
-    config.accessibility?.borderTargets ?? config.borderTargets;
-  const hasHcStory =
-    hcScaleForMode !== undefined || config.accessibility !== undefined;
+  const hcTextGrades = config.accessibility?.textGrades ?? TEXT_GRADES_HIGH_CONTRAST;
+  const hcBorderTargets = config.accessibility?.borderTargets ?? config.borderTargets;
+  const hasHcStory = hcScaleForMode !== undefined || config.accessibility !== undefined;
   const hcPlacements = hcScaleForMode
     ? planSurfacePlacements(ctx, hcScaleForMode, surfaceSpecs)
     : placements;
@@ -89,8 +86,7 @@ function solvePolarity(
     const unmetBorderTiers = config.borderTargets
       ? validateTargets(planned.lightness, chroma, { ...config.borderTargets })
       : [];
-    const hasDiagnostics =
-      unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
+    const hasDiagnostics = unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
 
     // High-contrast companions.
     let hcLightness: number | undefined;
@@ -102,12 +98,7 @@ function solvePolarity(
       const hcPlanned = hcPlacements.get(slug);
       if (hcPlanned) {
         hcLightness = hcPlanned.lightness;
-        hcTextValues = solveTextValues(
-          ctx,
-          hcLightness,
-          chroma,
-          hcTextGrades,
-        );
+        hcTextValues = solveTextValues(ctx, hcLightness, chroma, hcTextGrades);
         hcBorderValues = hcBorderTargets
           ? solveBorderValues(ctx, hcLightness, chroma, hcBorderTargets)
           : undefined;
@@ -119,11 +110,7 @@ function solvePolarity(
           ? validateTargets(hcLightness, chroma, { ...hcBorderTargets })
           : [];
         const hcInDeadZone = isInDeadZone(hcLightness);
-        if (
-          hcUnmetTextGrades.length > 0 ||
-          hcUnmetBorderTiers.length > 0 ||
-          hcInDeadZone
-        ) {
+        if (hcUnmetTextGrades.length > 0 || hcUnmetBorderTiers.length > 0 || hcInDeadZone) {
           hcDiagnostics = {
             unmetTextGrades: hcUnmetTextGrades,
             unmetBorderTiers: hcUnmetBorderTiers,
@@ -149,9 +136,7 @@ function solvePolarity(
           }
         : {}),
       ...(surface.hue ? { hue: resolveHue(surface.hue, config) } : {}),
-      ...(surface.targetChroma !== undefined
-        ? { chroma: surface.targetChroma }
-        : {}),
+      ...(surface.targetChroma !== undefined ? { chroma: surface.targetChroma } : {}),
       ...(Object.keys(states).length > 0 ? { states } : {}),
       ...(hcLightness !== undefined ? { lightnessHighContrast: hcLightness } : {}),
       ...(hcTextValues ? { textValuesHighContrast: hcTextValues } : {}),
@@ -171,10 +156,7 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
   const surfaces: SolvedSurface[] = [];
 
   // Solve each polarity bucket independently (§3)
-  for (const polarity of [
-    "page",
-    "inverted",
-  ] as const satisfies readonly Polarity[]) {
+  for (const polarity of ["page", "inverted"] as const satisfies readonly Polarity[]) {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     const ctx: Context = { polarity, mode };

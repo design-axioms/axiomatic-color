@@ -24,7 +24,7 @@ function toggle() {
     title="Simulate prefers-contrast: more on system surfaces"
     @click="toggle"
   >
-    {{ active ? '◉ HC on' : '○ HC' }}
+    {{ active ? "◉ HC on" : "○ HC" }}
   </button>
 </template>
 

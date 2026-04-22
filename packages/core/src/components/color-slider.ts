@@ -120,15 +120,13 @@ export class ColorSlider extends HTMLElement {
 
     this.#input = document.createElement("input");
     this.#input.type = "range";
-    this.#shadow.appendChild(this.#input);
+    this.#shadow.append(this.#input);
 
     this.#input.addEventListener("input", (e) => {
       e.stopPropagation();
       const val = parseFloat(this.#input.value);
       this.setAttribute("value", String(val));
-      this.dispatchEvent(
-        new CustomEvent("input", { detail: { value: val }, bubbles: true }),
-      );
+      this.dispatchEvent(new CustomEvent("input", { detail: { value: val }, bubbles: true }));
     });
   }
 
@@ -162,8 +160,7 @@ export class ColorSlider extends HTMLElement {
     this.#input.min = this.getAttribute("min") ?? defaults.min;
     this.#input.max = this.getAttribute("max") ?? defaults.max;
     this.#input.step = this.getAttribute("step") ?? defaults.step;
-    this.#input.value =
-      this.getAttribute("value") ?? (type === "hue" ? "0" : "0.1");
+    this.#input.value = this.getAttribute("value") ?? (type === "hue" ? "0" : "0.1");
   }
 
   #updateStyles(): void {
@@ -172,8 +169,7 @@ export class ColorSlider extends HTMLElement {
     const chroma = parseFloat(this.getAttribute("chroma") ?? "0.15");
     const muted = this.hasAttribute("muted");
 
-    const track =
-      type === "hue" ? hueGradient(muted) : chromaGradient(hue, muted);
+    const track = type === "hue" ? hueGradient(muted) : chromaGradient(hue, muted);
     const thumb = thumbColor(hue, chroma);
 
     this.#input.style.setProperty("--_track", track);
@@ -217,7 +213,7 @@ export class ColorSlider extends HTMLElement {
           );
         }
       });
-      this.#shadow.appendChild(dot);
+      this.#shadow.append(dot);
       this.#landmarks.push(dot);
     }
     while (this.#landmarks.length > items.length) {

@@ -1,6 +1,10 @@
 import { ref, type Ref } from "vue";
 
-type ParsedKeyColor = { hue: number; chroma: number; hex: string };
+interface ParsedKeyColor {
+  hue: number;
+  chroma: number;
+  hex: string;
+}
 type ParsedKeyColors = Record<string, ParsedKeyColor>;
 
 let parsed: Ref<ParsedKeyColors> | null = null;
@@ -12,9 +16,7 @@ export function useKeyColors(): Ref<ParsedKeyColors> {
   import("@design-axioms/color").then(({ DEFAULT_CONFIG, parseKeyColor }) => {
     if (!DEFAULT_CONFIG.keyColors) return;
     const result: ParsedKeyColors = {};
-    for (const [name, value] of Object.entries(
-      DEFAULT_CONFIG.keyColors,
-    )) {
+    for (const [name, value] of Object.entries(DEFAULT_CONFIG.keyColors)) {
       const kc = parseKeyColor(value);
       if (kc) result[name] = { ...kc, hex: value };
     }

@@ -1,19 +1,26 @@
 {
   "name": "@design-axioms/color-vscode",
-  "version": "0.0.0",
-  "type": "commonjs",
   "displayName": "Axiomatic Color",
+  "version": "0.0.0",
   "description": "VS Code extension for the Axiomatic Color System — contrast validation, surface inspection, and composition diagnostics.",
-  "publisher": "design-axioms",
-  "license": "MIT",
-  "engines": {
-    "vscode": "^1.96.0"
-  },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "license": "MIT",
+  "publisher": "design-axioms",
+  "type": "commonjs",
   "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@design-axioms/color": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "typescript": "^5.7.0"
+  },
   "contributes": {
     "commands": [
       {
@@ -26,15 +33,8 @@
       }
     ]
   },
-  "scripts": {
-    "build": "tsc --build",
-    "clean": "rm -rf dist *.tsbuildinfo"
-  },
-  "dependencies": {
-    "@design-axioms/color": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.96.0",
-    "typescript": "^5.7.0"
+  "activationEvents": [],
+  "engines": {
+    "vscode": "^1.96.0"
   }
 }

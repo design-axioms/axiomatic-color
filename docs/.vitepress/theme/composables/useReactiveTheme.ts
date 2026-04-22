@@ -13,13 +13,11 @@ export function useReactiveTheme(): {
   }
 
   if (!themePromise) {
-    themePromise = import("@design-axioms/color").then(
-      ({ createReactiveTheme }) => {
-        const t = createReactiveTheme();
-        themeRef!.value = t;
-        return t;
-      },
-    );
+    themePromise = import("@design-axioms/color").then(({ createReactiveTheme }) => {
+      const t = createReactiveTheme();
+      themeRef!.value = t;
+      return t;
+    });
   }
 
   return { theme: themeRef, ready: themePromise };

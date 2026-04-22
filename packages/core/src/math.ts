@@ -22,8 +22,7 @@ const toRgb = converter("rgb");
  */
 export function toRgbTriplet(lightness: number): [number, number, number] {
   const rgb = toRgb({ mode: "oklch", l: clamp01(lightness), c: 0, h: 0 });
-  const ch = (v: number): number =>
-    Math.round(Math.max(0, Math.min(1, v)) * 255);
+  const ch = (v: number): number => Math.round(Math.max(0, Math.min(1, v)) * 255);
   return [ch(rgb.r), ch(rgb.g), ch(rgb.b)];
 }
 
@@ -33,19 +32,14 @@ export function toRgbTriplet(lightness: number): [number, number, number] {
  * APCA contrast between two achromatic lightness values.
  * Returns absolute value (always positive).
  */
-export function contrastForPair(
-  foreground: number,
-  background: number,
-): number {
+export function contrastForPair(foreground: number, background: number): number {
   const fgY = sRGBtoY(toRgbTriplet(foreground));
   const bgY = sRGBtoY(toRgbTriplet(background));
   const c = APCAcontrast(fgY, bgY);
   const numeric = typeof c === "number" ? c : Number(c);
 
   if (!Number.isFinite(numeric)) {
-    throw new Error(
-      `APCA returned non-finite for fg=${foreground}, bg=${background}`,
-    );
+    throw new TypeError(`APCA returned non-finite for fg=${foreground}, bg=${background}`);
   }
 
   return Math.abs(numeric);
@@ -63,18 +57,11 @@ export function contrastWithChroma(
   bgC: number,
   bgH: number,
 ): number {
-  const fgOklch = clampChroma(
-    { mode: "oklch", l: fgL, c: fgC, h: fgH },
-    "oklch",
-  );
-  const bgOklch = clampChroma(
-    { mode: "oklch", l: bgL, c: bgC, h: bgH },
-    "oklch",
-  );
+  const fgOklch = clampChroma({ mode: "oklch", l: fgL, c: fgC, h: fgH }, "oklch");
+  const bgOklch = clampChroma({ mode: "oklch", l: bgL, c: bgC, h: bgH }, "oklch");
   const fgRgb = toRgb(fgOklch);
   const bgRgb = toRgb(bgOklch);
-  const ch = (v: number): number =>
-    Math.round(Math.max(0, Math.min(1, v)) * 255);
+  const ch = (v: number): number => Math.round(Math.max(0, Math.min(1, v)) * 255);
   const fgY = sRGBtoY([ch(fgRgb.r), ch(fgRgb.g), ch(fgRgb.b)]);
   const bgY = sRGBtoY([ch(bgRgb.r), ch(bgRgb.g), ch(bgRgb.b)]);
   const c = APCAcontrast(fgY, bgY);
@@ -132,7 +119,7 @@ export function safetyMarginForChroma(chroma: number): number {
   }
 
   // Above maximum defined chroma — extrapolate from last entry
-  const last = margins[margins.length - 1]!;
+  const last = margins.at(-1)!;
   if (chroma >= last.chroma) {
     return last.margin + ((chroma - last.chroma) / 0.05) * 1;
   }

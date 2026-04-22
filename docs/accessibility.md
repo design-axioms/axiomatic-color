@@ -29,12 +29,12 @@ Most surfaces are `"surface"`. Tag `action` and similar as `"interactive"`. Tag 
 
 When the user enables forced colors, the OS supplies a restricted palette via CSS system color keywords. The system emits a `@media (forced-colors: active)` block that remaps surface and token values per role.
 
-| Role          | Surface      | Text           | Border                       |
-| ------------- | ------------ | -------------- | ---------------------------- |
-| `surface`     | `Canvas`     | `CanvasText`   | `CanvasText`                 |
-| `interactive` | `ButtonFace` | `ButtonText`   | `ButtonBorder`               |
-| `alert`       | `Canvas`     | `CanvasText` → `Mark` | `CanvasText`          |
-| `link`        | `Canvas`     | `LinkText`     | `CanvasText`                 |
+| Role          | Surface      | Text                  | Border         |
+| ------------- | ------------ | --------------------- | -------------- |
+| `surface`     | `Canvas`     | `CanvasText`          | `CanvasText`   |
+| `interactive` | `ButtonFace` | `ButtonText`          | `ButtonBorder` |
+| `alert`       | `Canvas`     | `CanvasText` → `Mark` | `CanvasText`   |
+| `link`        | `Canvas`     | `LinkText`            | `CanvasText`   |
 
 Across every role:
 
@@ -99,7 +99,7 @@ accessibility: {
 
 ### Deriving an HC scale at authoring time
 
-`deriveHcScale` is a helper for the *config-authoring step* — not the runtime. It pushes each position toward its mode's extreme:
+`deriveHcScale` is a helper for the _config-authoring step_ — not the runtime. It pushes each position toward its mode's extreme:
 
 ```ts
 import { deriveHcScale } from "@design-axioms/color";

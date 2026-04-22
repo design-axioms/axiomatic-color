@@ -62,9 +62,7 @@ function renderContent() {
 
 function updateColorScheme() {
   if (!shadow.value) return;
-  const outer = shadow.value.querySelector(
-    ".shadow-surface-outer",
-  ) as HTMLElement | null;
+  const outer = shadow.value.querySelector(".shadow-surface-outer") as HTMLElement | null;
   if (!outer) return;
   outer.style.colorScheme = isDark.value ? "dark" : "light";
 }

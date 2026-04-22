@@ -1,11 +1,11 @@
 /* Override VitePress variables toward Geist feel */
 :root {
   --vp-font-family-base:
-    "Geist Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    "Geist Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
   --vp-font-family-mono:
-    "Geist Mono", ui-monospace, "Menlo", "Monaco", "Consolas",
-    "Liberation Mono", "Courier New", monospace;
+    "Geist Mono", ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New",
+    monospace;
 
   /* Tighter content density */
   --vp-nav-height: 56px;

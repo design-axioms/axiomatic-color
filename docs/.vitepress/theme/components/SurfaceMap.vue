@@ -39,7 +39,7 @@ function rebuildCSS() {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     for (const [slug, spec] of Object.entries(bucket)) {
-      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      const label = typeof spec === "number" ? slug : (spec.label ?? slug);
       const light = output.light.surfaces.find((x) => x.slug === slug);
       const dark = output.dark.surfaces.find((x) => x.slug === slug);
       if (!light || !dark) continue;
@@ -67,9 +67,7 @@ onMounted(async () => {
   t.subscribe(() => rebuildCSS());
 });
 
-const mode = computed<"light" | "dark">(() =>
-  isDark.value ? "dark" : "light",
-);
+const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
 
 function fmt(n: number): string {
   return n.toFixed(3);
@@ -143,15 +141,11 @@ function surfaceBySlug(slug: string) {
           <div class="map-label">
             <div class="map-title">
               <span class="map-name text-high">Spotlight</span>
-              <span class="map-role text-subtlest"
-                >Inverted · High-emphasis callout</span
-              >
+              <span class="map-role text-subtlest">Inverted · High-emphasis callout</span>
               <Token name=".surface-spotlight" />
             </div>
             <span class="map-l text-subtlest"
-              >L={{
-                fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0)
-              }}</span
+              >L={{ fmt(surfaceBySlug("spotlight")?.lightness[mode] ?? 0) }}</span
             >
           </div>
 
@@ -163,9 +157,7 @@ function surfaceBySlug(slug: string) {
                 <Token name=".surface-spotlight-card" />
               </div>
               <span class="map-l text-subtlest"
-                >L={{
-                  fmt(surfaceBySlug("spotlight-card")?.lightness[mode] ?? 0)
-                }}</span
+                >L={{ fmt(surfaceBySlug("spotlight-card")?.lightness[mode] ?? 0) }}</span
               >
             </div>
             <div class="map-card surface-spotlight-action hue-accent">
@@ -175,9 +167,7 @@ function surfaceBySlug(slug: string) {
                 <Token name=".surface-spotlight-action" />
               </div>
               <span class="map-l text-subtlest"
-                >L={{
-                  fmt(surfaceBySlug("spotlight-action")?.lightness[mode] ?? 0)
-                }}</span
+                >L={{ fmt(surfaceBySlug("spotlight-action")?.lightness[mode] ?? 0) }}</span
               >
             </div>
           </div>

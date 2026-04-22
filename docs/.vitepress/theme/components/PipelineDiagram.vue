@@ -9,8 +9,7 @@ const rootEl = ref<HTMLElement | null>(null);
 useThemeBuilder(rootEl);
 
 onMounted(async () => {
-  const { solve, DEFAULT_CONFIG, generateCSS } =
-    await import("@design-axioms/color");
+  const { solve, DEFAULT_CONFIG, generateCSS } = await import("@design-axioms/color");
 
   const output = solve(DEFAULT_CONFIG);
   css.value = generateCSS(output, {
@@ -35,12 +34,7 @@ const stages = [
   },
   {
     name: "Runtime",
-    items: [
-      "ThemeBuilder",
-      "color-scheme",
-      "Constructible sheets",
-      "Custom elements",
-    ],
+    items: ["ThemeBuilder", "color-scheme", "Constructible sheets", "Custom elements"],
   },
 ];
 </script>
@@ -57,11 +51,7 @@ const stages = [
       >
         <span class="text-high pl-stage-name">{{ stage.name }}</span>
         <ul class="pl-items">
-          <li
-            v-for="item in stage.items"
-            :key="item"
-            class="text-subtle pl-item"
-          >
+          <li v-for="item in stage.items" :key="item" class="text-subtle pl-item">
             {{ item }}
           </li>
         </ul>

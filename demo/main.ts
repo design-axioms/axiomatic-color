@@ -22,14 +22,14 @@ const css = generateCSS(output, DEFAULT_CONFIG.options);
 
 const style = document.createElement("style");
 style.textContent = css;
-document.head.appendChild(style);
+document.head.append(style);
 
 // ThemeBuilder handles polarity flips for spotlight
 createThemeBuilder();
 
 // Mode toggle
 let dark = false;
-const btn = document.getElementById("mode-toggle")!;
+const btn = document.querySelector("#mode-toggle")!;
 btn.addEventListener("click", () => {
   dark = !dark;
   document.documentElement.style.colorScheme = dark ? "dark" : "light";
@@ -39,13 +39,11 @@ btn.addEventListener("click", () => {
 // Atmosphere sliders
 const hueSlider = document.querySelector<HTMLElement>("#hue-slider")!;
 const chromaSlider = document.querySelector<HTMLElement>("#chroma-slider")!;
-const hueVal = document.getElementById("hue-val")!;
-const chromaVal = document.getElementById("chroma-val")!;
+const hueVal = document.querySelector("#hue-val")!;
+const chromaVal = document.querySelector("#chroma-val")!;
 
 function applyAtmosphere(h: number, c: number): void {
-  const surfaces = document.querySelectorAll<HTMLElement>(
-    '[class*="surface-"]',
-  );
+  const surfaces = document.querySelectorAll<HTMLElement>('[class*="surface-"]');
   for (const el of surfaces) {
     el.style.setProperty("--axm-hue", String(h));
     el.style.setProperty("--axm-chroma", String(c));

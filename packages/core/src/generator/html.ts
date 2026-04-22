@@ -12,10 +12,7 @@ import { generateCSS } from "./css.ts";
 
 // --- Public API ---
 
-export function generateHTML(
-  output: SolverOutput,
-  config: SolverConfig,
-): string {
+export function generateHTML(output: SolverOutput, config: SolverConfig): string {
   const keyColors = config.keyColors;
   const css = generateCSS(output, {
     ...config.options,
@@ -69,16 +66,13 @@ interface ModeInfo {
   unmetGrades: readonly string[];
 }
 
-function buildSwatchData(
-  output: SolverOutput,
-  config: SolverConfig,
-): SwatchInfo[] {
+function buildSwatchData(output: SolverOutput, config: SolverConfig): SwatchInfo[] {
   const labels = new Map<string, string>();
   for (const polarity of ["page", "inverted"] as const) {
     const bucket = config.surfaces[polarity];
     if (!bucket) continue;
     for (const [slug, spec] of Object.entries(bucket)) {
-      const label = typeof spec === "number" ? slug : spec.label ?? slug;
+      const label = typeof spec === "number" ? slug : (spec.label ?? slug);
       labels.set(slug, label);
     }
   }
@@ -90,9 +84,7 @@ function buildSwatchData(
     if (seen.has(lightSurface.slug)) continue;
     seen.add(lightSurface.slug);
 
-    const darkSurface = output.dark.surfaces.find(
-      (s) => s.slug === lightSurface.slug,
-    );
+    const darkSurface = output.dark.surfaces.find((s) => s.slug === lightSurface.slug);
     if (!darkSurface) continue;
 
     result.push({
@@ -169,10 +161,7 @@ function swatchCardHTML(s: SwatchInfo): string {
   };
 
   const textSamples = grades
-    .map(
-      (g) =>
-        `          <p class="text-${g}">${gradeLabels[g]} — sample text</p>`,
-    )
+    .map((g) => `          <p class="text-${g}">${gradeLabels[g]} — sample text</p>`)
     .join("\n");
 
   const metaRows = grades
@@ -181,12 +170,8 @@ function swatchCardHTML(s: SwatchInfo): string {
       const darkUnmet = s.dark.unmetGrades.includes(g);
       const lightVal = s.light.apca[g]!.toFixed(1);
       const darkVal = s.dark.apca[g]!.toFixed(1);
-      const lightCell = lightUnmet
-        ? `<span class="swatch-unmet">${lightVal} ⚠</span>`
-        : lightVal;
-      const darkCell = darkUnmet
-        ? `<span class="swatch-unmet">${darkVal} ⚠</span>`
-        : darkVal;
+      const lightCell = lightUnmet ? `<span class="swatch-unmet">${lightVal} ⚠</span>` : lightVal;
+      const darkCell = darkUnmet ? `<span class="swatch-unmet">${darkVal} ⚠</span>` : darkVal;
       return `            <tr><td>${g}</td><td>${lightCell}</td><td>${darkCell}</td></tr>`;
     })
     .join("\n");
@@ -615,5 +600,5 @@ function toggleScript(): string {
 // --- Utility ---
 
 function escapeHTML(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return str.replaceAll(/&/g, "&amp;").replaceAll(/</g, "&lt;").replaceAll(/>/g, "&gt;");
 }

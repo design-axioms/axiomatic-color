@@ -22,9 +22,7 @@ const textClass = computed(() => {
   return cls.endsWith("*") ? null : cls;
 });
 
-const usesShadow = computed(() =>
-  ["text", "surface", "border", "hue"].includes(category.value),
-);
+const usesShadow = computed(() => ["text", "surface", "border", "hue"].includes(category.value));
 
 const bareClass = computed(() => {
   if (!props.name.startsWith(".")) return null;
@@ -110,9 +108,7 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
 const isWildcard = computed(() => props.name.endsWith("*"));
 
 const sheets = computed(() =>
-  theme.value
-    ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)]
-    : [],
+  theme.value ? [theme.value.sheet, getLocalSheet(category.value, isWildcard.value)] : [],
 );
 
 const shadow = useShadowRoot(shadowHost, sheets);
