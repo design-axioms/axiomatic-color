@@ -61,6 +61,10 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       border: 1px solid var(--axm-border-decorative, var(--vp-c-divider, #e2e2e3));
       background: var(--axm-surface, var(--vp-c-bg-alt, #f6f6f7));
       color-scheme: inherit;
+      /* Suppress the surface-distinction inset shadow the token host
+         picks up from its surface-* class — the :host border above is
+         the token's framing, and we don't want a doubled ring. */
+      box-shadow: none;
     }
     code {
       font-family: var(--vp-font-family-mono);
