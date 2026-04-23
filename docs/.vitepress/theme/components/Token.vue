@@ -71,44 +71,36 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       /* surface-* class (from theme sheet) paints background,
          text-tier variables, and distinction shadow. */
     }
+    .pill .glyph {
+      font-family: var(--vp-font-family-base);
+      font-weight: 800;
+      font-size: 0.95em;
+      line-height: 1;
+      align-self: center;
+    }
     .pill code {
       font-family: var(--vp-font-family-mono);
       font-size: 0.78em;
       font-weight: 500;
+      color: var(--axm-text-subtle);
+    }
+    .pill .dot {
+      width: 0.5em; height: 0.5em; border-radius: 50%;
+      align-self: center; flex-shrink: 0;
     }
   `;
 
   let extra = "";
   if (wild) {
     const color = WILDCARD_COLORS[cat] ?? "#929295";
-    extra = `
-      .pill code { color: var(--axm-text-subtle); }
-      .dot {
-        width: 0.5em; height: 0.5em; border-radius: 50%;
-        background: ${color};
-        align-self: center; flex-shrink: 0;
-      }`;
-  } else if (cat === "text") {
-    // The code label itself is the demonstration — rendered in the
-    // tier's own color, on a card surface, in the current mode.
-    // The label's appearance IS what the token does.
-    extra = `.pill code { font-weight: 700; }`;
-  } else if (cat === "surface") {
-    // The pill's surface IS the demonstration. Label sits on it.
-    extra = `.pill code { color: var(--axm-text-subtle); }`;
-  } else if (cat === "hue") {
-    // Tinted card IS the demonstration.
-    extra = `.pill code { color: var(--axm-text-subtle); }`;
+    extra = `.pill .dot { background: ${color}; }`;
   } else if (cat === "border") {
-    // The pill's edge IS the demonstration. Add explicit width/style;
-    // the border-* utility sets color. Note this overlays surface-card's
-    // own distinction shadow (both sit at L=0.5), so there's no visible
-    // doubling.
-    extra = `
-      .pill { border-width: 1.5px; border-style: solid; }
-      .pill code { color: var(--axm-text-subtle); }
-    `;
+    // The pill's edge IS the demonstration. Width/style are local;
+    // the border-* utility sets color. This overlays surface-card's
+    // own distinction shadow (both sit at L=0.5), so no doubling.
+    extra = `.pill { border-width: 1.5px; border-style: solid; }`;
   }
+  // text/surface/hue: no extras — the composite itself is the demo.
 
   sheet = new CSSStyleSheet();
   sheet.replaceSync(hostStyles + extra);
@@ -144,8 +136,11 @@ function buildMarkup(): string {
     return `<span class="pill surface-card"><span class="dot"></span><code>${props.name}</code></span>`;
   }
   if (cat === "text") {
+    // Text glyph "A" IS the visualization — real text wearing the
+    // tier class, on the card surface, in the current mode. The code
+    // label is a reference. Both are on the same card.
     const cls = textClass.value ?? "";
-    return `<span class="pill surface-card"><code class="${cls}">${props.name}</code></span>`;
+    return `<span class="pill surface-card"><span class="glyph ${cls}">A</span><code>${props.name}</code></span>`;
   } else if (cat === "surface") {
     const surfCls = bareClass.value ?? "";
     return `<span class="pill ${surfCls}"><code>${props.name}</code></span>`;
