@@ -48,89 +48,66 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
   let sheet = localSheetCache.get(key);
   if (sheet) return sheet;
 
-  // The pill is a citation in prose — VitePress chrome, not a system
-  // surface. The actual demonstration of the named token lives inside,
-  // in a `.context` wrapper whose only job is to provide the system's
-  // CSS variables to its child via a `.surface-*` (and optionally
-  // `.hue-*`) class. The wrapper is `display: contents` so it has no
-  // box and inherits no decoration; the inner swatch/glyph reads the
-  // variables but never carries a surface class itself, so nothing
-  // surface-derived (background, border, distinction shadow) leaks
-  // onto the pill.
+  // The pill IS a surface + token composite. Its visual is literally
+  // what the named token looks like when applied: a text token is
+  // rendered as card-surface text in that grade; a surface token is
+  // rendered as that surface; a hue token is a card tinted by that
+  // hue. No VitePress chrome, no pinned color-scheme — the pill
+  // shows the real composite in the current mode.
   const hostStyles = `
     :host {
       display: inline-flex;
-      align-items: baseline;
-      gap: 0.25rem;
-      padding: 0.1rem 0.45rem 0.1rem 0.3rem;
-      border-radius: 10rem;
       vertical-align: middle;
       line-height: 1.4;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.3rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 10rem;
+      line-height: 1.4;
       white-space: nowrap;
-      /* Border uses the system's decorative tier (oklch L=0.5), not
-         VitePress's much-fainter divider. The pill is documenting the
-         system; using a system-derived color is correct. We pin the
-         literal value rather than reading --axm-border-decorative
-         because that variable's resolution depends on the ancestor's
-         surface context — which the pill explicitly opts out of. The
-         decorative tier is achromatic and mode-invariant by design,
-         so a single L=0.5 oklch works for both light and dark. */
-      border: 1px solid oklch(0.5 0 0);
-      background: var(--vp-c-bg-alt, #f6f6f7);
-      color-scheme: inherit;
+      /* surface-* class (from theme sheet) paints background,
+         text-tier variables, and distinction shadow. */
     }
-    .context {
-      display: contents;
-    }
-    code {
+    .pill code {
       font-family: var(--vp-font-family-mono);
       font-size: 0.78em;
       font-weight: 500;
-      /* Pill text is chrome, not a system text grade. Pin it to
-         VitePress's secondary text color so it reads consistently
-         regardless of the surrounding surface context (e.g. a token
-         cited inside a .surface-spotlight block must not inherit the
-         inverted text color). */
-      color: var(--vp-c-text-2);
     }
   `;
 
   let extra = "";
   if (wild) {
     const color = WILDCARD_COLORS[cat] ?? "#929295";
-    extra = `.dot {
-      width: 0.5em; height: 0.5em; border-radius: 50%;
-      background: ${color};
-      align-self: center; flex-shrink: 0;
-    }`;
+    extra = `
+      .pill code { color: var(--axm-text-subtle); }
+      .dot {
+        width: 0.5em; height: 0.5em; border-radius: 50%;
+        background: ${color};
+        align-self: center; flex-shrink: 0;
+      }`;
   } else if (cat === "text") {
-    // The glyph is a text sample demonstrating the tier's color. Keep
-    // it substantial enough that its color reads as "real text": at
-    // 0.7em the letterform was too small to communicate the tier's
-    // weight, so a dark text-high glyph looked dim despite having
-    // near-maximum APCA contrast. Bumping size + weight makes the
-    // perceived contrast match the numerical contrast.
-    extra = `.glyph { font-weight: 800; font-size: 0.95em; line-height: 1; align-self: center; font-family: var(--vp-font-family-base); }`;
+    // The code label itself is the demonstration — rendered in the
+    // tier's own color, on a card surface, in the current mode.
+    // The label's appearance IS what the token does.
+    extra = `.pill code { font-weight: 700; }`;
   } else if (cat === "surface") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 3px;
-      align-self: center; flex-shrink: 0;
-      background: var(--axm-surface);
-      border: 1px solid var(--axm-border-decorative);
-    }`;
-  } else if (cat === "border") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 2px;
-      align-self: center; flex-shrink: 0;
-      border-width: 1.5px; border-style: solid;
-    }`;
+    // The pill's surface IS the demonstration. Label sits on it.
+    extra = `.pill code { color: var(--axm-text-subtle); }`;
   } else if (cat === "hue") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 50%;
-      align-self: center; flex-shrink: 0;
-      background: var(--axm-surface);
-      border: 1px solid var(--axm-border-decorative);
-    }`;
+    // Tinted card IS the demonstration.
+    extra = `.pill code { color: var(--axm-text-subtle); }`;
+  } else if (cat === "border") {
+    // The pill's edge IS the demonstration. Add explicit width/style;
+    // the border-* utility sets color. Note this overlays surface-card's
+    // own distinction shadow (both sit at L=0.5), so there's no visible
+    // doubling.
+    extra = `
+      .pill { border-width: 1.5px; border-style: solid; }
+      .pill code { color: var(--axm-text-subtle); }
+    `;
   }
 
   sheet = new CSSStyleSheet();
@@ -148,39 +125,36 @@ const sheets = computed(() =>
 const shadow = useShadowRoot(shadowHost, sheets);
 
 /**
- * Build the pill's inner markup. The pill itself is generic chrome;
- * the demonstrative element (swatch / glyph) lives inside a `.context`
- * wrapper that carries the surface/hue class purely to provide CSS
- * variables. The wrapper is `display: contents` so it adds no box and
- * inherits no surface decoration onto the pill.
+ * Build the pill as a real surface + token composite. The pill itself
+ * wears the surface class; the label inside wears the token class.
+ * What you see is literally what `<div class="surface-X"><code
+ * class="token">...</code></div>` looks like.
  *
- * - text: `.context.surface-workspace` so .text-* utilities resolve
- *   to a real card-context value.
- * - surface: `.context.surface-{slug}` so the swatch reads the named
- *   surface's --axm-surface and border tokens.
- * - border: `.context.surface-card` so the named .border-* token has
- *   a sensible context to source from.
- * - hue: `.context.surface-card.hue-{name}` so the swatch shows the
- *   tinted surface for that hue.
+ * - text: `.pill.surface-card`, label wears `.text-*` — the label's
+ *   color IS the demonstration.
+ * - surface: `.pill.surface-{slug}` — the pill itself is the named
+ *   surface.
+ * - hue: `.pill.surface-card.hue-{name}` — card tinted by that hue.
+ * - border: `.pill.surface-card.border-{tier}` — card with that
+ *   border tier applied.
  */
 function buildMarkup(): string {
   const cat = category.value;
-  // Wildcards: category-colored dot instead of a concrete swatch
   if (isWildcard.value) {
-    return `<span class="dot"></span><code>${props.name}</code>`;
+    return `<span class="pill surface-card"><span class="dot"></span><code>${props.name}</code></span>`;
   }
   if (cat === "text") {
     const cls = textClass.value ?? "";
-    return `<span class="context surface-workspace"><span class="glyph ${cls}">A</span></span><code>${props.name}</code>`;
+    return `<span class="pill surface-card"><code class="${cls}">${props.name}</code></span>`;
   } else if (cat === "surface") {
     const surfCls = bareClass.value ?? "";
-    return `<span class="context ${surfCls}"><span class="swatch"></span></span><code>${props.name}</code>`;
+    return `<span class="pill ${surfCls}"><code>${props.name}</code></span>`;
   } else if (cat === "border") {
     const borderCls = bareClass.value ?? "";
-    return `<span class="context surface-card"><span class="swatch ${borderCls}"></span></span><code>${props.name}</code>`;
+    return `<span class="pill surface-card ${borderCls}"><code>${props.name}</code></span>`;
   } else if (cat === "hue") {
     const hueCls = bareClass.value ?? "";
-    return `<span class="context surface-card ${hueCls}"><span class="swatch"></span></span><code>${props.name}</code>`;
+    return `<span class="pill surface-card ${hueCls}"><code>${props.name}</code></span>`;
   }
   return "";
 }
