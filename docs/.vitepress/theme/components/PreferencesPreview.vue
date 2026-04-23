@@ -76,25 +76,30 @@ onUnmounted(() => {
       @update:chroma="setChroma"
     />
 
-    <div class="pp-toolbar" role="radiogroup" aria-label="Accessibility regime">
-      <button
+    <fieldset class="pp-toolbar">
+      <legend class="pp-toolbar-legend">Accessibility regime</legend>
+      <label
         v-for="opt in [
           { id: 'default', label: 'Default', hint: 'No user preferences set' },
           { id: 'hc', label: 'High contrast', hint: '@media (prefers-contrast: more)' },
           { id: 'forced', label: 'Forced colors', hint: '@media (forced-colors: active)' },
         ] as const"
         :key="opt.id"
-        type="button"
-        role="radio"
-        :aria-checked="regime === opt.id"
         class="pp-toggle"
         :class="{ active: regime === opt.id }"
         :title="opt.hint"
-        @click="regime = opt.id"
       >
-        {{ opt.label }}
-      </button>
-    </div>
+        <input
+          type="radio"
+          name="pp-regime"
+          class="pp-toggle-input"
+          :value="opt.id"
+          :checked="regime === opt.id"
+          @change="regime = opt.id"
+        />
+        <span>{{ opt.label }}</span>
+      </label>
+    </fieldset>
 
     <div class="pp-specimen surface-card">
       <h3 class="text-high pp-title">Account Settings</h3>
@@ -139,8 +144,23 @@ onUnmounted(() => {
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
+  border: none;
   border-bottom: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-alt);
+  margin: 0;
+}
+
+/* Visually hide the legend; keeps it as the group's accessible name. */
+.pp-toolbar-legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .pp-toggle {
@@ -159,8 +179,26 @@ onUnmounted(() => {
     border-color 0.15s ease;
 }
 
+/* The native radio carries keyboard focus + state; the label is the
+   visual. Hide the input but keep it in the accessibility tree. */
+.pp-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
 .pp-toggle:hover {
   color: var(--vp-c-text-1);
+}
+
+.pp-toggle:has(.pp-toggle-input:focus-visible) {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
 }
 
 .pp-toggle.active {

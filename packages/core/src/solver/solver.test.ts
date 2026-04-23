@@ -362,6 +362,29 @@ describe("solver", () => {
     expect(css).not.toMatch(/\.fc-simulate/);
   });
 
+  it("rejects invalid simulation class names", () => {
+    // Space, dot, starts with digit — all invalid CSS identifiers that
+    // would break or widen the emitted selector.
+    expect(() =>
+      generateCSS(output, {
+        ...DEFAULT_CONFIG.options,
+        forcedColorsSimulationClass: "has space",
+      }),
+    ).toThrow(/forcedColorsSimulationClass/);
+    expect(() =>
+      generateCSS(output, {
+        ...DEFAULT_CONFIG.options,
+        highContrastSimulationClass: ".dot-prefix",
+      }),
+    ).toThrow(/highContrastSimulationClass/);
+    expect(() =>
+      generateCSS(output, {
+        ...DEFAULT_CONFIG.options,
+        forcedColorsSimulationClass: "1starts-with-digit",
+      }),
+    ).toThrow(/forcedColorsSimulationClass/);
+  });
+
   // --- Distinction rule (§6 tier-1) ---
 
   it("flags same-polarity surfaces below APCA threshold as needing distinction", () => {

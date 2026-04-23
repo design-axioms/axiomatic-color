@@ -477,6 +477,22 @@ function generateHighContrast(
 }
 
 /**
+ * Simulation class names are interpolated straight into CSS selectors,
+ * so they must be a single valid CSS identifier — no spaces, no '.',
+ * no special characters that would change the selector's meaning.
+ * Throws with a clear message rather than silently emitting broken CSS.
+ */
+const SIM_CLASS_PATTERN = /^[a-zA-Z_-][a-zA-Z0-9_-]*$/;
+function validateSimClass(name: string, option: string): void {
+  if (!SIM_CLASS_PATTERN.test(name)) {
+    throw new Error(
+      `Invalid ${option}: ${JSON.stringify(name)}. ` +
+        `Must be a single CSS class identifier matching ${SIM_CLASS_PATTERN}.`,
+    );
+  }
+}
+
+/**
  * Emit a class-triggered HC variant for demo/preview simulation.
  *
  * Produces selectors like `.hc-simulate .surface-page { ... }` so a docs
@@ -489,6 +505,7 @@ function generateHighContrastSimulation(
   simClass: string,
   distinction?: DistinctionConfig,
 ): string | null {
+  validateSimClass(simClass, "highContrastSimulationClass");
   const slugs = new Set<string>();
   for (const s of output.light.surfaces) {
     if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
@@ -638,6 +655,7 @@ function generateForcedColorsSimulation(
   prefix: string,
   simClass: string,
 ): string | null {
+  validateSimClass(simClass, "forcedColorsSimulationClass");
   const slugs = new Set<string>();
   for (const s of output.light.surfaces) slugs.add(s.slug);
   for (const s of output.dark.surfaces) slugs.add(s.slug);
