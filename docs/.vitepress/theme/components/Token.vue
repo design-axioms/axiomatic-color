@@ -104,7 +104,13 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       align-self: center; flex-shrink: 0;
     }`;
   } else if (cat === "text") {
-    extra = `.glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }`;
+    // The glyph is a text sample demonstrating the tier's color. Keep
+    // it substantial enough that its color reads as "real text": at
+    // 0.7em the letterform was too small to communicate the tier's
+    // weight, so a dark text-high glyph looked dim despite having
+    // near-maximum APCA contrast. Bumping size + weight makes the
+    // perceived contrast match the numerical contrast.
+    extra = `.glyph { font-weight: 800; font-size: 0.95em; line-height: 1; align-self: center; font-family: var(--vp-font-family-base); }`;
   } else if (cat === "surface") {
     extra = `.swatch {
       width: 0.75em; height: 0.75em; border-radius: 3px;
