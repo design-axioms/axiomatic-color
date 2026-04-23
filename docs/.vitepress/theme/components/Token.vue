@@ -48,6 +48,15 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
   let sheet = localSheetCache.get(key);
   if (sheet) return sheet;
 
+  // The pill is a citation in prose — VitePress chrome, not a system
+  // surface. The actual demonstration of the named token lives inside,
+  // in a `.context` wrapper whose only job is to provide the system's
+  // CSS variables to its child via a `.surface-*` (and optionally
+  // `.hue-*`) class. The wrapper is `display: contents` so it has no
+  // box and inherits no decoration; the inner swatch/glyph reads the
+  // variables but never carries a surface class itself, so nothing
+  // surface-derived (background, border, distinction shadow) leaks
+  // onto the pill.
   const hostStyles = `
     :host {
       display: inline-flex;
@@ -58,20 +67,23 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       vertical-align: middle;
       line-height: 1.4;
       white-space: nowrap;
-      border: 1px solid var(--axm-border-decorative, var(--vp-c-divider, #e2e2e3));
-      background: var(--axm-surface, var(--vp-c-bg-alt, #f6f6f7));
+      border: 1px solid var(--vp-c-divider, #e2e2e3);
+      background: var(--vp-c-bg-alt, #f6f6f7);
       color-scheme: inherit;
-      /* Suppress the surface-distinction inset shadow the token host
-         picks up from its surface-* class. The :host border above is
-         the token's framing — without !important, the surface class
-         (same specificity, declared later in the cascade) wins and we
-         get a doubled ring. */
-      box-shadow: none !important;
+    }
+    .context {
+      display: contents;
     }
     code {
       font-family: var(--vp-font-family-mono);
       font-size: 0.78em;
       font-weight: 500;
+      /* Pill text is chrome, not a system text grade. Pin it to
+         VitePress's secondary text color so it reads consistently
+         regardless of the surrounding surface context (e.g. a token
+         cited inside a .surface-spotlight block must not inherit the
+         inverted text color). */
+      color: var(--vp-c-text-2);
     }
   `;
 
@@ -89,6 +101,7 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
     extra = `.swatch {
       width: 0.75em; height: 0.75em; border-radius: 3px;
       align-self: center; flex-shrink: 0;
+      background: var(--axm-surface);
       border: 1px solid var(--axm-border-decorative);
     }`;
   } else if (cat === "border") {
@@ -101,6 +114,7 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
     extra = `.swatch {
       width: 0.75em; height: 0.75em; border-radius: 50%;
       align-self: center; flex-shrink: 0;
+      background: var(--axm-surface);
       border: 1px solid var(--axm-border-decorative);
     }`;
   }
@@ -119,24 +133,40 @@ const sheets = computed(() =>
 
 const shadow = useShadowRoot(shadowHost, sheets);
 
+/**
+ * Build the pill's inner markup. The pill itself is generic chrome;
+ * the demonstrative element (swatch / glyph) lives inside a `.context`
+ * wrapper that carries the surface/hue class purely to provide CSS
+ * variables. The wrapper is `display: contents` so it adds no box and
+ * inherits no surface decoration onto the pill.
+ *
+ * - text: `.context.surface-workspace` so .text-* utilities resolve
+ *   to a real card-context value.
+ * - surface: `.context.surface-{slug}` so the swatch reads the named
+ *   surface's --axm-surface and border tokens.
+ * - border: `.context.surface-card` so the named .border-* token has
+ *   a sensible context to source from.
+ * - hue: `.context.surface-card.hue-{name}` so the swatch shows the
+ *   tinted surface for that hue.
+ */
 function buildMarkup(): string {
   const cat = category.value;
   // Wildcards: category-colored dot instead of a concrete swatch
   if (isWildcard.value) {
-    return `<span class="dot"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="dot"></span><code>${props.name}</code>`;
   }
   if (cat === "text") {
     const cls = textClass.value ?? "";
-    return `<span class="glyph ${cls}">A</span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="context surface-workspace"><span class="glyph ${cls}">A</span></span><code>${props.name}</code>`;
   } else if (cat === "surface") {
     const surfCls = bareClass.value ?? "";
-    return `<span class="swatch ${surfCls}"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="context ${surfCls}"><span class="swatch"></span></span><code>${props.name}</code>`;
   } else if (cat === "border") {
     const borderCls = bareClass.value ?? "";
-    return `<span class="swatch ${borderCls}"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="context surface-card"><span class="swatch ${borderCls}"></span></span><code>${props.name}</code>`;
   } else if (cat === "hue") {
     const hueCls = bareClass.value ?? "";
-    return `<span class="swatch surface-card ${hueCls}"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="context surface-card ${hueCls}"><span class="swatch"></span></span><code>${props.name}</code>`;
   }
   return "";
 }
@@ -147,33 +177,16 @@ watch([shadow, () => theme.value, () => props.name], () => {
 </script>
 
 <template>
-  <!-- Text tokens: shadow DOM host on a card surface -->
-  <span
-    v-if="category === 'text'"
-    ref="shadowHost"
-    class="token-badge token-text surface-workspace"
-  />
+  <!-- The pill is generic chrome. The system-surface context lives
+       inside the shadow root via a `display: contents` wrapper, so
+       no surface decoration leaks onto the host. -->
+  <span v-if="category === 'text'" ref="shadowHost" class="token-badge token-text" />
 
-  <!-- Surface tokens: shadow DOM host on a card surface (swatch shows the named surface) -->
-  <span
-    v-else-if="category === 'surface'"
-    ref="shadowHost"
-    class="token-badge token-surface surface-workspace"
-  />
+  <span v-else-if="category === 'surface'" ref="shadowHost" class="token-badge token-surface" />
 
-  <!-- Border tokens: shadow DOM host on a card surface (swatch shows the border tier) -->
-  <span
-    v-else-if="category === 'border'"
-    ref="shadowHost"
-    class="token-badge token-border surface-workspace"
-  />
+  <span v-else-if="category === 'border'" ref="shadowHost" class="token-badge token-border" />
 
-  <!-- Hue tokens: shadow DOM host on a card surface -->
-  <span
-    v-else-if="category === 'hue'"
-    ref="shadowHost"
-    class="token-badge token-hue surface-workspace"
-  />
+  <span v-else-if="category === 'hue'" ref="shadowHost" class="token-badge token-hue" />
 
   <!-- Generic: light DOM -->
   <span v-else class="token-badge token-generic">
