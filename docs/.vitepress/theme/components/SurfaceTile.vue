@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
@@ -122,7 +122,13 @@ onMounted(async () => {
 
   const t = await themeReady;
   rebuildCSS();
-  t.subscribe(() => rebuildCSS());
+  unsubscribe = t.subscribe(() => rebuildCSS());
+});
+
+let unsubscribe: (() => void) | null = null;
+onUnmounted(() => {
+  unsubscribe?.();
+  unsubscribe = null;
 });
 
 const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));

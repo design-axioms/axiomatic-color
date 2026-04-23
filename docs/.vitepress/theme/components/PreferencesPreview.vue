@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import Token from "./Token.vue";
 import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
@@ -39,6 +39,8 @@ function rebuildCSS() {
 
 useThemeBuilder(rootEl);
 
+let unsubscribe: (() => void) | null = null;
+
 onMounted(async () => {
   const mod = await import("@design-axioms/color");
   solveFn = mod.solve;
@@ -46,7 +48,12 @@ onMounted(async () => {
 
   const t = await themeReady;
   rebuildCSS();
-  t.subscribe(() => rebuildCSS());
+  unsubscribe = t.subscribe(() => rebuildCSS());
+});
+
+onUnmounted(() => {
+  unsubscribe?.();
+  unsubscribe = null;
 });
 </script>
 
