@@ -62,9 +62,11 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       background: var(--axm-surface, var(--vp-c-bg-alt, #f6f6f7));
       color-scheme: inherit;
       /* Suppress the surface-distinction inset shadow the token host
-         picks up from its surface-* class — the :host border above is
-         the token's framing, and we don't want a doubled ring. */
-      box-shadow: none;
+         picks up from its surface-* class. The :host border above is
+         the token's framing — without !important, the surface class
+         (same specificity, declared later in the cascade) wins and we
+         get a doubled ring. */
+      box-shadow: none !important;
     }
     code {
       font-family: var(--vp-font-family-mono);
