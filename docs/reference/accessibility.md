@@ -1,12 +1,10 @@
-# Accessibility
+# Accessibility Reference
 
-The color system supports two accessibility regimes beyond the default: **forced colors** (Windows High Contrast, browser "force colors" preferences) and **high contrast** (`prefers-contrast: more` — landing in PR B).
-
-The architectural claim: **these regimes are derived from the semantic vocabulary the system already has.** You don't re-author surfaces for accessibility; you declare their role once, and the generator maps them.
+Reference for surface roles, forced-colors mapping, high-contrast solver options, surface distinction config, and emission ordering. For the narrative, see [Preferences](/preferences).
 
 ## The `role` field
 
-Every surface has a semantic role. It drives the forced-colors mapping — and will drive future accessibility axes.
+Every surface has a semantic role. Role is the only accessibility input — it drives the forced-colors mapping and feeds future accessibility axes.
 
 ```ts
 interface SurfaceConfig {
@@ -23,11 +21,11 @@ interface SurfaceConfig {
 | `alert`       | Status / notification              | `success`, `error`   |
 | `link`        | Hyperlink surface                  | Link-styled elements |
 
-Most surfaces are `"surface"`. Tag `action` and similar as `"interactive"`. Tag status surfaces as `"alert"`.
+Most surfaces are `surface`. Tag `action` and similar as `interactive`. Tag status surfaces as `alert`.
 
 ## Forced colors
 
-When the user enables forced colors, the OS supplies a restricted palette via CSS system color keywords. The system emits a `@media (forced-colors: active)` block that remaps surface and token values per role.
+`@media (forced-colors: active)` cedes each surface to the OS palette based on its role.
 
 | Role          | Surface      | Text                  | Border         |
 | ------------- | ------------ | --------------------- | -------------- |
@@ -47,7 +45,7 @@ Across every role:
 
 ### Text utilities
 
-Two new utilities accompany the system color story:
+Two utilities accompany the system color story:
 
 - `.text-link` — links, underlined. Under forced colors: `LinkText`.
 - `.text-disabled` — disabled text. Under forced colors: `GrayText`.
@@ -55,8 +53,6 @@ Two new utilities accompany the system color story:
 ## High contrast
 
 `@media (prefers-contrast: more), (prefers-contrast: custom)` re-solves surfaces with tighter targets and an optional separate high-contrast scale.
-
-### How it works
 
 Each `PolarityScale` can optionally declare a `highContrast` companion scale:
 
@@ -84,8 +80,6 @@ When HC is active, the solver re-solves text and border values against:
 - The HC scale, if present, and
 - Tighter default targets (`TEXT_GRADES_HIGH_CONTRAST`: `high: 100, strong: 100, subtle: 95, subtlest: 90`).
 
-The generator emits the re-solved values under `@media (prefers-contrast: more), (prefers-contrast: custom)`. This block comes **before** the forced-colors block so forced-colors wins the cascade for users who have both active.
-
 ### Configurable targets
 
 The library caps `high` at 100 by default — the APCA practical ceiling. Users with stricter accessibility needs can override:
@@ -97,7 +91,7 @@ accessibility: {
 }
 ```
 
-### Deriving an HC scale at authoring time
+### `deriveHcScale`
 
 `deriveHcScale` is a helper for the _config-authoring step_ — not the runtime. It pushes each position toward its mode's extreme:
 
@@ -113,9 +107,34 @@ The helper is opt-in; most configurations are clearer with explicit arrays.
 
 Inverted surfaces swap `light-dark()` branches at emission time so children inherit `color-scheme: dark` (and vice versa) correctly. The HC media block **replicates the same swap** so inverted HC values land in the right branch. If you hand-author the HC emission (e.g. in a framework that can't run the generator), preserve this.
 
-### Simulating HC in a demo
+## Emission ordering
 
-Set `highContrastSimulationClass: "hc-simulate"` on `generateCSS` options to emit an additional class-triggered copy of the HC rules. A demo can toggle the class on `<html>` to preview HC mode without changing OS settings.
+The generator emits blocks in this order:
+
+1. Root declarations
+2. Surface classes (default mode)
+3. Text utilities
+4. Border utilities
+5. Hue utilities
+6. `@media (prefers-contrast: more), (prefers-contrast: custom)` — HC overrides
+7. `.hc-simulate` class (if `highContrastSimulationClass` option set)
+8. `@media (forced-colors: active)` — forced-colors overrides
+9. `.fc-simulate` class (if `forcedColorsSimulationClass` option set)
+
+HC comes before forced-colors so that users with both active (forced-colors also matches `prefers-contrast: custom` per MDN) get the forced-colors palette, not just tighter HC contrast.
+
+## Simulation classes
+
+For docs and tooling that want to preview accessibility regimes without changing OS settings, the generator accepts two options:
+
+```ts
+generateCSS(output, {
+  highContrastSimulationClass: "hc-simulate",
+  forcedColorsSimulationClass: "fc-simulate",
+});
+```
+
+Each emits a class-triggered copy of the corresponding media-query block. Apply the class to any ancestor (including `<html>`, the surface itself, or — via `:host-context` — a shadow-root host's ancestor) to trigger the overrides. Leave unset in production CSS; rely on the media queries alone.
 
 ## Surface distinction
 
@@ -144,11 +163,19 @@ distinction: {
 
 The default mechanism is an inset box-shadow because it doesn't affect layout. If you prefer a real border (affecting box size), set `mechanism: "border"`.
 
+### Diagnostics
+
+`mechanism: "none"` suppresses CSS emission but keeps the solver's `needsDistinction` / `needsDistinctionHighContrast` flags. CLI `validate` and downstream tooling can still report where distinction would be required.
+
+### Fallback
+
+The emitted declaration uses `var(--axm-border-decorative, currentColor)`. If a consumer configures distinction without `borderTargets`, the border token is undefined and the fallback keeps the distinction visible against the surface's current text color.
+
 ## Reduced contrast
 
 The default scale serves as the low-contrast case. There's no separate `prefers-contrast: less` scale.
 
-## What's out of scope
+## Out of scope
 
 - **`prefers-reduced-motion`** — the system uses CSS transitions on surface backgrounds only; respecting reduced motion is the consumer's responsibility.
 - **Font size / zoom** — font size affects APCA thresholds in practice (smaller text needs higher contrast). The default targets are calibrated for ~14–16px body copy. Apps with smaller text should raise their targets.

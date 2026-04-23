@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
@@ -173,7 +173,13 @@ onMounted(async () => {
 
   const t = await themeReady;
   rebuildCSS();
-  t.subscribe(() => rebuildCSS());
+  unsubscribe = t.subscribe(() => rebuildCSS());
+});
+
+let unsubscribe: (() => void) | null = null;
+onUnmounted(() => {
+  unsubscribe?.();
+  unsubscribe = null;
 });
 
 // Re-compute when mode changes

@@ -57,3 +57,13 @@ surface="surface-spotlight"
 />
 
 The same pattern works on both polarities. The primary button's polarity flips, the secondary border adapts, and contrast holds.
+
+## Same-Polarity Distinction
+
+Stacking same-polarity surfaces (a card inside a workspace inside a page) is the normal case. The system guarantees those surfaces stay perceptibly distinct from each other: when the lightness stagger between adjacent same-polarity surfaces falls below APCA Lc 45, the generator emits a 1px inset border on any non-outermost same-polarity surface that is too close to a sibling, so the edge is always visible.
+
+Only the outermost surface in each polarity is exempt from the distinction mark; any non-outermost surface can carry it, so multiple surfaces in the same stack may be marked.
+
+Atmosphere does not rescue the rule. A tinted surface next to an achromatic surface of the same lightness is still at the same lightness, and spatial perception reads lightness. Atmosphere is a secondary signal, layered on top.
+
+To tune the threshold, pick a different mechanism, or override per surface, see [Reference → Accessibility → Surface distinction](/reference/accessibility#surface-distinction).

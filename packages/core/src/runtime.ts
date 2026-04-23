@@ -24,10 +24,16 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
 
   function buildCSS(): string {
     const output = solve(current);
+    // Runtime defaults the two simulation classes on because the
+    // reactive theme is built for in-browser demo/preview contexts
+    // (ShadowSurface hosts, docs components). Callers can opt out by
+    // passing the key explicitly in `options` — including `undefined`
+    // — which takes precedence over the defaults below.
     const opts = {
-      ...current.options,
       selector: ":host" as const,
       highContrastSimulationClass: "hc-simulate",
+      forcedColorsSimulationClass: "fc-simulate",
+      ...current.options,
       ...(current.distinction && { distinction: current.distinction }),
     };
     const keyColors = current.keyColors;

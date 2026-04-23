@@ -57,13 +57,14 @@ function onChromaInput(e: Event) {
 
 function onLandmarkClick(e: Event) {
   const detail = (e as CustomEvent).detail;
-  if (!detail || !props.keyColors) return;
-  // Find the key color that matches this landmark's name
-  const kc = props.keyColors[detail.name];
-  if (kc) {
-    emit("update:hue", kc.hue);
-    emit("update:chroma", kc.chroma);
-  }
+  if (!detail) return;
+  // A landmark on a preview slider is a navigation shortcut: it takes
+  // the slider to that landmark's hue angle so the user can preview the
+  // system in that hue. It does NOT overwrite the key color's chroma
+  // (the user's current chroma choice stays). For the authoring UI
+  // where a click should replace a key color's full identity, see
+  // AtmosphereDropdown.vue.
+  emit("update:hue", detail.value);
 }
 </script>
 

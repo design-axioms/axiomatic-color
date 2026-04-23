@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import Token from "./Token.vue";
 import PreviewControls from "./PreviewControls.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
@@ -42,7 +42,13 @@ onMounted(async () => {
 
   const t = await themeReady;
   rebuildCSS();
-  t.subscribe(() => rebuildCSS());
+  unsubscribe = t.subscribe(() => rebuildCSS());
+});
+
+let unsubscribe: (() => void) | null = null;
+onUnmounted(() => {
+  unsubscribe?.();
+  unsubscribe = null;
 });
 </script>
 
