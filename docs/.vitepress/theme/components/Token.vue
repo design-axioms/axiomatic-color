@@ -88,19 +88,25 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       width: 0.5em; height: 0.5em; border-radius: 50%;
       align-self: center; flex-shrink: 0;
     }
+    /* Border swatch: a small outlined square that WEARS the
+       .border-* utility. Parallels the text glyph — the demo is
+       a distinct element inside the pill, not the pill itself. */
+    .pill .swatch {
+      width: 0.75em; height: 0.75em;
+      border-width: 1.5px; border-style: solid;
+      border-radius: 2px;
+      align-self: center; flex-shrink: 0;
+    }
   `;
 
+  // Category-specific styles go on the demo element (glyph / swatch /
+  // dot), not the pill. The pill is always just a card.
   let extra = "";
   if (wild) {
     const color = WILDCARD_COLORS[cat] ?? "#929295";
     extra = `.pill .dot { background: ${color}; }`;
-  } else if (cat === "border") {
-    // The pill's edge IS the demonstration. Width/style are local;
-    // the border-* utility sets color. This overlays surface-card's
-    // own distinction shadow (both sit at L=0.5), so no doubling.
-    extra = `.pill { border-width: 1.5px; border-style: solid; }`;
   }
-  // text/surface/hue: no extras — the composite itself is the demo.
+  // text/surface/hue/border: demo element handles its own appearance.
 
   sheet = new CSSStyleSheet();
   sheet.replaceSync(hostStyles + extra);
@@ -117,18 +123,15 @@ const sheets = computed(() =>
 const shadow = useShadowRoot(shadowHost, sheets);
 
 /**
- * Build the pill as a real surface + token composite. The pill itself
- * wears the surface class; the label inside wears the token class.
- * What you see is literally what `<div class="surface-X"><code
- * class="token">...</code></div>` looks like.
+ * Every pill follows one shape: a real surface (the pill) + a demo
+ * element inside it that wears the token, + the code label. What you
+ * see is literally the composite the token produces.
  *
- * - text: `.pill.surface-card`, label wears `.text-*` — the label's
- *   color IS the demonstration.
- * - surface: `.pill.surface-{slug}` — the pill itself is the named
- *   surface.
- * - hue: `.pill.surface-card.hue-{name}` — card tinted by that hue.
- * - border: `.pill.surface-card.border-{tier}` — card with that
- *   border tier applied.
+ * - text:    .pill.surface-card   > <span.glyph.text-X>A</span>
+ * - border:  .pill.surface-card   > <span.swatch.border-X></span>
+ * - hue:     .pill.surface-card.hue-X  (the tint IS the demo)
+ * - surface: .pill.surface-X            (the surface IS the demo)
+ * - wildcard: .pill.surface-card  > <span.dot></span>
  */
 function buildMarkup(): string {
   const cat = category.value;
@@ -136,20 +139,17 @@ function buildMarkup(): string {
     return `<span class="pill surface-card"><span class="dot"></span><code>${props.name}</code></span>`;
   }
   if (cat === "text") {
-    // Text glyph "A" IS the visualization — real text wearing the
-    // tier class, on the card surface, in the current mode. The code
-    // label is a reference. Both are on the same card.
     const cls = textClass.value ?? "";
     return `<span class="pill surface-card"><span class="glyph ${cls}">A</span><code>${props.name}</code></span>`;
-  } else if (cat === "surface") {
-    const surfCls = bareClass.value ?? "";
-    return `<span class="pill ${surfCls}"><code>${props.name}</code></span>`;
   } else if (cat === "border") {
-    const borderCls = bareClass.value ?? "";
-    return `<span class="pill surface-card ${borderCls}"><code>${props.name}</code></span>`;
+    const cls = bareClass.value ?? "";
+    return `<span class="pill surface-card"><span class="swatch ${cls}"></span><code>${props.name}</code></span>`;
+  } else if (cat === "surface") {
+    const cls = bareClass.value ?? "";
+    return `<span class="pill ${cls}"><code>${props.name}</code></span>`;
   } else if (cat === "hue") {
-    const hueCls = bareClass.value ?? "";
-    return `<span class="pill surface-card ${hueCls}"><code>${props.name}</code></span>`;
+    const cls = bareClass.value ?? "";
+    return `<span class="pill surface-card ${cls}"><code>${props.name}</code></span>`;
   }
   return "";
 }
