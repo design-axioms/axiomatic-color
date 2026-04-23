@@ -67,7 +67,15 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
       vertical-align: middle;
       line-height: 1.4;
       white-space: nowrap;
-      border: 1px solid var(--vp-c-divider, #e2e2e3);
+      /* Border uses the system's decorative tier (oklch L=0.5), not
+         VitePress's much-fainter divider. The pill is documenting the
+         system; using a system-derived color is correct. We pin the
+         literal value rather than reading --axm-border-decorative
+         because that variable's resolution depends on the ancestor's
+         surface context — which the pill explicitly opts out of. The
+         decorative tier is achromatic and mode-invariant by design,
+         so a single L=0.5 oklch works for both light and dark. */
+      border: 1px solid oklch(0.5 0 0);
       background: var(--vp-c-bg-alt, #f6f6f7);
       color-scheme: inherit;
     }
