@@ -68,7 +68,11 @@ function resolveDistinction(
   if (override !== true && !needs) return null;
   if (mechanism === "none") return null;
 
-  const color = `var(--${prefix}-border-${token})`;
+  // Fall back to currentColor: if a consumer configures distinction
+  // but omits borderTargets, the border token var will be unresolved.
+  // currentColor keeps the distinction visible against whatever text
+  // color the surface already established.
+  const color = `var(--${prefix}-border-${token}, currentColor)`;
   if (mechanism === "inset") {
     return `box-shadow: inset 0 0 0 1px ${color}`;
   }

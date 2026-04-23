@@ -249,12 +249,11 @@ function solveMode(mode: Mode, config: SolverConfig): SolvedMode {
   }
 
   // Annotate distinction after all surfaces in the mode are solved.
-  // Disabled mechanism means "do nothing" — caller wants to handle it.
+  // Always annotate — the flags are diagnostics. `mechanism: "none"`
+  // controls CSS emission only; consumers (CLI validate, downstream
+  // tooling) still need to see where distinction would be required.
   const threshold = config.distinction?.threshold ?? DISTINCTION_THRESHOLD_DEFAULT;
-  const shouldAnnotate = config.distinction?.mechanism !== "none";
-  const surfaces = shouldAnnotate
-    ? annotateDistinction(raw, threshold, minPositionBySlug(config))
-    : raw;
+  const surfaces = annotateDistinction(raw, threshold, minPositionBySlug(config));
 
   // Classify composition for all surface pairs
   for (let i = 0; i < surfaces.length; i++) {

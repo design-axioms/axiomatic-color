@@ -370,13 +370,13 @@ describe("solver", () => {
     const css = generateCSS(output, DEFAULT_CONFIG.options);
     // Every non-outermost same-polarity surface needs distinction now.
     expect(css).toMatch(
-      /\.surface-workspace \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+      /\.surface-workspace \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative, currentColor\);/,
     );
     expect(css).toMatch(
-      /\.surface-card \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+      /\.surface-card \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative, currentColor\);/,
     );
     expect(css).toMatch(
-      /\.surface-action \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative\);/,
+      /\.surface-action \{[\s\S]*?box-shadow: inset 0 0 0 1px var\(--axm-border-decorative, currentColor\);/,
     );
     // Page rule should NOT have a box-shadow distinction line.
     const pageBlock = css.match(/\.surface-page \{[^}]+\}/)?.[0];
@@ -410,7 +410,7 @@ describe("solver", () => {
       distinction: { mechanism: "border" },
     });
     expect(css).toMatch(
-      /\.surface-workspace \{[\s\S]*?border: 1px solid var\(--axm-border-decorative\);/,
+      /\.surface-workspace \{[\s\S]*?border: 1px solid var\(--axm-border-decorative, currentColor\);/,
     );
     expect(css).not.toMatch(/box-shadow: inset 0 0 0 1px/);
   });
@@ -421,6 +421,13 @@ describe("solver", () => {
       distinction: { mechanism: "none" },
     });
     expect(css).not.toMatch(/box-shadow: inset 0 0 0 1px var\(--axm-border-/);
+  });
+  it("mechanism: none still sets needsDistinction flags on solver output", () => {
+    // Diagnostics survive even when emission is disabled so CLI validate
+    // and downstream tooling can report where distinction would be needed.
+    const out = solve({ ...DEFAULT_CONFIG, distinction: { mechanism: "none" } });
+    const workspace = out.light.surfaces.find((s) => s.slug === "workspace");
+    expect(workspace!.needsDistinction).toBe(true);
   });
 
   it("threshold override: Infinity makes every non-outermost surface distinct", () => {
