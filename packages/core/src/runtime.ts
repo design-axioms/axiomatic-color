@@ -28,6 +28,7 @@ export function createReactiveTheme(config?: SolverConfig): ReactiveTheme {
       ...current.options,
       selector: ":host" as const,
       highContrastSimulationClass: "hc-simulate",
+      forcedColorsSimulationClass: "fc-simulate",
       ...(current.distinction && { distinction: current.distinction }),
     };
     const keyColors = current.keyColors;

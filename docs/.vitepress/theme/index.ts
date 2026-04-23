@@ -15,6 +15,7 @@ import ApcaBadge from "./components/ApcaBadge.vue";
 import Token from "./components/Token.vue";
 import GradePreview from "./components/GradePreview.vue";
 import BorderPreview from "./components/BorderPreview.vue";
+import PreferencesPreview from "./components/PreferencesPreview.vue";
 import PipelineDiagram from "./components/PipelineDiagram.vue";
 import ShadowSurface from "./components/ShadowSurface.vue";
 import LiveExample from "./components/LiveExample.vue";
@@ -32,6 +33,7 @@ export default {
     app.component("Token", Token);
     app.component("GradePreview", GradePreview);
     app.component("BorderPreview", BorderPreview);
+    app.component("PreferencesPreview", PreferencesPreview);
     app.component("PipelineDiagram", PipelineDiagram);
     app.component("ShadowSurface", ShadowSurface);
     app.component("LiveExample", LiveExample);

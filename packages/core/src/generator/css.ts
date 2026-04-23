@@ -37,6 +37,14 @@ interface GeneratorOptions {
    */
   highContrastSimulationClass?: string;
   /**
+   * When set, also emit a class-triggered copy of the forced-colors
+   * overrides that matches any ancestor with this class. Intended for
+   * demo/preview simulation — a docs demo can apply the class to
+   * visualize forced-colors mode without changing OS settings. Leave
+   * unset in production CSS; rely on the media query alone.
+   */
+  forcedColorsSimulationClass?: string;
+  /**
    * Cross-surface distinction config (§6 tier-1). Controls the
    * mechanism the generator emits on surfaces the solver flagged as
    * `needsDistinction`. When unset, the library defaults apply
@@ -129,6 +137,14 @@ export function generateCSS(output: SolverOutput, options: GeneratorOptions = {}
 
   // Forced-colors overrides — cede colors to OS palette per surface role
   sections.push(generateForcedColors(output, prefix));
+  if (options.forcedColorsSimulationClass) {
+    const fcSim = generateForcedColorsSimulation(
+      output,
+      prefix,
+      options.forcedColorsSimulationClass,
+    );
+    if (fcSim) sections.push(fcSim);
+  }
 
   return sections.join("\n\n");
 }
@@ -326,7 +342,7 @@ function generateBorderUtilities(prefix: string): string {
  * override with Mark/MarkText — browsers that support Mark use it,
  * older ones keep the Canvas baseline.
  */
-function forcedColorsForRole(role: SurfaceRole): {
+function forcedColorsForRole(role: SurfaceRole | undefined): {
   bg: string;
   fg: readonly string[];
   border?: string;
@@ -551,6 +567,41 @@ function generateHighContrastSimulation(
   return lines.join("\n");
 }
 
+/**
+ * Build the forced-colors declaration body for a surface, given its
+ * role. Shared between the media-query block and the simulation class.
+ * `indent` is the leading whitespace for each declaration line.
+ */
+function forcedColorsBody(role: SurfaceRole | undefined, prefix: string, indent: string): string[] {
+  const mapping = forcedColorsForRole(role);
+  const body: string[] = [];
+  body.push(`${indent}--${prefix}-surface: ${mapping.bg};`);
+
+  // Text tokens all map to the role's primary fg. For alert-role the
+  // fg array has two entries (e.g. [CanvasText, Mark]) — the second
+  // overrides the first via cascade, so browsers that support Mark
+  // use it and others keep the Canvas baseline.
+  for (const fg of mapping.fg) {
+    body.push(`${indent}--${prefix}-text-high: ${fg};`);
+    body.push(`${indent}--${prefix}-text-strong: ${fg};`);
+    body.push(`${indent}--${prefix}-text-subtle: ${fg};`);
+    body.push(`${indent}--${prefix}-text-subtlest: ${fg};`);
+  }
+
+  // Role-independent: links always get LinkText, disabled always GrayText.
+  body.push(`${indent}--${prefix}-text-link: LinkText;`);
+  body.push(`${indent}--${prefix}-text-disabled: GrayText;`);
+
+  // Border tokens: decorative + critical use the same text color so
+  // they contrast against Canvas; interactive uses ButtonBorder when
+  // applicable, else CanvasText.
+  const borderPrimary = mapping.border ?? "CanvasText";
+  body.push(`${indent}--${prefix}-border-decorative: CanvasText;`);
+  body.push(`${indent}--${prefix}-border-interactive: ${borderPrimary};`);
+  body.push(`${indent}--${prefix}-border-critical: CanvasText;`);
+  return body;
+}
+
 function generateForcedColors(output: SolverOutput, prefix: string): string {
   const lines: string[] = [
     "/* Forced colors — cede to OS palette per surface role */",
@@ -566,41 +617,45 @@ function generateForcedColors(output: SolverOutput, prefix: string): string {
   for (const slug of slugs) {
     const surface = output.light.surfaces.find((s) => s.slug === slug);
     if (!surface) continue;
-
-    const mapping = forcedColorsForRole(surface.role);
-
-    const body: string[] = [];
-    body.push(`    --${prefix}-surface: ${mapping.bg};`);
-
-    // Text tokens all map to the role's primary fg. For alert-role the
-    // fg array has two entries (e.g. [CanvasText, Mark]) — the second
-    // overrides the first via cascade, so browsers that support Mark
-    // use it and others keep the Canvas baseline.
-    for (const fg of mapping.fg) {
-      body.push(`    --${prefix}-text-high: ${fg};`);
-      body.push(`    --${prefix}-text-strong: ${fg};`);
-      body.push(`    --${prefix}-text-subtle: ${fg};`);
-      body.push(`    --${prefix}-text-subtlest: ${fg};`);
-    }
-
-    // Role-independent: links always get LinkText, disabled always GrayText.
-    body.push(`    --${prefix}-text-link: LinkText;`);
-    body.push(`    --${prefix}-text-disabled: GrayText;`);
-
-    // Border tokens: decorative + critical use the same text color so
-    // they contrast against Canvas; interactive uses ButtonBorder when
-    // applicable, else CanvasText.
-    const borderPrimary = mapping.border ?? "CanvasText";
-    body.push(`    --${prefix}-border-decorative: CanvasText;`);
-    body.push(`    --${prefix}-border-interactive: ${borderPrimary};`);
-    body.push(`    --${prefix}-border-critical: CanvasText;`);
-
     lines.push(`  .surface-${slug} {`);
-    lines.push(...body);
+    lines.push(...forcedColorsBody(surface.role, prefix, "    "));
     lines.push("  }");
   }
 
   lines.push("}");
+  return lines.join("\n");
+}
+
+/**
+ * Emit a class-triggered forced-colors variant for demo/preview
+ * simulation. Produces selectors like `.fc-simulate .surface-page`
+ * so a docs demo can apply the class and visualize forced-colors
+ * mode without changing OS settings. Uses the same role → palette
+ * mapping as the media-query block.
+ */
+function generateForcedColorsSimulation(
+  output: SolverOutput,
+  prefix: string,
+  simClass: string,
+): string | null {
+  const slugs = new Set<string>();
+  for (const s of output.light.surfaces) slugs.add(s.slug);
+  for (const s of output.dark.surfaces) slugs.add(s.slug);
+  if (slugs.size === 0) return null;
+
+  const lines: string[] = ["/* Forced colors simulation — class-triggered for demo preview */"];
+  for (const slug of slugs) {
+    const surface = output.light.surfaces.find((s) => s.slug === slug);
+    if (!surface) continue;
+    // Match three ways so the class can sit on <html>, on the same
+    // element as the surface, or (via :host-context) on an ancestor of
+    // a shadow-root host.
+    lines.push(
+      `.${simClass} .surface-${slug}, .${simClass}.surface-${slug}, :host-context(.${simClass}) .surface-${slug} {`,
+    );
+    lines.push(...forcedColorsBody(surface.role, prefix, "  "));
+    lines.push(`}`);
+  }
   return lines.join("\n");
 }
 

@@ -43,13 +43,14 @@ export default defineConfig({
           { text: "Borders", link: "/borders" },
           { text: "Atmosphere", link: "/atmosphere" },
           { text: "Composition", link: "/composition" },
-          { text: "Accessibility", link: "/accessibility" },
+          { text: "Preferences", link: "/preferences" },
         ],
       },
       {
         text: "Reference",
         items: [
           { text: "Architecture", link: "/architecture" },
+          { text: "Accessibility", link: "/reference/accessibility" },
           { text: "Surface × Token Matrix", link: "/reference/grid" },
           { text: "CLI", link: "/reference/cli" },
         ],

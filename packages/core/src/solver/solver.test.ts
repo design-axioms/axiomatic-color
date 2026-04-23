@@ -339,6 +339,29 @@ describe("solver", () => {
     expect(css).not.toMatch(/:host-context/);
   });
 
+  it("emits class-triggered forced-colors simulation when the option is set", () => {
+    const css = generateCSS(output, {
+      ...DEFAULT_CONFIG.options,
+      forcedColorsSimulationClass: "fc-simulate",
+    });
+    // Same three-way selector shape as HC simulation.
+    expect(css).toMatch(/\.fc-simulate \.surface-page/);
+    expect(css).toMatch(/\.fc-simulate\.surface-page/);
+    expect(css).toMatch(/:host-context\(\.fc-simulate\) \.surface-page/);
+    // Body matches the media-query block's mapping.
+    const block = css.match(/\.fc-simulate \.surface-page[\s\S]*?\n\}/)?.[0];
+    expect(block).toBeDefined();
+    expect(block).toContain("--axm-surface: Canvas");
+    expect(block).toContain("--axm-text-high: CanvasText");
+    expect(block).toContain("--axm-text-link: LinkText");
+    expect(block).toContain("--axm-text-disabled: GrayText");
+  });
+
+  it("omits forced-colors simulation when forcedColorsSimulationClass is unset", () => {
+    const css = generateCSS(output, DEFAULT_CONFIG.options);
+    expect(css).not.toMatch(/\.fc-simulate/);
+  });
+
   // --- Distinction rule (§6 tier-1) ---
 
   it("flags same-polarity surfaces below APCA threshold as needing distinction", () => {
