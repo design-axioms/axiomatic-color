@@ -15,6 +15,10 @@ export type {
   CompositionReport,
   CompositionTier,
   Context,
+  DistinctionConfig,
+  DistinctionMechanism,
+  DistinctionOverride,
+  DistinctionToken,
   Mode,
   ModeScale,
   Oklch,
@@ -38,5 +42,11 @@ export type {
 
 export type { DeriveHcOptions } from "./deriveHcScale.ts";
 
-export { DEAD_ZONE, SAFETY_MARGINS, TEXT_GRADES, TEXT_GRADES_HIGH_CONTRAST } from "./types.ts";
+export {
+  DEAD_ZONE,
+  DISTINCTION_THRESHOLD_DEFAULT,
+  SAFETY_MARGINS,
+  TEXT_GRADES,
+  TEXT_GRADES_HIGH_CONTRAST,
+} from "./types.ts";
 export { contrastForPair } from "./math.ts";

@@ -32,6 +32,7 @@ function rebuildCSS() {
     selector: ".surface-map-root",
     keyColors: config.keyColors,
     highContrastSimulationClass: "hc-simulate",
+    ...(config.distinction && { distinction: config.distinction }),
   });
 
   const result: SurfaceInfo[] = [];

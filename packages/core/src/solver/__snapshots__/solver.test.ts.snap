@@ -52,6 +52,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.4221 calc(var(--axm-chroma) * (1 - abs(2 * 0.4221 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-card {
@@ -65,6 +66,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.3504 calc(var(--axm-chroma) * (1 - abs(2 * 0.3504 - 1))) var(--axm-hue)), oklch(0.8746 calc(var(--axm-chroma) * (1 - abs(2 * 0.8746 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-card:hover {
@@ -86,6 +88,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.2414 calc(var(--axm-chroma) * (1 - abs(2 * 0.2414 - 1))) var(--axm-hue)), oklch(0.8899 calc(var(--axm-chroma) * (1 - abs(2 * 0.8899 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-action-soft {
@@ -99,6 +102,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.9325 calc(var(--axm-chroma) * (1 - abs(2 * 0.9325 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-action-soft:hover {
@@ -120,6 +124,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.3231 calc(var(--axm-chroma) * (1 - abs(2 * 0.3231 - 1))) var(--axm-hue)), oklch(0.8868 calc(var(--axm-chroma) * (1 - abs(2 * 0.8868 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-warning {
@@ -133,6 +138,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.3191 calc(var(--axm-chroma) * (1 - abs(2 * 0.3191 - 1))) var(--axm-hue)), oklch(0.8899 calc(var(--axm-chroma) * (1 - abs(2 * 0.8899 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-error {
@@ -146,6 +152,7 @@ exports[`solver (rich config) > CSS output matches golden master for rich config
   --axm-border-critical: light-dark(oklch(0.3112 calc(var(--axm-chroma) * (1 - abs(2 * 0.3112 - 1))) var(--axm-hue)), oklch(0.8930 calc(var(--axm-chroma) * (1 - abs(2 * 0.8930 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-spotlight {
@@ -446,6 +453,7 @@ exports[`solver > CSS output matches golden master 1`] = `
   --axm-border-critical: light-dark(oklch(0.4221 calc(var(--axm-chroma) * (1 - abs(2 * 0.4221 - 1))) var(--axm-hue)), oklch(0.8715 calc(var(--axm-chroma) * (1 - abs(2 * 0.8715 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-card {
@@ -459,6 +467,7 @@ exports[`solver > CSS output matches golden master 1`] = `
   --axm-border-critical: light-dark(oklch(0.3112 calc(var(--axm-chroma) * (1 - abs(2 * 0.3112 - 1))) var(--axm-hue)), oklch(0.8807 calc(var(--axm-chroma) * (1 - abs(2 * 0.8807 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-card:hover {
@@ -480,6 +489,7 @@ exports[`solver > CSS output matches golden master 1`] = `
   --axm-border-critical: light-dark(oklch(0.2541 calc(var(--axm-chroma) * (1 - abs(2 * 0.2541 - 1))) var(--axm-hue)), oklch(0.8960 calc(var(--axm-chroma) * (1 - abs(2 * 0.8960 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
 }
 
 .surface-action:hover {
@@ -515,6 +525,7 @@ exports[`solver > CSS output matches golden master 1`] = `
   --axm-border-critical: light-dark(oklch(0.2414 calc(var(--axm-chroma) * (1 - abs(2 * 0.2414 - 1))) var(--axm-hue)), oklch(0.8684 calc(var(--axm-chroma) * (1 - abs(2 * 0.8684 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
   color-scheme: dark;
 }
 
@@ -529,6 +540,7 @@ exports[`solver > CSS output matches golden master 1`] = `
   --axm-border-critical: light-dark(oklch(0.1661 calc(var(--axm-chroma) * (1 - abs(2 * 0.1661 - 1))) var(--axm-hue)), oklch(0.8838 calc(var(--axm-chroma) * (1 - abs(2 * 0.8838 - 1))) var(--axm-hue)));
   background: var(--axm-surface);
   transition: background 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--axm-border-decorative, currentColor);
   color-scheme: dark;
 }
 

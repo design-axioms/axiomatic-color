@@ -12,7 +12,14 @@
  * - Taper as single calc() expression (§5)
  */
 
-import type { SolvedSurface, SolverOutput, SurfaceRole } from "../types.ts";
+import type {
+  DistinctionConfig,
+  DistinctionMechanism,
+  DistinctionToken,
+  SolvedSurface,
+  SolverOutput,
+  SurfaceRole,
+} from "../types.ts";
 import { converter, formatHex, parse } from "culori";
 
 const toOklch = converter("oklch");
@@ -29,6 +36,48 @@ interface GeneratorOptions {
    * production CSS; rely on the media query alone.
    */
   highContrastSimulationClass?: string;
+  /**
+   * Cross-surface distinction config (§6 tier-1). Controls the
+   * mechanism the generator emits on surfaces the solver flagged as
+   * `needsDistinction`. When unset, the library defaults apply
+   * (`inset` mechanism, `decorative` token, no overrides).
+   */
+  distinction?: DistinctionConfig;
+}
+
+/**
+ * Resolve the distinction declaration for a surface, given config and
+ * the surface's slug. Returns the CSS declaration to inject (e.g.
+ * "box-shadow: inset 0 0 0 1px var(--axm-border-decorative)") or null
+ * to emit nothing.
+ */
+function resolveDistinction(
+  slug: string,
+  needs: boolean,
+  config: DistinctionConfig | undefined,
+  prefix: string,
+): string | null {
+  const override = config?.overrides?.[slug];
+  const mechanism: DistinctionMechanism = config?.mechanism ?? "inset";
+  const token: DistinctionToken = config?.token ?? "decorative";
+
+  // Per-surface override wins over rule outcome.
+  if (override === false) return null;
+  if (typeof override === "string") return override;
+  // Rule didn't flag it and user didn't force it on.
+  if (override !== true && !needs) return null;
+  if (mechanism === "none") return null;
+
+  // Fall back to currentColor: if a consumer configures distinction
+  // but omits borderTargets, the border token var will be unresolved.
+  // currentColor keeps the distinction visible against whatever text
+  // color the surface already established.
+  const color = `var(--${prefix}-border-${token}, currentColor)`;
+  if (mechanism === "inset") {
+    return `box-shadow: inset 0 0 0 1px ${color}`;
+  }
+  // mechanism === "border"
+  return `border: 1px solid ${color}`;
 }
 
 /**
@@ -49,7 +98,7 @@ export function generateCSS(output: SolverOutput, options: GeneratorOptions = {}
   sections.push(generateEngine(prefix));
 
   // Surface classes
-  sections.push(generateSurfaces(output, prefix));
+  sections.push(generateSurfaces(output, prefix, options.distinction));
 
   // Text utilities
   sections.push(generateTextUtilities(prefix));
@@ -66,13 +115,14 @@ export function generateCSS(output: SolverOutput, options: GeneratorOptions = {}
   // Must come BEFORE forced-colors so forced-colors wins the cascade
   // for users who have both (per MDN: `prefers-contrast: custom` matches
   // forced-colors users).
-  const hcSection = generateHighContrast(output, prefix);
+  const hcSection = generateHighContrast(output, prefix, options.distinction);
   if (hcSection) sections.push(hcSection);
   if (options.highContrastSimulationClass) {
     const simSection = generateHighContrastSimulation(
       output,
       prefix,
       options.highContrastSimulationClass,
+      options.distinction,
     );
     if (simSection) sections.push(simSection);
   }
@@ -117,7 +167,11 @@ function generateEngine(_prefix: string): string {
 /* Text: inherits from nearest surface context */`;
 }
 
-function generateSurfaces(output: SolverOutput, prefix: string): string {
+function generateSurfaces(
+  output: SolverOutput,
+  prefix: string,
+  distinction?: DistinctionConfig,
+): string {
   const lines: string[] = ["/* Surface classes */"];
 
   // Collect all unique surface slugs
@@ -131,7 +185,7 @@ function generateSurfaces(output: SolverOutput, prefix: string): string {
 
     if (!light || !dark) continue;
 
-    lines.push(generateSurfaceClass(slug, light, dark, prefix));
+    lines.push(generateSurfaceClass(slug, light, dark, prefix, distinction));
 
     // State variants
     if (light.states && dark.states) {
@@ -179,6 +233,7 @@ function generateSurfaceClass(
   light: SolvedSurface,
   dark: SolvedSurface,
   prefix: string,
+  distinction?: DistinctionConfig,
 ): string {
   // Atmosphere (hue/chroma) is never emitted on surface classes.
   // It inherits purely via CSS cascade, or is set explicitly via
@@ -192,6 +247,14 @@ function generateSurfaceClass(
   const [lb, db] = light.polarity === "inverted" ? [dark, light] : [light, dark];
 
   const colorScheme = light.polarity === "inverted" ? `\n  color-scheme: dark;` : "";
+
+  // Distinction (§6 tier-1): emit when solver flagged the surface OR
+  // the user forced it on via overrides. The check uses base-mode
+  // needsDistinction; the HC media block adds its own rule when HC
+  // compression changes the answer.
+  const needsBase = light.needsDistinction === true || dark.needsDistinction === true;
+  const distinctionDecl = resolveDistinction(slug, needsBase, distinction, prefix);
+  const distinctionLine = distinctionDecl ? `\n  ${distinctionDecl};` : "";
 
   return `.surface-${slug} {
   --${prefix}-surface: ${lightDarkColor(lb.lightness, db.lightness, prefix)};
@@ -207,7 +270,7 @@ function generateSurfaceClass(
       : ""
   }
   background: var(--${prefix}-surface);
-  transition: background 0.3s ease;${colorScheme}
+  transition: background 0.3s ease;${distinctionLine}${colorScheme}
 }`;
 }
 
@@ -310,7 +373,11 @@ function forcedColorsForRole(role: SurfaceRole): {
  *
  * Returns null if no surface has HC companion values — nothing to emit.
  */
-function generateHighContrast(output: SolverOutput, prefix: string): string | null {
+function generateHighContrast(
+  output: SolverOutput,
+  prefix: string,
+  distinction?: DistinctionConfig,
+): string | null {
   const slugs = new Set<string>();
   for (const s of output.light.surfaces) {
     if (s.lightnessHighContrast !== undefined) slugs.add(s.slug);
@@ -374,6 +441,16 @@ function generateHighContrast(output: SolverOutput, prefix: string): string | nu
       );
     }
 
+    // Distinction: emit in HC block only when HC needs it AND base
+    // didn't already handle it. Base distinction inherits here.
+    const needsBase = light.needsDistinction === true || dark.needsDistinction === true;
+    const needsHc =
+      light.needsDistinctionHighContrast === true || dark.needsDistinctionHighContrast === true;
+    if (needsHc && !needsBase) {
+      const decl = resolveDistinction(slug, true, distinction, prefix);
+      if (decl) body.push(`    ${decl};`);
+    }
+
     lines.push(`  .surface-${slug} {`);
     lines.push(...body);
     lines.push("  }");
@@ -394,6 +471,7 @@ function generateHighContrastSimulation(
   output: SolverOutput,
   prefix: string,
   simClass: string,
+  distinction?: DistinctionConfig,
 ): string | null {
   const slugs = new Set<string>();
   for (const s of output.light.surfaces) {
@@ -449,6 +527,15 @@ function generateHighContrastSimulation(
       body.push(
         `  --${prefix}-border-critical: ${lightDarkColor(lbBorders.critical, dbBorders.critical, prefix)};`,
       );
+    }
+
+    // Distinction: same rule as the media-query HC block.
+    const needsBase = light.needsDistinction === true || dark.needsDistinction === true;
+    const needsHc =
+      light.needsDistinctionHighContrast === true || dark.needsDistinctionHighContrast === true;
+    if (needsHc && !needsBase) {
+      const decl = resolveDistinction(slug, true, distinction, prefix);
+      if (decl) body.push(`  ${decl};`);
     }
 
     // Match three ways so the class can sit on <html>, on the same

@@ -48,56 +48,65 @@ function getLocalSheet(cat: string, wild: boolean): CSSStyleSheet {
   let sheet = localSheetCache.get(key);
   if (sheet) return sheet;
 
+  // The pill IS a surface + token composite. Its visual is literally
+  // what the named token looks like when applied: a text token is
+  // rendered as card-surface text in that grade; a surface token is
+  // rendered as that surface; a hue token is a card tinted by that
+  // hue. No VitePress chrome, no pinned color-scheme — the pill
+  // shows the real composite in the current mode.
   const hostStyles = `
     :host {
       display: inline-flex;
-      align-items: baseline;
-      gap: 0.25rem;
-      padding: 0.1rem 0.45rem 0.1rem 0.3rem;
-      border-radius: 10rem;
       vertical-align: middle;
       line-height: 1.4;
-      white-space: nowrap;
-      border: 1px solid var(--axm-border-decorative, var(--vp-c-divider, #e2e2e3));
-      background: var(--axm-surface, var(--vp-c-bg-alt, #f6f6f7));
-      color-scheme: inherit;
     }
-    code {
+    .pill {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.3rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 10rem;
+      line-height: 1.4;
+      white-space: nowrap;
+      /* surface-* class (from theme sheet) paints background,
+         text-tier variables, and distinction shadow. */
+    }
+    .pill .glyph {
+      font-family: var(--vp-font-family-base);
+      font-weight: 800;
+      font-size: 0.95em;
+      line-height: 1;
+      align-self: center;
+    }
+    .pill code {
       font-family: var(--vp-font-family-mono);
       font-size: 0.78em;
       font-weight: 500;
+      color: var(--axm-text-subtle);
+    }
+    .pill .dot {
+      width: 0.5em; height: 0.5em; border-radius: 50%;
+      align-self: center; flex-shrink: 0;
+    }
+    /* Border swatch: a small outlined square that WEARS the
+       .border-* utility. Parallels the text glyph — the demo is
+       a distinct element inside the pill, not the pill itself. */
+    .pill .swatch {
+      width: 0.75em; height: 0.75em;
+      border-width: 1.5px; border-style: solid;
+      border-radius: 2px;
+      align-self: center; flex-shrink: 0;
     }
   `;
 
+  // Category-specific styles go on the demo element (glyph / swatch /
+  // dot), not the pill. The pill is always just a card.
   let extra = "";
   if (wild) {
     const color = WILDCARD_COLORS[cat] ?? "#929295";
-    extra = `.dot {
-      width: 0.5em; height: 0.5em; border-radius: 50%;
-      background: ${color};
-      align-self: center; flex-shrink: 0;
-    }`;
-  } else if (cat === "text") {
-    extra = `.glyph { font-weight: 700; font-size: 0.7em; line-height: 1; align-self: center; }`;
-  } else if (cat === "surface") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 3px;
-      align-self: center; flex-shrink: 0;
-      border: 1px solid var(--axm-border-decorative);
-    }`;
-  } else if (cat === "border") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 2px;
-      align-self: center; flex-shrink: 0;
-      border-width: 1.5px; border-style: solid;
-    }`;
-  } else if (cat === "hue") {
-    extra = `.swatch {
-      width: 0.75em; height: 0.75em; border-radius: 50%;
-      align-self: center; flex-shrink: 0;
-      border: 1px solid var(--axm-border-decorative);
-    }`;
+    extra = `.pill .dot { background: ${color}; }`;
   }
+  // text/surface/hue/border: demo element handles its own appearance.
 
   sheet = new CSSStyleSheet();
   sheet.replaceSync(hostStyles + extra);
@@ -113,24 +122,34 @@ const sheets = computed(() =>
 
 const shadow = useShadowRoot(shadowHost, sheets);
 
+/**
+ * Every pill follows one shape: a real surface (the pill) + a demo
+ * element inside it that wears the token, + the code label. What you
+ * see is literally the composite the token produces.
+ *
+ * - text:    .pill.surface-card   > <span.glyph.text-X>A</span>
+ * - border:  .pill.surface-card   > <span.swatch.border-X></span>
+ * - hue:     .pill.surface-card.hue-X  (the tint IS the demo)
+ * - surface: .pill.surface-X            (the surface IS the demo)
+ * - wildcard: .pill.surface-card  > <span.dot></span>
+ */
 function buildMarkup(): string {
   const cat = category.value;
-  // Wildcards: category-colored dot instead of a concrete swatch
   if (isWildcard.value) {
-    return `<span class="dot"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="pill surface-card"><span class="dot"></span><code>${props.name}</code></span>`;
   }
   if (cat === "text") {
     const cls = textClass.value ?? "";
-    return `<span class="glyph ${cls}">A</span><code class="text-subtle">${props.name}</code>`;
-  } else if (cat === "surface") {
-    const surfCls = bareClass.value ?? "";
-    return `<span class="swatch ${surfCls}"></span><code class="text-subtle">${props.name}</code>`;
+    return `<span class="pill surface-card"><span class="glyph ${cls}">A</span><code>${props.name}</code></span>`;
   } else if (cat === "border") {
-    const borderCls = bareClass.value ?? "";
-    return `<span class="swatch ${borderCls}"></span><code class="text-subtle">${props.name}</code>`;
+    const cls = bareClass.value ?? "";
+    return `<span class="pill surface-card"><span class="swatch ${cls}"></span><code>${props.name}</code></span>`;
+  } else if (cat === "surface") {
+    const cls = bareClass.value ?? "";
+    return `<span class="pill ${cls}"><code>${props.name}</code></span>`;
   } else if (cat === "hue") {
-    const hueCls = bareClass.value ?? "";
-    return `<span class="swatch surface-card ${hueCls}"></span><code class="text-subtle">${props.name}</code>`;
+    const cls = bareClass.value ?? "";
+    return `<span class="pill surface-card ${cls}"><code>${props.name}</code></span>`;
   }
   return "";
 }
@@ -141,33 +160,16 @@ watch([shadow, () => theme.value, () => props.name], () => {
 </script>
 
 <template>
-  <!-- Text tokens: shadow DOM host on a card surface -->
-  <span
-    v-if="category === 'text'"
-    ref="shadowHost"
-    class="token-badge token-text surface-workspace"
-  />
+  <!-- The pill is generic chrome. The system-surface context lives
+       inside the shadow root via a `display: contents` wrapper, so
+       no surface decoration leaks onto the host. -->
+  <span v-if="category === 'text'" ref="shadowHost" class="token-badge token-text" />
 
-  <!-- Surface tokens: shadow DOM host on a card surface (swatch shows the named surface) -->
-  <span
-    v-else-if="category === 'surface'"
-    ref="shadowHost"
-    class="token-badge token-surface surface-workspace"
-  />
+  <span v-else-if="category === 'surface'" ref="shadowHost" class="token-badge token-surface" />
 
-  <!-- Border tokens: shadow DOM host on a card surface (swatch shows the border tier) -->
-  <span
-    v-else-if="category === 'border'"
-    ref="shadowHost"
-    class="token-badge token-border surface-workspace"
-  />
+  <span v-else-if="category === 'border'" ref="shadowHost" class="token-badge token-border" />
 
-  <!-- Hue tokens: shadow DOM host on a card surface -->
-  <span
-    v-else-if="category === 'hue'"
-    ref="shadowHost"
-    class="token-badge token-hue surface-workspace"
-  />
+  <span v-else-if="category === 'hue'" ref="shadowHost" class="token-badge token-hue" />
 
   <!-- Generic: light DOM -->
   <span v-else class="token-badge token-generic">

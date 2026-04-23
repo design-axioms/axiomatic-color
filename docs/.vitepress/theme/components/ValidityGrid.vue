@@ -88,6 +88,7 @@ function rebuildCSS() {
     selector: ".validity-grid-root",
     keyColors: config.keyColors,
     highContrastSimulationClass: "hc-simulate",
+    ...(config.distinction && { distinction: config.distinction }),
   });
 
   const borderTargets = config.borderTargets ?? defaultConfig.borderTargets!;
