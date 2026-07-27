@@ -4,4 +4,4 @@ domain = "axiomatic-color.localhost"
 
 [services.web]
 type = "exec"
-command = "pnpm docs:dev --port=$PORT"
+command = "pnpm docs:dev --host 127.0.0.1 --port=$PORT"
