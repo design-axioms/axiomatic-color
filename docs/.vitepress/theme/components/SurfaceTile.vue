@@ -6,6 +6,16 @@ import { useDarkMode } from "../composables/useDarkMode";
 import { useKeyColors } from "../composables/useKeyColors";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 import PreviewControls from "./PreviewControls.vue";
+import ThemePopoverButton from "./ThemePopoverButton.vue";
+
+withDefaults(
+  defineProps<{
+    showControls?: boolean;
+  }>(),
+  {
+    showControls: true,
+  },
+);
 
 interface SurfaceData {
   slug: string;
@@ -152,6 +162,7 @@ function fmt(n: number): string {
     <component :is="'style'" v-text="css" />
 
     <PreviewControls
+      v-if="showControls"
       :hue="hue"
       :chroma="chroma"
       @update:hue="setHue"
@@ -239,6 +250,11 @@ function fmt(n: number): string {
         </div>
       </div>
     </div>
+
+    <div v-if="!showControls" class="tile-footer">
+      <span class="tile-footer-note">Responds to the global theme controls</span>
+      <ThemePopoverButton label="Adjust theme" />
+    </div>
   </div>
   <div v-else class="surface-tile-loading">Solving color system…</div>
 </template>
@@ -324,6 +340,21 @@ function fmt(n: number): string {
   border-top-width: 3px;
   border-top-style: solid;
   border-radius: 2px;
+}
+
+.tile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+}
+
+.tile-footer-note {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-2);
 }
 
 .surface-tile-loading {

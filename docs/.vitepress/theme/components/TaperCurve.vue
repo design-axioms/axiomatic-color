@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import DarkToggle from "./DarkToggle.vue";
+import PreviewControls from "./PreviewControls.vue";
 import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
+import { useKeyColors } from "../composables/useKeyColors";
 
-const { hue, chroma: maxChroma } = useBrandColor();
+const { hue, chroma: maxChroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
+const parsedKeyColors = useKeyColors();
 
 const STRIP_STEPS = 80;
 
@@ -102,9 +104,14 @@ function connectorPath(l: number, index: number): string {
 
 <template>
   <div class="taper-root">
-    <div class="taper-toolbar">
-      <DarkToggle v-model="isDark" />
-    </div>
+    <PreviewControls
+      :hue="hue"
+      :chroma="maxChroma"
+      v-model:is-dark="isDark"
+      :key-colors="parsedKeyColors"
+      @update:hue="setHue"
+      @update:chroma="setChroma"
+    />
 
     <!-- The gradient strip -->
     <div v-if="surfaces.length > 0" class="taper-strip-area">

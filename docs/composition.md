@@ -4,9 +4,9 @@ Surface, atmosphere, and text grade are three independent axes. Surface controls
 
 ## The Tile
 
-<SurfaceTile />
+<SurfaceTile :show-controls="false" />
 
-Toggle dark mode or change the hue. Grade behavior and border visibility hold.
+Open **Theme** in the top bar (or click **Adjust theme** above) to toggle dark mode, high contrast, or brand/accent hue. Grade behavior and border visibility hold across every surface.
 
 ## Nesting
 

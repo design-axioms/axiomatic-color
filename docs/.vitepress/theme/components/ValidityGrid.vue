@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
-import DarkToggle from "./DarkToggle.vue";
+import ThemePopoverButton from "./ThemePopoverButton.vue";
 import Token from "./Token.vue";
 
 interface CellData {
@@ -242,7 +242,7 @@ function isCellDimmed(slug: string, key: string): boolean {
           {{ opt === "none" ? "None" : opt.charAt(0).toUpperCase() + opt.slice(1) }}
         </button>
       </div>
-      <DarkToggle v-model="isDark" />
+      <ThemePopoverButton />
     </div>
 
     <!-- Grid -->

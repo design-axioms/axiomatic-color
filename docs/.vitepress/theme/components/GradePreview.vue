@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import Token from "./Token.vue";
-import PreviewControls from "./PreviewControls.vue";
+import ThemePopoverButton from "./ThemePopoverButton.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
-import { useKeyColors } from "../composables/useKeyColors";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
-const parsedKeyColors = useKeyColors();
-const { hue, chroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
@@ -60,15 +56,6 @@ onUnmounted(() => {
     :style="{ colorScheme: isDark ? 'dark' : 'light' }"
   >
     <component :is="'style'" v-text="css" />
-
-    <PreviewControls
-      :hue="hue"
-      :chroma="chroma"
-      @update:hue="setHue"
-      @update:chroma="setChroma"
-      v-model:is-dark="isDark"
-      :key-colors="parsedKeyColors"
-    />
 
     <div class="gp-panels">
       <!-- Page polarity: realistic content block -->
@@ -133,6 +120,11 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <div class="gp-footer">
+      <span class="gp-footer-note">Responds to the global theme controls</span>
+      <ThemePopoverButton label="Adjust theme" />
+    </div>
   </div>
 </template>
 
@@ -142,6 +134,21 @@ onUnmounted(() => {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--vp-c-divider);
+}
+
+.gp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+}
+
+.gp-footer-note {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-2);
 }
 
 .gp-panels {

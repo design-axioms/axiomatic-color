@@ -1,36 +1,63 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
+import { useDarkMode } from "../composables/useDarkMode";
+import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
+const { isDark } = useDarkMode();
+const { theme, ready: themeReady } = useReactiveTheme();
+
+let solveFn: typeof import("@design-axioms/color").solve | null = null;
+let generateCSSFn: typeof import("@design-axioms/color").generateCSS | null = null;
+
+function rebuildCSS() {
+  if (!theme.value || !solveFn || !generateCSSFn) return;
+  const config = theme.value.getConfig();
+  const output = solveFn(config);
+  css.value = generateCSSFn(output, {
+    ...config.options,
+    selector: ".pipeline-root",
+    keyColors: config.keyColors,
+    highContrastSimulationClass: "hc-simulate",
+    ...(config.distinction && { distinction: config.distinction }),
+  });
+  ready.value = true;
+}
 
 useThemeBuilder(rootEl);
 
-onMounted(async () => {
-  const { solve, DEFAULT_CONFIG, generateCSS } = await import("@design-axioms/color");
+let unsubscribe: (() => void) | null = null;
 
-  const output = solve(DEFAULT_CONFIG);
-  css.value = generateCSS(output, {
-    ...DEFAULT_CONFIG.options,
-    selector: ".pipeline-root",
-  });
-  ready.value = true;
+onMounted(async () => {
+  const mod = await import("@design-axioms/color");
+  solveFn = mod.solve;
+  generateCSSFn = mod.generateCSS;
+
+  const t = await themeReady;
+  rebuildCSS();
+  unsubscribe = t.subscribe(() => rebuildCSS());
+});
+
+onUnmounted(() => {
+  unsubscribe?.();
+  unsubscribe = null;
 });
 
 const stages = [
   {
     name: "Config",
-    items: ["Surfaces", "Anchors", "Targets", "Key Colors"],
+    items: ["Scales", "Surfaces & Roles", "Targets", "Key Colors"],
   },
   {
     name: "Solver",
-    items: ["Place surfaces", "Solve text", "Solve borders", "Classify"],
+    items: ["Lookup lightness", "Solve text & borders", "Check distinction", "Diagnostics"],
   },
   {
     name: "CSS",
-    items: ["light-dark()", "oklch()", "@property", "Taper calc()"],
+    items: ["light-dark()", "oklch() + Taper", "prefers-contrast", "forced-colors"],
   },
   {
     name: "Runtime",
@@ -40,12 +67,17 @@ const stages = [
 </script>
 
 <template>
-  <div v-if="ready" ref="rootEl" class="pipeline-root surface-workspace">
+  <div
+    v-if="ready"
+    ref="rootEl"
+    class="pipeline-root surface-workspace hue-brand"
+    :style="{ colorScheme: isDark ? 'dark' : 'light' }"
+  >
     <component :is="'style'" v-text="css" />
 
     <div class="pl-flow">
       <div
-        v-for="(stage, i) in stages"
+        v-for="stage in stages"
         :key="stage.name"
         class="pl-stage surface-card border-decorative"
       >

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import Token from "./Token.vue";
-import PreviewControls from "./PreviewControls.vue";
+import ThemePopoverButton from "./ThemePopoverButton.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
-import { useBrandColor } from "../composables/useKeyColor";
 import { useDarkMode } from "../composables/useDarkMode";
-import { useKeyColors } from "../composables/useKeyColors";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
 
 type Regime = "default" | "hc" | "forced";
@@ -14,8 +12,6 @@ const regime = ref<Regime>("default");
 const css = ref("");
 const ready = ref(false);
 const rootEl = ref<HTMLElement | null>(null);
-const parsedKeyColors = useKeyColors();
-const { hue, chroma, setHue, setChroma } = useBrandColor();
 const { isDark } = useDarkMode();
 const { theme, ready: themeReady } = useReactiveTheme();
 
@@ -67,15 +63,6 @@ onUnmounted(() => {
   >
     <component :is="'style'" v-text="css" />
 
-    <PreviewControls
-      :hue="hue"
-      :chroma="chroma"
-      v-model:is-dark="isDark"
-      :key-colors="parsedKeyColors"
-      @update:hue="setHue"
-      @update:chroma="setChroma"
-    />
-
     <fieldset class="pp-toolbar">
       <legend class="pp-toolbar-legend">Accessibility regime</legend>
       <label
@@ -99,6 +86,9 @@ onUnmounted(() => {
         />
         <span>{{ opt.label }}</span>
       </label>
+      <div class="pp-toolbar-end">
+        <ThemePopoverButton />
+      </div>
     </fieldset>
 
     <div class="pp-specimen surface-card">
@@ -142,12 +132,17 @@ onUnmounted(() => {
 
 .pp-toolbar {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border: none;
   border-bottom: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-alt);
   margin: 0;
+}
+
+.pp-toolbar-end {
+  margin-left: auto;
 }
 
 /* Visually hide the legend; keeps it as the group's accessible name. */
