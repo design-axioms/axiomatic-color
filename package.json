@@ -10,7 +10,7 @@
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "prepare": "lefthook install",
+    "prepare": "[ -n \"$CI\" ] || [ ! -e .git ] || lefthook install",
     "clean": "pnpm --filter \"./packages/*\" clean",
     "cli": "node --conditions=design-axioms:source packages/cli/src/index.ts",
     "demo:dev": "vite --config demo/vite.config.ts",
