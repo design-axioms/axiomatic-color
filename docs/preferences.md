@@ -34,11 +34,11 @@ Set a surface's role in config:
 
 ```ts
 surfaces: {
-  page: [
-    { slug: "card", position: 2, role: "surface" },       // default
-    { slug: "action", position: 2, role: "interactive" }, // buttons, inputs
-    { slug: "error", position: 2, role: "alert" },        // status
-  ],
+  page: {
+    card: { position: 2, role: "surface" },       // default
+    action: { position: 2, role: "interactive" }, // buttons, inputs
+    error: { position: 2, role: "alert" },        // status
+  },
 }
 ```
 

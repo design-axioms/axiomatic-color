@@ -10,21 +10,26 @@ import type { SolverConfig } from "@design-axioms/color";
 import { DEFAULT_CONFIG, generateCSS, generateHTML, solve } from "@design-axioms/color";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseCliArgs } from "./args.ts";
 
-const args = process.argv.slice(2);
-const command = args[0];
+const parsed = parseCliArgs(process.argv.slice(2));
 
-if (!command || command === "help" || command === "--help") {
+if (parsed.error) {
+  console.error(parsed.error);
+  process.exit(1);
+}
+
+if (parsed.help || !parsed.command) {
   console.log(`axiomatic — Axiomatic Color System CLI
 
 Commands:
-  build [config]    Solve and emit CSS (default: axiomatic.config.json)
+  build [config]    Solve and emit CSS (default: built-in DEFAULT_CONFIG)
   validate [config] Validate config without emitting CSS
   inspect [config]  Print solver output as JSON
   demo [config]     Generate a self-contained HTML demo page
 
 Options:
-  --output, -o      Output file (default: stdout)
+  --output, -o      Output file (default: stdout, or demo.html for demo)
 `);
   process.exit(0);
 }
@@ -37,9 +42,7 @@ function loadConfig(configPath?: string): SolverConfig {
   return JSON.parse(raw) as SolverConfig;
 }
 
-const configPath = args[1];
-const outputFlag = args.indexOf("--output");
-const outputPath = outputFlag !== -1 ? args[outputFlag + 1] : undefined;
+const { command, configPath, outputPath } = parsed;
 
 if (command === "build") {
   const config = loadConfig(configPath);
