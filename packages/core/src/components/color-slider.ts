@@ -22,8 +22,7 @@
  *   landmark-click — fires when a landmark is clicked, detail: { value, color, name? }
  */
 
-const sheet = new CSSStyleSheet();
-sheet.replaceSync(`
+const SLIDER_STYLES = `
   :host {
     display: inline-flex;
     align-items: center;
@@ -78,7 +77,24 @@ sheet.replaceSync(`
     pointer-events: none;
     cursor: pointer;
   }
-`);
+`;
+
+let sharedSheet: CSSStyleSheet | undefined;
+
+function getSliderSheet(): CSSStyleSheet {
+  if (!sharedSheet) {
+    sharedSheet = new CSSStyleSheet();
+    sharedSheet.replaceSync(SLIDER_STYLES);
+  }
+  return sharedSheet;
+}
+
+function NoopHTMLElement() {}
+
+const BaseHTMLElement: typeof HTMLElement =
+  typeof HTMLElement === "undefined"
+    ? (NoopHTMLElement as unknown as typeof HTMLElement)
+    : HTMLElement;
 
 function hueGradient(muted: boolean): string {
   const l = muted ? 0.85 : 0.7;
@@ -96,7 +112,7 @@ function thumbColor(hue: number, chroma: number): string {
   return `oklch(0.6 ${chroma} ${hue})`;
 }
 
-export class ColorSlider extends HTMLElement {
+export class ColorSlider extends BaseHTMLElement {
   static observedAttributes = [
     "type",
     "value",
@@ -116,7 +132,7 @@ export class ColorSlider extends HTMLElement {
   constructor() {
     super();
     this.#shadow = this.attachShadow({ mode: "open" });
-    this.#shadow.adoptedStyleSheets = [sheet];
+    this.#shadow.adoptedStyleSheets = [getSliderSheet()];
 
     this.#input = document.createElement("input");
     this.#input.type = "range";

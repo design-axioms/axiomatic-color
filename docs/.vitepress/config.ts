@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 export default defineConfig({
   title: "Axiomatic Color",
   description: "A physics engine for design — guarantees contrast correctness using APCA",
+  cleanUrls: true,
   markdown: {
     math: true,
   },
@@ -56,6 +57,6 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [{ icon: "github", link: "https://github.com/design-axioms/color" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/design-axioms/axiomatic-color" }],
   },
 });

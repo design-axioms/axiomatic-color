@@ -19,20 +19,22 @@ const { isDark } = useDarkMode();
 const { theme, ready } = useReactiveTheme();
 
 const baseSheet = (() => {
+  if (typeof CSSStyleSheet === "undefined") return null;
   const s = new CSSStyleSheet();
   s.replaceSync(`.shadow-surface-root { padding: 1.25rem; }`);
   return s;
 })();
 
 const extraSheet = computed(() => {
-  if (!props.extraCss) return null;
+  if (!props.extraCss || typeof CSSStyleSheet === "undefined") return null;
   const s = new CSSStyleSheet();
   s.replaceSync(props.extraCss);
   return s;
 });
 
 const sheets = computed(() => {
-  const result: CSSStyleSheet[] = [baseSheet];
+  const result: CSSStyleSheet[] = [];
+  if (baseSheet) result.push(baseSheet);
   if (theme.value) result.push(theme.value.sheet);
   if (extraSheet.value) result.push(extraSheet.value);
   return result;
