@@ -12,3 +12,5 @@ docs/.vitepress/cache/
 docs/.vitepress/.temp/
 coverage/
 docs/.vitepress/config.ts.timestamp-*.mjs
+.vercel/
+.env.local
