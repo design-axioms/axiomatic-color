@@ -30,4 +30,4 @@ The system makes three kinds of claims.
 
 ## When targets cannot be met
 
-If a target cannot be met, the system reports the shortfall in diagnostics and solves for the best achievable value. For example, a dark card surface at L=0.40 may not reach a 100 APCA text target. The solver reports which grades fell short and by how much.
+If a target cannot be met, the system reports the shortfall in diagnostics and solves for the best achievable value. For example, a dark surface at scale position 4 (`L=0.40`) or a light card surface at `L=0.90` cannot reach a 100 APCA text target. The solver reports which grades fell short instead of silently relaxing the contract.

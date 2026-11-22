@@ -6,7 +6,12 @@ Named regions with fixed lightness. Each surface establishes text and border tok
 
 <SurfaceMap />
 
-The map shows seven surfaces across two polarities. Four share **page polarity**: light in light mode, dark in dark mode. Three share **inverted polarity** (<Token name=".surface-spotlight" />, <Token name=".surface-spotlight-card" />, <Token name=".surface-spotlight-action" />), so they stay opposite page-polarity surfaces with at least <ApcaBadge :value="87" :target="80" /> contrast.
+The map shows seven surfaces across two polarities:
+
+- **Page polarity** (light in light mode, dark in dark mode): <Token name=".surface-page" />, <Token name=".surface-workspace" />, <Token name=".surface-card" />, and <Token name=".surface-action" /> (which pairs `role: "interactive"` with default accent atmosphere for clickable controls).
+- **Inverted polarity** (opposite the page polarity): <Token name=".surface-spotlight" />, <Token name=".surface-spotlight-card" />, and <Token name=".surface-spotlight-action" />—providing both a high-emphasis inverted container and card/action surfaces inside it. Across polarities, Page and Spotlight maintain over <ApcaBadge :value="87" :target="80" /> contrast in both modes (and Card ↔ Spotlight holds 83+ APCA).
+
+When same-polarity surfaces sit closer than APCA Lc 45 in lightness (for example, <Token name=".surface-card" /> inside <Token name=".surface-workspace" />), the generator automatically emits a subtle 1px inset distinction edge—see [Composition → Same-Polarity Distinction](/composition#same-polarity-distinction).
 
 ## Usage
 

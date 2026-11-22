@@ -1,9 +1,18 @@
 # Getting Started
 
-## Installation
+::: info Pre-release
+Axiomatic Color v2 (`@design-axioms/color`) is in active development and not yet published to npm. Run it from a local checkout below, or explore it live in the browser via the [interactive demo](/demo).
+:::
+
+## Setup from Source
+
+Use Node 24+ and pnpm 10:
 
 ```bash
-pnpm add @design-axioms/color
+git clone https://github.com/design-axioms/axiomatic-color.git
+cd axiomatic-color
+pnpm install
+pnpm build
 ```
 
 ## Quick Start
@@ -21,18 +30,19 @@ const css = generateCSS(output, {
 
 // css is a complete stylesheet with:
 // - light-dark() mode switching
-// - .surface-* classes (lightness context)
+// - .surface-* classes (lightness context + automatic surface distinction)
 // - .hue-* utilities (atmosphere from key colors)
 // - .text-* and .border-* utilities (contrast intent)
+// - prefers-contrast and forced-colors accessibility blocks
 ```
 
 ## CLI
 
-The CLI provides commands for building, validating, and inspecting the color system:
+From the repository root, use `pnpm cli` to run the `axiomatic` CLI commands:
 
 ```bash
 # Generate CSS to stdout
-npx axiomatic build
+pnpm cli build
 ```
 
 ::: details Output (truncated)
@@ -41,8 +51,12 @@ npx axiomatic build
 /* Root — color-scheme drives light-dark() */
 :root {
   color-scheme: light;
+  --axm-hue: 0;
+  --axm-chroma: 0;
   --axm-key-brand-hue: 288.0332;
   --axm-key-brand-chroma: 0.179;
+  --axm-key-accent-hue: 221.7231;
+  --axm-key-accent-chroma: 0.1109;
   --axm-key-success-hue: 149.5793;
   --axm-key-success-chroma: 0.192;
   --axm-key-warning-hue: 86.0468;
@@ -51,14 +65,21 @@ npx axiomatic build
   --axm-key-error-chroma: 0.2078;
 }
 
+/* Hue/chroma properties — inheriting */
+@property --axm-hue {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 /* Surface classes */
 
 .surface-page {
-  --axm-surface: light-dark(oklch(0.975...), oklch(0.25...));
-  --axm-text-high: light-dark(oklch(0.2024...), oklch(0.9746...));
-  --axm-text-strong: light-dark(oklch(0.3072...), oklch(0.9536...));
-  --axm-text-subtle: light-dark(oklch(0.3658...), oklch(0.9295...));
-  /* ... borders, more surfaces ... */
+  --axm-surface: light-dark(oklch(0.975...), oklch(0.1...));
+  --axm-text-high: light-dark(oklch(0.2024...), oklch(0.9657...));
+  --axm-text-strong: light-dark(oklch(0.3072...), oklch(0.9416...));
+  --axm-text-subtle: light-dark(oklch(0.3658...), oklch(0.9174...));
+  /* ... borders, more surfaces, prefers-contrast, forced-colors ... */
 }
 
 /* Text utilities */
@@ -68,52 +89,83 @@ npx axiomatic build
 .text-strong {
   color: var(--axm-text-strong);
 }
-/* ... 147 lines total ... */
+/* ... 322 lines total ... */
 ```
 
 :::
 
 ```bash
 # Validate configuration and show diagnostics
-npx axiomatic validate
+pnpm cli validate
 ```
 
-::: details Output
+::: details Output (truncated)
 
 ```
 === LIGHT MODE ===
   page: L=0.9750, polarity=page
-  workspace: L=0.9566, polarity=page
-  card: L=0.9016, polarity=page
-  action: L=0.9016, polarity=page
+    HC: L=0.9900
+  workspace: L=0.9550, polarity=page
+    ⚠ unmet text grades: high
+    ◻ distinction required (base)
+    HC: L=0.9820
+      ◻ distinction required (HC)
+  card: L=0.9000, polarity=page
+    ⚠ unmet text grades: high, strong, subtle
+    ◻ distinction required (base)
+    HC: L=0.9600
+      ◻ distinction required (HC)
+      ⚠ HC unmet text grades: high, strong
+  action: L=0.9000, polarity=page
+    ⚠ unmet text grades: high, strong, subtle
+    ◻ distinction required (base)
+    HC: L=0.9600
+      ◻ distinction required (HC)
+      ⚠ HC unmet text grades: high, strong, subtle
   spotlight: L=0.1000, polarity=inverted
+  spotlight-card: L=0.1200, polarity=inverted
+    ◻ distinction required (base)
+  spotlight-action: L=0.1200, polarity=inverted
+    ◻ distinction required (base)
 
   Composition:
-    page ↔ workspace: 0.0 APCA [enhancement]
     page ↔ card: 14.2 APCA [enhancement]
     page ↔ spotlight: 102.6 APCA [guarantee]
+    card ↔ spotlight: 86.6 APCA [guarantee]
 
 === DARK MODE ===
-  page: L=0.2500, polarity=page
-  workspace: L=0.3465, polarity=page
-  card: L=0.3999, polarity=page
-  action: L=0.3999, polarity=page
+  page: L=0.1000, polarity=page
+    HC: L=0.0400
+  workspace: L=0.1800, polarity=page
+    ◻ distinction required (base)
+  card: L=0.2500, polarity=page
+    ◻ distinction required (base)
+  action: L=0.2500, polarity=page
+    ◻ distinction required (base)
   spotlight: L=0.9000, polarity=inverted
+    ⚠ unmet text grades: high, strong, subtle
+  spotlight-card: L=0.8800, polarity=inverted
+    ⚠ unmet text grades: high, strong, subtle
+    ◻ distinction required (base)
+  spotlight-action: L=0.8800, polarity=inverted
+    ⚠ unmet text grades: high, strong, subtle
+    ⚠ unmet border tiers: critical
+    ◻ distinction required (base)
 
   Composition:
-    page ↔ spotlight: 83.5 APCA [guarantee]
-    workspace ↔ spotlight: 77.2 APCA [guarantee]
-    card ↔ spotlight: 71.7 APCA [guarantee]
+    page ↔ spotlight: 86.7 APCA [guarantee]
+    card ↔ spotlight: 83.5 APCA [guarantee]
+    card ↔ spotlight-card: 79.5 APCA [guarantee]
 ```
 
 :::
 
 ```bash
 # Print solver output as JSON
-npx axiomatic inspect
+pnpm cli inspect
 
 # Generate a self-contained HTML demo page
-npx axiomatic demo
+pnpm cli demo
 ```
 
 ## Hello World
@@ -121,7 +173,7 @@ npx axiomatic demo
 Save the build output and open it in a browser:
 
 ```bash
-npx axiomatic build -o axiomatic.css
+pnpm cli build -o axiomatic.css
 ```
 
 <LiveExample

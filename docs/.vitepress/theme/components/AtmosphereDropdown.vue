@@ -29,6 +29,17 @@ onMounted(async () => {
   parseFn.value = coreMod.parseKeyColor;
   displayableFn.value = culoriMod.displayable;
   coreMod.registerColorSlider();
+
+  const parsedBrand = coreMod.parseKeyColor(DEFAULT_BRAND);
+  if (parsedBrand) {
+    defaultBrandParsed.value = parsedBrand;
+    brandAnchorChroma.value = parsedBrand.chroma;
+  }
+  const parsedAccent = coreMod.parseKeyColor(DEFAULT_ACCENT);
+  if (parsedAccent) {
+    defaultAccentParsed.value = parsedAccent;
+    accentAnchorChroma.value = parsedAccent.chroma;
+  }
 });
 
 // Max in-gamut chroma for a given hue at L=0.6 (binary search)
@@ -101,16 +112,16 @@ function isPresetActive(row: "brand" | "accent", kc: { hue: number; chroma: numb
   return Math.abs(h - kc.hue) < 2 && Math.abs(c - kc.chroma) < 0.01;
 }
 
-// Default colors and parsed values (must be before anchor refs)
+// Default colors and parsed values (updated from parseKeyColor on mount)
 const DEFAULT_BRAND = "#6e56cf";
 const DEFAULT_ACCENT = "#0891b2";
-const defaultBrandParsed = { hue: 288.033, chroma: 0.179 };
-const defaultAccentParsed = { hue: 194.769, chroma: 0.108 };
+const defaultBrandParsed = ref({ hue: 288.0332, chroma: 0.179 });
+const defaultAccentParsed = ref({ hue: 221.7231, chroma: 0.1109 });
 
 // Anchor chroma: the chroma of the last explicit selection (preset, hex, reset).
 // Slider drags don't update this — it's the "snap back" target.
-const brandAnchorChroma = ref(defaultBrandParsed.chroma);
-const accentAnchorChroma = ref(defaultAccentParsed.chroma);
+const brandAnchorChroma = ref(defaultBrandParsed.value.chroma);
+const accentAnchorChroma = ref(defaultAccentParsed.value.chroma);
 
 function selectPreset(row: "brand" | "accent", kc: { hue: number; chroma: number; hex: string }) {
   if (row === "brand") brandAnchorChroma.value = kc.chroma;
@@ -125,7 +136,7 @@ function applyNone(row: "brand" | "accent") {
 }
 
 function resetToDefault(row: "brand" | "accent") {
-  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  const def = row === "brand" ? defaultBrandParsed.value : defaultAccentParsed.value;
   if (row === "brand") brandAnchorChroma.value = def.chroma;
   else accentAnchorChroma.value = def.chroma;
   theme.value?.setKeyColor(row, row === "brand" ? DEFAULT_BRAND : DEFAULT_ACCENT);
@@ -134,7 +145,7 @@ function resetToDefault(row: "brand" | "accent") {
 function isModified(row: "brand" | "accent") {
   const h = row === "brand" ? brand.hue.value : accent.hue.value;
   const c = row === "brand" ? brand.chroma.value : accent.chroma.value;
-  const def = row === "brand" ? defaultBrandParsed : defaultAccentParsed;
+  const def = row === "brand" ? defaultBrandParsed.value : defaultAccentParsed.value;
   return Math.abs(h - def.hue) > 1 || Math.abs(c - def.chroma) > 0.005;
 }
 
@@ -227,10 +238,11 @@ const indicatorStyle = computed(() => {
     <button
       class="atmosphere-btn"
       popovertarget="atmosphere-popover"
-      aria-label="Color controls"
-      title="Colors"
+      aria-label="Theme controls"
+      title="Theme controls (Brand, Accent, Dark mode, High contrast)"
     >
-      <span class="atmosphere-indicator" :style="indicatorStyle" />
+      <span class="atmosphere-indicator" :style="indicatorStyle" aria-hidden="true" />
+      <span class="atmosphere-btn-label">Theme</span>
     </button>
     <div id="atmosphere-popover" popover class="atmosphere-popover">
       <!-- Brand panel -->
@@ -431,20 +443,41 @@ const indicatorStyle = computed(() => {
 }
 
 .atmosphere-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  background: none;
-  border: none;
+  gap: 0.4rem;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0.25rem 0.65rem 0.25rem 0.35rem;
+  margin-left: 0.5rem;
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-base);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.atmosphere-btn:hover {
+  border-color: var(--vp-c-border);
+  background: var(--vp-c-bg-mute);
 }
 
 .atmosphere-indicator {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 1.5px solid var(--vp-c-divider);
+  flex-shrink: 0;
+}
+
+.atmosphere-btn-label {
+  white-space: nowrap;
 }
 
 .atmosphere-popover {

@@ -26,6 +26,7 @@ export default defineConfig({
     nav: [
       { text: "Docs", link: "/" },
       { text: "Demo", link: "/demo" },
+      { text: "Axiomatic", link: "https://axioms.design" },
     ],
     sidebar: [
       {
@@ -52,6 +53,7 @@ export default defineConfig({
         items: [
           { text: "Architecture", link: "/architecture" },
           { text: "Accessibility", link: "/reference/accessibility" },
+          { text: "APCA Contrast", link: "/reference/apca" },
           { text: "Surface × Token Matrix", link: "/reference/grid" },
           { text: "CLI", link: "/reference/cli" },
         ],

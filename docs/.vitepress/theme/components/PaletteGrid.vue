@@ -47,15 +47,44 @@ interface ScaleRow {
 
 const mode = computed<"light" | "dark">(() => (isDark.value ? "dark" : "light"));
 
+const keyColorChannels = ref<Record<string, { hue: number; chroma: number }>>({
+  brand: { hue: 288.0332, chroma: 0.179 },
+  accent: { hue: 221.7231, chroma: 0.1109 },
+  success: { hue: 149.5793, chroma: 0.192 },
+  warning: { hue: 86.0468, chroma: 0.1617 },
+  error: { hue: 25.3313, chroma: 0.2078 },
+});
+
 const scales = computed<ScaleRow[]>(() => {
   const m = mode.value;
+  const kc = keyColorChannels.value;
   return [
     { name: "Gray", keyColor: null, steps: generateScale(0, 0, m) },
-    { name: "Purple", keyColor: "brand", steps: generateScale(288, 0.18, m) },
-    { name: "Teal", keyColor: "accent", steps: generateScale(195, 0.12, m) },
-    { name: "Green", keyColor: "success", steps: generateScale(145, 0.15, m) },
-    { name: "Amber", keyColor: "warning", steps: generateScale(85, 0.16, m) },
-    { name: "Red", keyColor: "error", steps: generateScale(25, 0.18, m) },
+    {
+      name: "Purple",
+      keyColor: "brand",
+      steps: generateScale(kc.brand!.hue, kc.brand!.chroma, m),
+    },
+    {
+      name: "Teal",
+      keyColor: "accent",
+      steps: generateScale(kc.accent!.hue, kc.accent!.chroma, m),
+    },
+    {
+      name: "Green",
+      keyColor: "success",
+      steps: generateScale(kc.success!.hue, kc.success!.chroma, m),
+    },
+    {
+      name: "Amber",
+      keyColor: "warning",
+      steps: generateScale(kc.warning!.hue, kc.warning!.chroma, m),
+    },
+    {
+      name: "Red",
+      keyColor: "error",
+      steps: generateScale(kc.error!.hue, kc.error!.chroma, m),
+    },
   ];
 });
 
@@ -90,6 +119,17 @@ onMounted(async () => {
     light: [...config.scale.page.light, ...config.scale.inverted.light],
     dark: [...config.scale.page.dark, ...config.scale.inverted.dark],
   };
+
+  if (config.keyColors) {
+    const parsedChannels: Record<string, { hue: number; chroma: number }> = {
+      ...keyColorChannels.value,
+    };
+    for (const [name, hex] of Object.entries(config.keyColors)) {
+      const parsed = mod.parseKeyColor(hex);
+      if (parsed) parsedChannels[name] = parsed;
+    }
+    keyColorChannels.value = parsedChannels;
+  }
 
   const refs: SolvedRef[] = [];
   for (const polarity of ["page", "inverted"] as const) {

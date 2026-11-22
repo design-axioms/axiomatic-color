@@ -19,9 +19,9 @@ Explore the color system interactively. Pick a key color, adjust hue and chroma,
 
 ## Generate locally
 
-You can also generate the demo as a standalone HTML file:
+From a local checkout, generate the demo as a standalone HTML file:
 
 ```bash
-npx axiomatic demo
+pnpm cli demo
 open demo.html
 ```

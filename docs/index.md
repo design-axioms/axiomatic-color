@@ -1,8 +1,10 @@
 # Axiomatic Color
 
-CSS color systems break when you add a surface or change a mode. Text contrast that worked on one background fails on another, and every change triggers a manual re-check across both light and dark modes.
+CSS color systems break when you add a surface or switch modes. Contrast that worked on one background fails on another, and every change sends you back into a manual re-check across light mode, dark mode, high contrast, and forced colors.
 
-Axiomatic Color solves this. You declare surfaces, text grades, and atmosphere. The solver generates CSS custom properties where every text/surface pair meets its [APCA](/reference/apca) contrast target in both modes — no manual checking, no runtime JS.
+Axiomatic Color starts from intent instead of a palette. You declare **surfaces**, **contrast grades**, and **atmosphere**. The solver computes CSS using `oklch()` and `light-dark()` so every surface carries its own solved text and border tokens against [APCA](/reference/apca) targets—with diagnostics whenever a target can't be met.
+
+Drag hue, chroma, or dark mode below—or open **Theme** in the top bar on any page to adjust Brand, Accent, Dark mode, and High Contrast site-wide:
 
 <SurfaceTile />
 
@@ -17,8 +19,17 @@ Axiomatic Color solves this. You declare surfaces, text grades, and atmosphere. 
 </body>
 ```
 
-- [Surfaces](/surfaces) — named regions with fixed lightness
-- [Text](/text) — four contrast grades, solved per surface
-- [Borders](/borders) — three tiers: decorative, interactive, critical
-- [Atmosphere](/atmosphere) — hue and chroma without affecting contrast
-- [Composition](/composition) — independent axes, polarity inversion
+## Explore the System
+
+- **[Why Axiomatic?](/why)** — why swatch palettes can't answer "does this work?", with an interactive palette explorer
+- **[Getting Started](/getting-started)** — run the solver and CLI locally from source
+- **[Live Demo](/demo)** — full interactive surface, border, atmosphere, and CSS inspector
+
+### Concepts
+
+- **[Surfaces](/surfaces)** — named regions with fixed lightness across page and inverted polarities
+- **[Text](/text)** — four contrast grades, solved per surface and mode
+- **[Borders](/borders)** — three contrast tiers (`decorative`, `interactive`, `critical`) and automatic surface distinction
+- **[Atmosphere](/atmosphere)** — opt-in hue and chroma shaped by the safe bicone taper
+- **[Composition](/composition)** — orthogonal axes, polarity contrast, and same-polarity distinction
+- **[Preferences](/preferences)** — `prefers-color-scheme`, `prefers-contrast`, and `forced-colors` derived from semantic role

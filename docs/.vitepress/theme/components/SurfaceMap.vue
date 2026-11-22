@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import Token from "./Token.vue";
-import DarkToggle from "./DarkToggle.vue";
+import ThemePopoverButton from "./ThemePopoverButton.vue";
 import { useThemeBuilder } from "../composables/useThemeBuilder";
 import { useDarkMode } from "../composables/useDarkMode";
 import { useReactiveTheme } from "../composables/useReactiveTheme";
@@ -105,7 +105,7 @@ function surfaceBySlug(slug: string) {
           <span class="map-l text-subtlest"
             >L={{ fmt(surfaceBySlug("page")?.lightness[mode] ?? 0) }}</span
           >
-          <DarkToggle v-model="isDark" />
+          <ThemePopoverButton />
         </div>
       </div>
 
