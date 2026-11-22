@@ -13,15 +13,17 @@ export function useKeyColors(): Ref<ParsedKeyColors> {
   if (parsed) return parsed;
   parsed = ref({});
 
-  import("@design-axioms/color").then(({ DEFAULT_CONFIG, parseKeyColor }) => {
-    if (!DEFAULT_CONFIG.keyColors) return;
-    const result: ParsedKeyColors = {};
-    for (const [name, value] of Object.entries(DEFAULT_CONFIG.keyColors)) {
-      const kc = parseKeyColor(value);
-      if (kc) result[name] = { ...kc, hex: value };
-    }
-    parsed!.value = result;
-  });
+  if (typeof window !== "undefined") {
+    import("@design-axioms/color").then(({ DEFAULT_CONFIG, parseKeyColor }) => {
+      if (!DEFAULT_CONFIG.keyColors) return;
+      const result: ParsedKeyColors = {};
+      for (const [name, value] of Object.entries(DEFAULT_CONFIG.keyColors)) {
+        const kc = parseKeyColor(value);
+        if (kc) result[name] = { ...kc, hex: value };
+      }
+      parsed!.value = result;
+    });
+  }
 
   return parsed;
 }

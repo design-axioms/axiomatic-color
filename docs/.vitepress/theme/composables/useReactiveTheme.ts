@@ -12,6 +12,10 @@ export function useReactiveTheme(): {
     themeRef = ref<ReactiveTheme | null>(null);
   }
 
+  if (typeof window === "undefined") {
+    return { theme: themeRef, ready: new Promise<ReactiveTheme>(() => {}) };
+  }
+
   if (!themePromise) {
     themePromise = import("@design-axioms/color").then(({ createReactiveTheme }) => {
       const t = createReactiveTheme();

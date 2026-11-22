@@ -9,4 +9,6 @@ demo.html
 demo.css
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+docs/.vitepress/.temp/
 coverage/
+docs/.vitepress/config.ts.timestamp-*.mjs
