@@ -1,6 +1,10 @@
 {
   "name": "axiomatic-color-workspace",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/design-axioms/axiomatic-color.git"
+  },
   "type": "module",
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" build",
@@ -29,6 +33,7 @@
     "markdown-it-mathjax3": "^4.3.2",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
+    "release-plan": "^0.20.1",
     "shiki": "^4.0.2",
     "typescript": "6.0.2",
     "vite": "^8.0.3",
