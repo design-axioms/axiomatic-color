@@ -1,14 +1,38 @@
 {
   "name": "@design-axioms/color-cli",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
+  "description": "CLI for the Axiomatic Color System — solve configs, emit CSS, validate APCA diagnostics, and generate interactive HTML demos.",
+  "keywords": [
+    "apca",
+    "axiomatic",
+    "cli",
+    "color",
+    "contrast",
+    "css",
+    "design-system",
+    "oklch"
+  ],
+  "homepage": "https://color.axioms.design/reference/cli",
+  "bugs": {
+    "url": "https://github.com/design-axioms/axiomatic-color/issues"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/design-axioms/axiomatic-color.git",
+    "directory": "packages/cli"
+  },
   "bin": {
     "axiomatic": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.*"
   ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc --build",
     "clean": "rm -rf dist *.tsbuildinfo",
@@ -22,5 +46,14 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "release-plan": {
+    "semverIncrementAs": {
+      "major": "prerelease",
+      "minor": "prerelease",
+      "patch": "prerelease"
+    },
+    "semverIncrementTag": "alpha",
+    "publishTag": "alpha"
   }
 }

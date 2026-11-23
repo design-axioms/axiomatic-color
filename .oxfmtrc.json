@@ -10,6 +10,8 @@
     "pnpm-lock.yaml",
     "demo.html",
     "demo.css",
+    "CHANGELOG.md",
+    ".release-plan.json",
     "*.timestamp-*.mjs"
   ]
 }

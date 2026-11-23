@@ -1,9 +1,31 @@
 {
   "name": "@design-axioms/color",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
+  "description": "Constraint-solved, APCA-verified semantic color system with native CSS light-dark() and OKLCH atmosphere.",
+  "keywords": [
+    "accessibility",
+    "apca",
+    "axiomatic",
+    "color",
+    "contrast",
+    "css",
+    "design-system",
+    "light-dark",
+    "oklch"
+  ],
+  "homepage": "https://color.axioms.design",
+  "bugs": {
+    "url": "https://github.com/design-axioms/axiomatic-color/issues"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/design-axioms/axiomatic-color.git",
+    "directory": "packages/core"
+  },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.*"
   ],
   "type": "module",
   "exports": {
@@ -23,6 +45,9 @@
       "default": "./dist/runtime.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc --build",
     "clean": "rm -rf dist *.tsbuildinfo",
@@ -37,5 +62,14 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "release-plan": {
+    "semverIncrementAs": {
+      "major": "prerelease",
+      "minor": "prerelease",
+      "patch": "prerelease"
+    },
+    "semverIncrementTag": "alpha",
+    "publishTag": "alpha"
   }
 }

@@ -1,0 +1,50 @@
+# For every push to main with .release-plan.json modified, publishes planned releases to npm via Trusted Publishing (OIDC).
+
+name: Publish Alpha
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".release-plan.json"
+
+concurrency:
+  group: publish-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: NPM Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      # Intentionally omit registry-url so setup-node does not write an empty
+      # _authToken placeholder to .npmrc, which would disable npm OIDC Trusted Publishing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Check npm version (OIDC requires >= 11.5.1)
+        run: npm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Publish to npm
+        run: NPM_CONFIG_PROVENANCE=true pnpm exec release-plan publish --github-prerelease
+        env:
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}

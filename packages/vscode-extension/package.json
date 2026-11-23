@@ -2,6 +2,7 @@
   "name": "@design-axioms/color-vscode",
   "displayName": "Axiomatic Color",
   "version": "0.0.0",
+  "private": true,
   "description": "VS Code extension for the Axiomatic Color System — contrast validation, surface inspection, and composition diagnostics.",
   "categories": [
     "Other"
