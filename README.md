@@ -18,13 +18,11 @@ Axiomatic Color eliminates the conflict between aesthetics and accessibility by 
 
 ## Quick Start
 
-> **Pre-release**: `@design-axioms/color` v2 is in active development and not yet published to npm. Clone this repository and run it from source with Node 24+ and pnpm 10:
+> **Alpha pre-release**: `@design-axioms/color` and `@design-axioms/color-cli` are published under the `alpha` dist-tag while the v2 API settles (Node 24+).
 
 ```bash
-git clone https://github.com/design-axioms/axiomatic-color.git
-cd axiomatic-color
-pnpm install
-pnpm build
+pnpm add @design-axioms/color@alpha
+pnpm add -D @design-axioms/color-cli@alpha
 ```
 
 ```typescript
@@ -40,9 +38,9 @@ const css = generateCSS(output, {
 ## CLI
 
 ```bash
-pnpm cli build              # Emit CSS
-pnpm cli validate           # Show diagnostics
-pnpm cli demo               # Generate interactive HTML demo
+pnpm exec axiomatic build -o axiomatic.css   # Emit CSS
+pnpm exec axiomatic validate                 # Show diagnostics
+pnpm exec axiomatic demo -o demo.html        # Generate interactive HTML demo
 ```
 
 ## Demo
@@ -50,7 +48,7 @@ pnpm cli demo               # Generate interactive HTML demo
 Generate a self-contained HTML demo to explore the color system:
 
 ```bash
-pnpm cli demo
+pnpm exec axiomatic demo
 open demo.html
 ```
 
