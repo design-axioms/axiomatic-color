@@ -28,6 +28,7 @@ import {
   isInDeadZone,
   solveBorderValues,
   solveTextValues,
+  validateBorderTargets,
   validateTargets,
 } from "./validator.ts";
 
@@ -85,7 +86,7 @@ function solvePolarity(
       ...TEXT_GRADES,
     });
     const unmetBorderTiers = config.borderTargets
-      ? validateTargets(planned.lightness, chroma, { ...config.borderTargets })
+      ? validateBorderTargets(ctx, planned.lightness, chroma, config.borderTargets)
       : [];
     const hasDiagnostics = unmetTextGrades.length > 0 || unmetBorderTiers.length > 0;
 
@@ -108,7 +109,7 @@ function solvePolarity(
           ...hcTextGrades,
         });
         const hcUnmetBorderTiers = hcBorderTargets
-          ? validateTargets(hcLightness, chroma, { ...hcBorderTargets })
+          ? validateBorderTargets(ctx, hcLightness, chroma, hcBorderTargets)
           : [];
         const hcInDeadZone = isInDeadZone(hcLightness);
         if (hcUnmetTextGrades.length > 0 || hcUnmetBorderTiers.length > 0 || hcInDeadZone) {

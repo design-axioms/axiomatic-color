@@ -13,6 +13,8 @@
 
 import {
   binarySearchLightness,
+  clamp01,
+  clampTo,
   contrastForPair,
   roundLightness,
   safetyMarginForChroma,
@@ -75,11 +77,35 @@ export function solveTextValues(
   };
 }
 
+function foregroundExtremeForContext(ctx: Context): 0 | 1 {
+  const usesDarkForeground =
+    (ctx.polarity === "page" && ctx.mode === "light") ||
+    (ctx.polarity === "inverted" && ctx.mode === "dark");
+  return usesDarkForeground ? 0 : 1;
+}
+
+/**
+ * Maximum APCA contrast achievable in the foreground direction chosen for
+ * `ctx` (dark foreground on `page/light` and `inverted/dark`; light
+ * foreground on `page/dark` and `inverted/light`).
+ */
+export function directionalCeiling(ctx: Context, surfaceLightness: number): number {
+  return contrastForPair(foregroundExtremeForContext(ctx), clamp01(surfaceLightness));
+}
+
 /**
  * Pre-solve border lightness values for a surface.
  *
- * Same approach as text: binary-search per tier. Same direction logic
- * (dark borders on light surfaces, light borders on dark surfaces).
+ * Searches monotonically from the surface lightness toward the dark (0) or
+ * light (1) extreme for the surface's polarity/mode, rather than stopping at
+ * L = 0.5 (which clamped low-contrast borders on both light and dark surfaces).
+ *
+ * Because `contrastForPair()` quantizes through 8-bit sRGB and APCA clips raw
+ * contrast below `loClip = 0.1` (~7.3–7.9 Lc) to 0, rounding the search
+ * boundary to 4 decimals can otherwise drop below the target (or all the way
+ * to 0 Lc for sub-floor targets). Stepping away from `surfaceLightness` in
+ * 0.0001 increments until `>= adjustedTarget` guarantees the tightest
+ * quantized lightness that meets the target without overshooting.
  */
 export function solveBorderValues(
   ctx: Context,
@@ -89,24 +115,37 @@ export function solveBorderValues(
 ): SolvedBorderValues {
   const margin = safetyMarginForChroma(chroma);
 
-  const usesDarkForeground =
-    (ctx.polarity === "page" && ctx.mode === "light") ||
-    (ctx.polarity === "inverted" && ctx.mode === "dark");
-  const [fgMin, fgMax] = usesDarkForeground ? [0, 0.5] : [0.5, 1];
+  const extreme = foregroundExtremeForContext(ctx);
+  const usesDarkForeground = extreme === 0;
+  const clampedSurface = clamp01(surfaceLightness);
+  const [fgMin, fgMax] = usesDarkForeground ? [0, clampedSurface] : [clampedSurface, 1];
+  const ceiling = contrastForPair(extreme, clampedSurface);
+  const stepAway = usesDarkForeground ? -0.0001 : 0.0001;
 
   function solveTier(target: number): number {
     const adjustedTarget = target + margin;
-    const ceiling = textCeiling(surfaceLightness);
-    const effectiveTarget = Math.min(adjustedTarget, ceiling - 0.5);
+    if (adjustedTarget <= 0 || ceiling <= 0) {
+      return roundLightness(clampedSurface);
+    }
+    if (adjustedTarget >= ceiling) {
+      return extreme;
+    }
 
-    return roundLightness(
-      binarySearchLightness(
-        fgMin,
-        fgMax,
-        (fg) => contrastForPair(fg, surfaceLightness),
-        effectiveTarget,
-      ),
+    const raw = binarySearchLightness(
+      fgMin,
+      fgMax,
+      (fg) => contrastForPair(fg, clampedSurface),
+      adjustedTarget,
     );
+    let candidate = clampTo(roundLightness(raw), fgMin, fgMax);
+
+    while (contrastForPair(candidate, clampedSurface) < adjustedTarget) {
+      const next = roundLightness(candidate + stepAway);
+      if (next === candidate || next < fgMin || next > fgMax) break;
+      candidate = next;
+    }
+
+    return candidate;
   }
 
   return {
@@ -124,8 +163,8 @@ export function validateTargets(
   surfaceLightness: number,
   chroma: number,
   targets: { readonly [name: string]: number },
+  ceiling = textCeiling(surfaceLightness),
 ): string[] {
-  const ceiling = textCeiling(surfaceLightness);
   const margin = safetyMarginForChroma(chroma);
   const failures: string[] = [];
 
@@ -136,6 +175,24 @@ export function validateTargets(
   }
 
   return failures;
+}
+
+/**
+ * Validate border tiers against the attainable contrast in the surface's
+ * chosen foreground direction, matching `solveBorderValues`.
+ */
+export function validateBorderTargets(
+  ctx: Context,
+  surfaceLightness: number,
+  chroma: number,
+  targets: BorderTargets,
+): string[] {
+  return validateTargets(
+    surfaceLightness,
+    chroma,
+    { ...targets },
+    directionalCeiling(ctx, surfaceLightness),
+  );
 }
 
 /**
