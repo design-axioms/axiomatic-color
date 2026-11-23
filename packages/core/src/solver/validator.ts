@@ -19,6 +19,7 @@ import {
   roundLightness,
   safetyMarginForChroma,
   textCeiling,
+  textLightnessForContext,
 } from "../math.ts";
 import type {
   BorderTargets,
@@ -77,35 +78,13 @@ export function solveTextValues(
   };
 }
 
-function foregroundExtremeForContext(ctx: Context): 0 | 1 {
-  const usesDarkForeground =
-    (ctx.polarity === "page" && ctx.mode === "light") ||
-    (ctx.polarity === "inverted" && ctx.mode === "dark");
-  return usesDarkForeground ? 0 : 1;
-}
-
 /**
- * Maximum APCA contrast achievable in the foreground direction chosen for
- * `ctx` (dark foreground on `page/light` and `inverted/dark`; light
- * foreground on `page/dark` and `inverted/light`).
- */
-export function directionalCeiling(ctx: Context, surfaceLightness: number): number {
-  return contrastForPair(foregroundExtremeForContext(ctx), clamp01(surfaceLightness));
-}
-
-/**
- * Pre-solve border lightness values for a surface.
+ * Search from the surface toward its foreground extreme. A subtle border can
+ * be only a few shades away from the surface, on either side of L = 0.5.
  *
- * Searches monotonically from the surface lightness toward the dark (0) or
- * light (1) extreme for the surface's polarity/mode, rather than stopping at
- * L = 0.5 (which clamped low-contrast borders on both light and dark surfaces).
- *
- * Because `contrastForPair()` quantizes through 8-bit sRGB and APCA clips raw
- * contrast below `loClip = 0.1` (~7.3–7.9 Lc) to 0, rounding the search
- * boundary to 4 decimals can otherwise drop below the target (or all the way
- * to 0 Lc for sub-floor targets). Stepping away from `surfaceLightness` in
- * 0.0001 increments until `>= adjustedTarget` guarantees the tightest
- * quantized lightness that meets the target without overshooting.
+ * CSS emits four decimal places of lightness. If rounding lands below the
+ * requested contrast, advance to the first emitted shade that meets it.
+ * Very low positive targets can reach APCA's first nonzero step.
  */
 export function solveBorderValues(
   ctx: Context,
@@ -115,7 +94,7 @@ export function solveBorderValues(
 ): SolvedBorderValues {
   const margin = safetyMarginForChroma(chroma);
 
-  const extreme = foregroundExtremeForContext(ctx);
+  const extreme = textLightnessForContext(ctx);
   const usesDarkForeground = extreme === 0;
   const clampedSurface = clamp01(surfaceLightness);
   const [fgMin, fgMax] = usesDarkForeground ? [0, clampedSurface] : [clampedSurface, 1];
@@ -191,7 +170,7 @@ export function validateBorderTargets(
     surfaceLightness,
     chroma,
     { ...targets },
-    directionalCeiling(ctx, surfaceLightness),
+    contrastForPair(textLightnessForContext(ctx), surfaceLightness),
   );
 }
 
