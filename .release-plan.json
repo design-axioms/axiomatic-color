@@ -1,0 +1,31 @@
+{
+  "solution": {
+    "@design-axioms/color-cli": {
+      "impact": "patch",
+      "oldVersion": "0.1.0-alpha.0",
+      "newVersion": "0.1.0-alpha.1",
+      "tagName": "alpha",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Has dependency `workspace:*` on @design-axioms/color"
+        }
+      ],
+      "pkgJSONPath": "./packages/cli/package.json"
+    },
+    "@design-axioms/color": {
+      "impact": "patch",
+      "oldVersion": "0.1.0-alpha.0",
+      "newVersion": "0.1.0-alpha.1",
+      "tagName": "alpha",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
+        }
+      ],
+      "pkgJSONPath": "./packages/core/package.json"
+    }
+  },
+  "description": "## Release (2026-11-24)\n\n* @design-axioms/color-cli 0.1.0-alpha.1 (patch)\n* @design-axioms/color 0.1.0-alpha.1 (patch)\n\n#### :bug: Bug Fix\n* `@design-axioms/color`\n  * [#20](https://github.com/design-axioms/axiomatic-color/pull/20) Fit border contrast targets against the surface they outline ([@wycats](https://github.com/wycats))\n\n#### Committers: 1\n- Yehuda Katz ([@wycats](https://github.com/wycats))\n"
+}

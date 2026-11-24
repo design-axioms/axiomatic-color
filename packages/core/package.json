@@ -1,6 +1,6 @@
 {
   "name": "@design-axioms/color",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Constraint-solved, APCA-verified semantic color system with native CSS light-dark() and OKLCH atmosphere.",
   "keywords": [
     "accessibility",
