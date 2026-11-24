@@ -13,10 +13,13 @@
 
 import {
   binarySearchLightness,
+  clamp01,
+  clampTo,
   contrastForPair,
   roundLightness,
   safetyMarginForChroma,
   textCeiling,
+  textLightnessForContext,
 } from "../math.ts";
 import type {
   BorderTargets,
@@ -76,10 +79,12 @@ export function solveTextValues(
 }
 
 /**
- * Pre-solve border lightness values for a surface.
+ * Search from the surface toward its foreground extreme. A subtle border can
+ * be only a few shades away from the surface, on either side of L = 0.5.
  *
- * Same approach as text: binary-search per tier. Same direction logic
- * (dark borders on light surfaces, light borders on dark surfaces).
+ * CSS emits four decimal places of lightness. If rounding lands below the
+ * requested contrast, advance to the first emitted shade that meets it.
+ * Very low positive targets can reach APCA's first nonzero step.
  */
 export function solveBorderValues(
   ctx: Context,
@@ -89,24 +94,37 @@ export function solveBorderValues(
 ): SolvedBorderValues {
   const margin = safetyMarginForChroma(chroma);
 
-  const usesDarkForeground =
-    (ctx.polarity === "page" && ctx.mode === "light") ||
-    (ctx.polarity === "inverted" && ctx.mode === "dark");
-  const [fgMin, fgMax] = usesDarkForeground ? [0, 0.5] : [0.5, 1];
+  const extreme = textLightnessForContext(ctx);
+  const usesDarkForeground = extreme === 0;
+  const clampedSurface = clamp01(surfaceLightness);
+  const [fgMin, fgMax] = usesDarkForeground ? [0, clampedSurface] : [clampedSurface, 1];
+  const ceiling = contrastForPair(extreme, clampedSurface);
+  const stepAway = usesDarkForeground ? -0.0001 : 0.0001;
 
   function solveTier(target: number): number {
     const adjustedTarget = target + margin;
-    const ceiling = textCeiling(surfaceLightness);
-    const effectiveTarget = Math.min(adjustedTarget, ceiling - 0.5);
+    if (adjustedTarget <= 0 || ceiling <= 0) {
+      return roundLightness(clampedSurface);
+    }
+    if (adjustedTarget >= ceiling) {
+      return extreme;
+    }
 
-    return roundLightness(
-      binarySearchLightness(
-        fgMin,
-        fgMax,
-        (fg) => contrastForPair(fg, surfaceLightness),
-        effectiveTarget,
-      ),
+    const raw = binarySearchLightness(
+      fgMin,
+      fgMax,
+      (fg) => contrastForPair(fg, clampedSurface),
+      adjustedTarget,
     );
+    let candidate = clampTo(roundLightness(raw), fgMin, fgMax);
+
+    while (contrastForPair(candidate, clampedSurface) < adjustedTarget) {
+      const next = roundLightness(candidate + stepAway);
+      if (next === candidate || next < fgMin || next > fgMax) break;
+      candidate = next;
+    }
+
+    return candidate;
   }
 
   return {
@@ -124,8 +142,8 @@ export function validateTargets(
   surfaceLightness: number,
   chroma: number,
   targets: { readonly [name: string]: number },
+  ceiling = textCeiling(surfaceLightness),
 ): string[] {
-  const ceiling = textCeiling(surfaceLightness);
   const margin = safetyMarginForChroma(chroma);
   const failures: string[] = [];
 
@@ -136,6 +154,24 @@ export function validateTargets(
   }
 
   return failures;
+}
+
+/**
+ * Validate border tiers against the attainable contrast in the surface's
+ * chosen foreground direction, matching `solveBorderValues`.
+ */
+export function validateBorderTargets(
+  ctx: Context,
+  surfaceLightness: number,
+  chroma: number,
+  targets: BorderTargets,
+): string[] {
+  return validateTargets(
+    surfaceLightness,
+    chroma,
+    { ...targets },
+    contrastForPair(textLightnessForContext(ctx), surfaceLightness),
+  );
 }
 
 /**

@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG } from "../defaults.ts";
 import { generateCSS } from "../generator/css.ts";
-import { contrastForPair, contrastWithChroma } from "../math.ts";
-import type { SolverConfig } from "../types.ts";
+import { contrastForPair, contrastWithChroma, safetyMarginForChroma } from "../math.ts";
+import type {
+  BorderTargets,
+  Mode,
+  SolvedBorderValues,
+  SolvedSurface,
+  SolverConfig,
+} from "../types.ts";
 import { solve } from "./index.ts";
 
 /**
@@ -87,6 +93,88 @@ const RICH_CONFIG: SolverConfig = {
   borderTargets: { decorative: 10, interactive: 30, critical: 80 },
   options: { prefix: "axm", selector: ":root" },
 };
+
+const MAX_QUANTIZATION_OVERSHOOT = 0.75;
+
+function assertBorderVariantFit(
+  mode: Mode,
+  surface: SolvedSurface,
+  surfaceL: number,
+  borders: SolvedBorderValues,
+  unmetBorderTiers: readonly string[],
+  targets: BorderTargets,
+  checkProgression: boolean,
+): void {
+  const usesDark =
+    (surface.polarity === "page" && mode === "light") ||
+    (surface.polarity === "inverted" && mode === "dark");
+  const extreme = usesDark ? 0 : 1;
+  const ceiling = contrastForPair(extreme, surfaceL);
+  const margin = safetyMarginForChroma(surface.chroma ?? 0);
+
+  const achieved: Record<keyof BorderTargets, number> = {
+    decorative: contrastForPair(borders.decorative, surfaceL),
+    interactive: contrastForPair(borders.interactive, surfaceL),
+    critical: contrastForPair(borders.critical, surfaceL),
+  };
+  const expectedUnmet: string[] = [];
+
+  for (const tier of ["decorative", "interactive", "critical"] as const) {
+    const borderL = borders[tier];
+    const adjustedTarget = targets[tier] + margin;
+    if (usesDark) {
+      expect(borderL).toBeLessThanOrEqual(surfaceL);
+    } else {
+      expect(borderL).toBeGreaterThanOrEqual(surfaceL);
+    }
+
+    if (adjustedTarget <= ceiling) {
+      // No undershoot: always meets target + chroma safety margin.
+      expect(achieved[tier]).toBeGreaterThanOrEqual(adjustedTarget);
+      // No overshoot: stays within one 8-bit sRGB gray quantization step (<= 0.67 Lc).
+      expect(achieved[tier]).toBeLessThanOrEqual(adjustedTarget + MAX_QUANTIZATION_OVERSHOOT);
+    } else {
+      // Unmeetable in this polarity direction: saturates at the directional extreme.
+      expect(borderL).toBe(extreme);
+      expect(achieved[tier]).toBe(ceiling);
+      expectedUnmet.push(tier);
+    }
+  }
+
+  expect(unmetBorderTiers).toEqual(expectedUnmet);
+  if (checkProgression) {
+    expect(achieved.decorative).toBeLessThan(achieved.interactive);
+    expect(achieved.interactive).toBeLessThan(achieved.critical);
+  }
+}
+
+function assertSurfaceBordersFit(
+  mode: Mode,
+  surface: SolvedSurface,
+  targets: BorderTargets,
+  checkProgression = false,
+): void {
+  assertBorderVariantFit(
+    mode,
+    surface,
+    surface.lightness,
+    surface.borderValues!,
+    surface.diagnostics?.unmetBorderTiers ?? [],
+    targets,
+    checkProgression,
+  );
+  if (surface.lightnessHighContrast !== undefined && surface.borderValuesHighContrast) {
+    assertBorderVariantFit(
+      mode,
+      surface,
+      surface.lightnessHighContrast,
+      surface.borderValuesHighContrast,
+      surface.diagnosticsHighContrast?.unmetBorderTiers ?? [],
+      targets,
+      checkProgression,
+    );
+  }
+}
 
 describe("solver", () => {
   const output = solve(DEFAULT_CONFIG);
@@ -181,15 +269,164 @@ describe("solver", () => {
     }
   });
 
-  it("border values achieve their APCA targets", () => {
-    for (const surface of output.light.surfaces) {
-      // Decorative (10) — should always be achievable
-      const decorativeApca = contrastForPair(surface.borderValues!.decorative, surface.lightness);
-      expect(decorativeApca).toBeGreaterThan(8);
+  it("border values hit their APCA targets without undershoot or overshoot across polarities, modes, and HC", () => {
+    const targets = DEFAULT_CONFIG.borderTargets!;
 
-      // Interactive (30)
-      const interactiveApca = contrastForPair(surface.borderValues!.interactive, surface.lightness);
-      expect(interactiveApca).toBeGreaterThan(25);
+    for (const mode of ["light", "dark"] as const) {
+      for (const surface of output[mode].surfaces) {
+        assertSurfaceBordersFit(mode, surface, targets, true);
+      }
+    }
+
+    // Explicit regression check for the L = 0.5 clamp (previously +75.3 Lc on light page,
+    // +21.8 Lc on dark page for the 10 Lc decorative target).
+    const lightPage = output.light.surfaces.find((s) => s.slug === "page")!;
+    const darkPage = output.dark.surfaces.find((s) => s.slug === "page")!;
+    expect(lightPage.borderValues!.decorative).toBeGreaterThan(0.5);
+    expect(lightPage.borderValues!.interactive).toBeGreaterThan(0.5);
+    expect(darkPage.borderValues!.decorative).toBeLessThan(0.5);
+  });
+
+  it("reports unmet border tiers against attainable directional contrast in base and HC paths", () => {
+    const targets = { decorative: 10, interactive: 30, critical: 80 };
+    const constrained = solve({
+      ...DEFAULT_CONFIG,
+      scale: {
+        ...DEFAULT_CONFIG.scale,
+        page: {
+          // On light page L = 0.5, dark foreground ceiling is ~24.0 Lc while opposite-polarity
+          // textCeiling(0.5) is ~85.4 Lc. On dark page L = 0.85, light foreground ceiling is ~29.0 Lc
+          // while textCeiling(0.85) is ~77.6 Lc.
+          light: [0.5],
+          dark: [0.85],
+          highContrast: {
+            light: [0.5],
+            dark: [0.85],
+          },
+        },
+        inverted: {
+          light: [0.85],
+          dark: [0.5],
+          highContrast: {
+            light: [0.85],
+            dark: [0.5],
+          },
+        },
+      },
+      surfaces: {
+        page: {
+          page: { position: 0, label: "Page" },
+        },
+        inverted: {
+          spotlight: { position: 0, label: "Spotlight" },
+        },
+      },
+      borderTargets: targets,
+    });
+
+    const lightPage = constrained.light.surfaces.find((s) => s.slug === "page")!;
+    expect(lightPage.borderValues!.critical).toBe(0);
+    expect(contrastForPair(lightPage.borderValues!.critical, 0.5)).toBeCloseTo(24.0, 0);
+    expect(lightPage.diagnostics?.unmetBorderTiers).toEqual(["interactive", "critical"]);
+    expect(lightPage.diagnosticsHighContrast?.unmetBorderTiers).toEqual([
+      "interactive",
+      "critical",
+    ]);
+    assertSurfaceBordersFit("light", lightPage, targets);
+
+    const darkPage = constrained.dark.surfaces.find((s) => s.slug === "page")!;
+    expect(darkPage.borderValues!.critical).toBe(1);
+    expect(darkPage.diagnostics?.unmetBorderTiers).toEqual(["interactive", "critical"]);
+    expect(darkPage.diagnosticsHighContrast?.unmetBorderTiers).toEqual(["interactive", "critical"]);
+    assertSurfaceBordersFit("dark", darkPage, targets);
+
+    const lightSpotlight = constrained.light.surfaces.find((s) => s.slug === "spotlight")!;
+    expect(lightSpotlight.borderValues!.critical).toBe(1);
+    expect(lightSpotlight.diagnostics?.unmetBorderTiers).toEqual(["interactive", "critical"]);
+    expect(lightSpotlight.diagnosticsHighContrast?.unmetBorderTiers).toEqual([
+      "interactive",
+      "critical",
+    ]);
+    assertSurfaceBordersFit("light", lightSpotlight, targets);
+
+    const darkSpotlight = constrained.dark.surfaces.find((s) => s.slug === "spotlight")!;
+    expect(darkSpotlight.borderValues!.critical).toBe(0);
+    expect(darkSpotlight.diagnostics?.unmetBorderTiers).toEqual(["interactive", "critical"]);
+    expect(darkSpotlight.diagnosticsHighContrast?.unmetBorderTiers).toEqual([
+      "interactive",
+      "critical",
+    ]);
+    assertSurfaceBordersFit("dark", darkSpotlight, targets);
+  });
+
+  it("handles sub-floor APCA border targets without collapsing to zero and preserves zero targets", () => {
+    const subFloor = solve({
+      ...DEFAULT_CONFIG,
+      borderTargets: { decorative: 5, interactive: 30, critical: 80 },
+    });
+
+    // APCA-W3 clips raw contrast below loClip = 0.1 (~7.3–7.9 Lc) to 0.
+    // A positive sub-floor target must land on the first non-zero quantized step,
+    // never on 0 Lc and never overshooting past the APCA clip floor.
+    for (const mode of ["light", "dark"] as const) {
+      for (const slug of ["page", "workspace", "spotlight"] as const) {
+        const surface = subFloor[mode].surfaces.find((s) => s.slug === slug)!;
+        const apca = contrastForPair(surface.borderValues!.decorative, surface.lightness);
+        expect(apca).toBeGreaterThanOrEqual(7.3);
+        expect(apca).toBeLessThanOrEqual(8.0);
+      }
+    }
+
+    const zeroTarget = solve({
+      ...DEFAULT_CONFIG,
+      borderTargets: { decorative: 0, interactive: 30, critical: 80 },
+    });
+    const lightPage = zeroTarget.light.surfaces.find((s) => s.slug === "page")!;
+    const darkPage = zeroTarget.dark.surfaces.find((s) => s.slug === "page")!;
+    expect(lightPage.borderValues!.decorative).toBe(lightPage.lightness);
+    expect(darkPage.borderValues!.decorative).toBe(darkPage.lightness);
+  });
+
+  it("fits custom high-contrast accessibility border targets without undershoot or overshoot", () => {
+    const hcTargets = { decorative: 25, interactive: 60, critical: 90 };
+    const custom = solve({
+      ...DEFAULT_CONFIG,
+      accessibility: { borderTargets: hcTargets },
+    });
+
+    for (const mode of ["light", "dark"] as const) {
+      const page = custom[mode].surfaces.find((s) => s.slug === "page")!;
+      for (const tier of ["decorative", "interactive", "critical"] as const) {
+        const achieved = contrastForPair(
+          page.borderValuesHighContrast![tier],
+          page.lightnessHighContrast!,
+        );
+        expect(achieved).toBeGreaterThanOrEqual(hcTargets[tier]);
+        expect(achieved).toBeLessThanOrEqual(hcTargets[tier] + 0.75);
+      }
+    }
+  });
+
+  it("chromatic border safety margin keeps tapered borders at or above target", () => {
+    const targets = DEFAULT_CONFIG.borderTargets!;
+    for (const mode of ["light", "dark"] as const) {
+      const action = output[mode].surfaces.find((s) => s.slug === "action")!;
+      const chroma = action.chroma ?? 0;
+      const hue = action.hue ?? 0;
+      const surfaceTaper = chroma * (1 - Math.abs(2 * action.lightness - 1));
+      for (const tier of ["decorative", "interactive", "critical"] as const) {
+        const borderL = action.borderValues![tier];
+        const borderTaper = chroma * (1 - Math.abs(2 * borderL - 1));
+        const chromatic = contrastWithChroma(
+          borderL,
+          borderTaper,
+          hue,
+          action.lightness,
+          surfaceTaper,
+          hue,
+        );
+        expect(chromatic).toBeGreaterThanOrEqual(targets[tier]);
+      }
     }
   });
 
@@ -602,6 +839,15 @@ describe("solver (rich config)", () => {
     const markIdx = successBlock!.indexOf("--axm-text-high: Mark");
     expect(canvasIdx).toBeGreaterThanOrEqual(0);
     expect(markIdx).toBeGreaterThan(canvasIdx);
+  });
+
+  it("fits all rich-config border values without undershoot or overshoot", () => {
+    const targets = RICH_CONFIG.borderTargets!;
+    for (const mode of ["light", "dark"] as const) {
+      for (const surface of output[mode].surfaces) {
+        assertSurfaceBordersFit(mode, surface, targets);
+      }
+    }
   });
 
   it("CSS output matches golden master for rich config", () => {
