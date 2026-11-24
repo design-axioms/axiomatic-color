@@ -19,9 +19,9 @@ Explore the color system interactively. Pick a key color, adjust hue and chroma,
 
 ## Generate locally
 
-From a local checkout, generate the demo as a standalone HTML file:
+Generate the demo as a standalone HTML file with `@design-axioms/color-cli`:
 
 ```bash
-pnpm cli demo
+pnpm exec axiomatic demo
 open demo.html
 ```

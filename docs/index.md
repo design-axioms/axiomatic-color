@@ -22,7 +22,7 @@ Drag hue, chroma, or dark mode below—or open **Theme** in the top bar on any p
 ## Explore the System
 
 - **[Why Axiomatic?](/why)** — why swatch palettes can't answer "does this work?", with an interactive palette explorer
-- **[Getting Started](/getting-started)** — run the solver and CLI locally from source
+- **[Getting Started](/getting-started)** — install the alpha packages, generate CSS, and run the CLI
 - **[Live Demo](/demo)** — full interactive surface, border, atmosphere, and CSS inspector
 
 ### Concepts

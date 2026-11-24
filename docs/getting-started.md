@@ -1,19 +1,17 @@
 # Getting Started
 
-::: info Pre-release
-Axiomatic Color v2 (`@design-axioms/color`) is in active development and not yet published to npm. Run it from a local checkout below, or explore it live in the browser via the [interactive demo](/demo).
+::: info Alpha pre-release
+Axiomatic Color v2 (`@design-axioms/color` and `@design-axioms/color-cli`) is published on npm under the `alpha` dist-tag while the v2 API settles (Node 24+). You can also explore it live in the browser via the [interactive demo](/demo).
 :::
 
-## Setup from Source
-
-Use Node 24+ and pnpm 10:
+## Installation
 
 ```bash
-git clone https://github.com/design-axioms/axiomatic-color.git
-cd axiomatic-color
-pnpm install
-pnpm build
+pnpm add @design-axioms/color@alpha
+pnpm add -D @design-axioms/color-cli@alpha
 ```
+
+_(Contributors working inside a clone of [`design-axioms/axiomatic-color`](https://github.com/design-axioms/axiomatic-color) can run the CLI from source with `pnpm cli <command>`.)_
 
 ## Quick Start
 
@@ -38,11 +36,11 @@ const css = generateCSS(output, {
 
 ## CLI
 
-From the repository root, use `pnpm cli` to run the `axiomatic` CLI commands:
+With `@design-axioms/color-cli` installed, invoke `axiomatic` via your package manager (or `pnpm dlx @design-axioms/color-cli@alpha`):
 
 ```bash
 # Generate CSS to stdout
-pnpm cli build
+pnpm exec axiomatic build
 ```
 
 ::: details Output (truncated)
@@ -96,7 +94,7 @@ pnpm cli build
 
 ```bash
 # Validate configuration and show diagnostics
-pnpm cli validate
+pnpm exec axiomatic validate
 ```
 
 ::: details Output (truncated)
@@ -162,10 +160,10 @@ pnpm cli validate
 
 ```bash
 # Print solver output as JSON
-pnpm cli inspect
+pnpm exec axiomatic inspect
 
 # Generate a self-contained HTML demo page
-pnpm cli demo
+pnpm exec axiomatic demo
 ```
 
 ## Hello World
@@ -173,7 +171,7 @@ pnpm cli demo
 Save the build output and open it in a browser:
 
 ```bash
-pnpm cli build -o axiomatic.css
+pnpm exec axiomatic build -o axiomatic.css
 ```
 
 <LiveExample

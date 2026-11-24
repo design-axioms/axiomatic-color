@@ -1,6 +1,12 @@
 # CLI Reference
 
-The `@design-axioms/color-cli` package provides the `axiomatic` binary. From a local checkout of `design-axioms/axiomatic-color`, invoke it with `pnpm cli <command>`.
+The `@design-axioms/color-cli` package provides the `axiomatic` binary:
+
+```bash
+pnpm add -D @design-axioms/color-cli@alpha
+```
+
+Invoke it with `pnpm exec axiomatic <command>` (or `pnpm cli <command>` inside a local clone of `design-axioms/axiomatic-color`).
 
 ## Commands
 
@@ -9,9 +15,9 @@ The `@design-axioms/color-cli` package provides the `axiomatic` binary. From a l
 Solve the color system and emit CSS.
 
 ```bash
-pnpm cli build                    # Use default config, output to stdout
-pnpm cli build my-config.json     # Use custom config
-pnpm cli build --output theme.css # Write to file (-o also supported)
+pnpm exec axiomatic build                    # Use default config, output to stdout
+pnpm exec axiomatic build my-config.json     # Use custom config
+pnpm exec axiomatic build --output theme.css # Write to file (-o also supported)
 ```
 
 ### `validate [config]`
@@ -19,7 +25,7 @@ pnpm cli build --output theme.css # Write to file (-o also supported)
 Solve and report diagnostics without emitting CSS. Shows surface placements, high-contrast placements, distinction requirements (`◻`), unmet contrast targets (`⚠`), and composition classifications.
 
 ```bash
-pnpm cli validate
+pnpm exec axiomatic validate
 ```
 
 Example output (truncated):
@@ -56,8 +62,8 @@ Example output (truncated):
 Print the raw solver output as JSON. Useful for debugging and tooling integration.
 
 ```bash
-pnpm cli inspect
-pnpm cli inspect | jq '.light.surfaces[0]'
+pnpm exec axiomatic inspect
+pnpm exec axiomatic inspect | jq '.light.surfaces[0]'
 ```
 
 ### `demo [config]`
@@ -65,8 +71,8 @@ pnpm cli inspect | jq '.light.surfaces[0]'
 Generate a self-contained HTML demo page. Opens in any browser — no server, no build step.
 
 ```bash
-pnpm cli demo                         # Writes demo.html
-pnpm cli demo --output my-demo.html   # Write to a custom path (-o also supported)
+pnpm exec axiomatic demo                         # Writes demo.html
+pnpm exec axiomatic demo --output my-demo.html   # Write to a custom path (-o also supported)
 ```
 
 The demo includes:
